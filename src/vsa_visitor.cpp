@@ -5,14 +5,22 @@ using namespace llvm;
 namespace pcpo {
 
 void VsaVisitor::visitInstruction(Instruction &I){
-    errs() << I.getOpcodeName() << "\n";
+    errs() << I.getOpcodeName() << ": " << I.getValueID() << "\n";
 }
 
 void VsaVisitor::visitBinaryOperator(BinaryOperator &I) {
-    Maluba maluba;
-    errs() << "visited binary Operator \n";
-    return;
 
+    errs() << "visited binary Operator"<<"\n";
+
+    /// todo
+    if(true){
+        for(auto values: I.users()){
+            if(Instruction::classof(values)) {
+                Instruction *v = reinterpret_cast<Instruction *>(values);
+                worklist.push(v);
+            }
+        }
+    }
 }
 
 

@@ -9,11 +9,6 @@ using namespace llvm;
 
 namespace pcpo{
 
-class Maluba {
-/// Do nothing -> RetType
-};
-
-
 class VsaVisitor : public InstVisitor<VsaVisitor,void> {
 
 public:
