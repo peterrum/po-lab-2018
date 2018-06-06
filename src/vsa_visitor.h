@@ -6,6 +6,7 @@
 #include "AbstractDomain.h"
 #include <queue>
 #include <unordered_map>
+#include <map>
 
 using namespace llvm;
 
@@ -16,11 +17,11 @@ class State{
 public:
     State() = default;
 
-    bool put(Value& v, AbstractDomain& ad);
+    bool put(Value& v, std::shared_ptr<AbstractDomain> ad);
     void leastUpperBound(State& other);
 
 private:
-    std::unordered_map<Value,AbstractDomain> vars;
+    std::map<Value*,std::shared_ptr<AbstractDomain>> vars;
 };
 
 class VsaVisitor : public InstVisitor<VsaVisitor,void> {
@@ -63,7 +64,7 @@ private:
     void pushInstUsers(Instruction &I);
 
     std::queue<Instruction*>& worklist;
-    std::unordered_map<BasicBlock,State> programPoints;
+    std::map<BasicBlock,State> programPoints;
 };
 
 }

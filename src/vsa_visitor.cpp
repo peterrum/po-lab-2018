@@ -5,22 +5,22 @@ using namespace llvm;
 namespace pcpo {
 
 
-bool State::put(Value& v, std::unique_ptr<AbstractDomain> ad){
-    const auto find = vars.find(v);
+bool State::put(Value& v, std::shared_ptr<AbstractDomain> ad){
+    const auto find = vars.find(&v);
     if(find != vars.end()){
-        if(ad.lessOrEqual(vars[v]))
+        if(ad->lessOrEqual(*vars[&v]))
             return false;
-        vars[v] = vars[v].leastUpperBound(ad);
+        vars[&v] = vars[&v]->leastUpperBound(*ad);
 
     } else {
-        vars[v] = ad;
+        vars[&v] = ad;
     }
     return true;
 }
 
 void State::leastUpperBound(State& other){
-    for(auto& [key,value] : vars){
-        put(key,value);
+    for(auto& var : vars){
+        put(*var.first,var.second);
     }
 }
 

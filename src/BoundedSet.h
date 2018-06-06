@@ -19,17 +19,17 @@ class BoundedSet : public AbstractDomain {
 private:
   std::set<APInt, Comparator> values;
   bool top{false};
-  unique_ptr<AbstractDomain> compute(AbstractDomain &other,
+  shared_ptr<AbstractDomain> compute(AbstractDomain &other,
                                      std::function<APInt(APInt, APInt)> op);
 
 public:
-  unique_ptr<AbstractDomain> add(AbstractDomain &other);
-  unique_ptr<AbstractDomain> subtract(AbstractDomain &other);
-  unique_ptr<AbstractDomain> multiply(AbstractDomain &other);
-  unique_ptr<AbstractDomain> unaryMinus();
-  unique_ptr<AbstractDomain> increment();
-  unique_ptr<AbstractDomain> decrement();
-  unique_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
+  shared_ptr<AbstractDomain> add(AbstractDomain &other);
+  shared_ptr<AbstractDomain> subtract(AbstractDomain &other);
+  shared_ptr<AbstractDomain> multiply(AbstractDomain &other);
+  shared_ptr<AbstractDomain> unaryMinus();
+  shared_ptr<AbstractDomain> increment();
+  shared_ptr<AbstractDomain> decrement();
+  shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
   bool lessOrEqual(AbstractDomain &other);
 
   BoundedSet(std::set<APInt, Comparator> values);

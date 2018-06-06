@@ -10,38 +10,38 @@
 namespace pcpo {
 
 using namespace llvm;
-using std::unique_ptr;
+using std::shared_ptr;
 
 BoundedSet::BoundedSet(std::set<APInt, Comparator> vals) : values{vals} {}
 BoundedSet::BoundedSet(APInt val) { values.insert(val); }
 BoundedSet::BoundedSet(bool isTop) : top{isTop} {}
 
-unique_ptr<AbstractDomain>
+shared_ptr<AbstractDomain>
 BoundedSet::compute(AbstractDomain &other,
                     std::function<APInt(APInt, APInt)> op) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
     int count = 0;
     std::set<APInt, Comparator> newValues{};
     if (top || otherB->top) {
-      return unique_ptr<BoundedSet>{new BoundedSet(true)};
+      return shared_ptr<BoundedSet>{new BoundedSet(true)};
     }
     for (auto &leftVal : values) {
       for (auto &rightVal : otherB->values) {
         if (++count > SET_LIMIT) {
-          unique_ptr<BoundedSet> topSet{new BoundedSet(true)};
+          shared_ptr<BoundedSet> topSet{new BoundedSet(true)};
         }
 
         APInt newVal = op(leftVal, rightVal);
         newValues.insert(newVal);
       }
     }
-    unique_ptr<AbstractDomain> result{new BoundedSet(newValues)};
+    shared_ptr<AbstractDomain> result{new BoundedSet(newValues)};
     return result;
   }
   return nullptr;
 }
 
-unique_ptr<AbstractDomain> BoundedSet::add(AbstractDomain &other) {
+shared_ptr<AbstractDomain> BoundedSet::add(AbstractDomain &other) {
   auto opPlus = [](APInt left, APInt right) {
     APInt newValue{left};
     newValue += right;
@@ -49,7 +49,7 @@ unique_ptr<AbstractDomain> BoundedSet::add(AbstractDomain &other) {
   };
   return compute(other, opPlus);
 }
-unique_ptr<AbstractDomain> BoundedSet::subtract(AbstractDomain &other) {
+shared_ptr<AbstractDomain> BoundedSet::subtract(AbstractDomain &other) {
   auto opMinus = [](APInt left, APInt right) {
     APInt newValue{left};
     newValue -= right;
@@ -57,7 +57,7 @@ unique_ptr<AbstractDomain> BoundedSet::subtract(AbstractDomain &other) {
   };
   return compute(other, opMinus);
 }
-unique_ptr<AbstractDomain> BoundedSet::multiply(AbstractDomain &other) {
+shared_ptr<AbstractDomain> BoundedSet::multiply(AbstractDomain &other) {
   auto opMinus = [](APInt left, APInt right) {
     APInt newValue{left};
     newValue *= right;
@@ -65,7 +65,7 @@ unique_ptr<AbstractDomain> BoundedSet::multiply(AbstractDomain &other) {
   };
   return compute(other, opMinus);
 }
-unique_ptr<AbstractDomain> BoundedSet::unaryMinus() {
+shared_ptr<AbstractDomain> BoundedSet::unaryMinus() {
   std::set<APInt, Comparator> newValues{};
   APInt tmp;
   for (auto &val : values) {
@@ -73,12 +73,12 @@ unique_ptr<AbstractDomain> BoundedSet::unaryMinus() {
     tmp *= -1;
     newValues.insert(tmp);
   }
-  return unique_ptr<BoundedSet>(new BoundedSet(newValues));
+  return shared_ptr<BoundedSet>(new BoundedSet(newValues));
 }
-unique_ptr<AbstractDomain> BoundedSet::increment() { return nullptr; }
-unique_ptr<AbstractDomain> BoundedSet::decrement() { return nullptr; }
+shared_ptr<AbstractDomain> BoundedSet::increment() { return nullptr; }
+shared_ptr<AbstractDomain> BoundedSet::decrement() { return nullptr; }
 
-unique_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
+shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
     std::set<APInt, Comparator> result;
     for (auto &val : values) {
@@ -87,11 +87,11 @@ unique_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
     int count = values.size();
     for (auto &val : otherB->values) {
       if (++count > SET_LIMIT) {
-        return unique_ptr<BoundedSet>{new BoundedSet(true)};
+        return shared_ptr<BoundedSet>{new BoundedSet(true)};
       }
       result.insert(val);
     }
-    unique_ptr<BoundedSet> res{new BoundedSet{result}};
+    shared_ptr<BoundedSet> res{new BoundedSet{result}};
     return res;
   }
   return nullptr;
