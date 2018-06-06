@@ -32,6 +32,8 @@ struct Hello : public FunctionPass {
   bool runOnFunction(Function &F) override {
     pcpo::testConstructor();
     pcpo::testLeastUpperBound();
+    pcpo::testTop();
+    return false;
   }
 };
 } // namespace

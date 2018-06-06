@@ -12,6 +12,24 @@ void testConstructor() {
   result->printOut();
 }
 
+void testTop() {
+  APInt first{32, 13, false};
+  APInt second{32, 42, false};
+
+  BoundedSet left{first};
+  BoundedSet right{second};
+  auto result = left.leastUpperBound(right);
+  BoundedSet tmp{false};
+  APInt tmpInt;
+  for (int i = 0; i < 20; i++) {
+    tmpInt = APInt(32, i, false);
+    tmp = BoundedSet(tmpInt);
+    result = result->leastUpperBound(tmp);
+  }
+
+  result->printOut();
+}
+
 void testLeastUpperBound() {
   APInt first{32, 13, false};
   APInt second{32, 42, false};

@@ -3,5 +3,6 @@
 namespace pcpo {
 void testConstructor();
 void testLeastUpperBound();
+void testTop();
 } // namespace pcpo
 #endif
