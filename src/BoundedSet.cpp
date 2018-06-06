@@ -42,19 +42,12 @@ BoundedSet::compute(AbstractDomain &other,
 }
 
 unique_ptr<AbstractDomain> BoundedSet::add(AbstractDomain &other) {
-  if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
-    std::set<APInt, Comparator> newValues{};
-    for (auto &leftVal : values) {
-      for (auto &rightVal : otherB->values) {
-        APInt newVal{leftVal};
-        newVal += rightVal;
-        newValues.insert(newVal);
-      }
-    }
-    unique_ptr<AbstractDomain> result{new BoundedSet(newValues)};
-    return result;
-  }
-  return nullptr;
+  auto opPlus = [](APInt left, APInt right) {
+    APInt newValue{left};
+    newValue += right;
+    return newValue;
+  };
+  return compute(other, opPlus);
 }
 unique_ptr<AbstractDomain> BoundedSet::subtract(AbstractDomain &other) {
   auto opMinus = [](APInt left, APInt right) {
@@ -65,9 +58,23 @@ unique_ptr<AbstractDomain> BoundedSet::subtract(AbstractDomain &other) {
   return compute(other, opMinus);
 }
 unique_ptr<AbstractDomain> BoundedSet::multiply(AbstractDomain &other) {
-  return nullptr;
+  auto opMinus = [](APInt left, APInt right) {
+    APInt newValue{left};
+    newValue *= right;
+    return newValue;
+  };
+  return compute(other, opMinus);
 }
-unique_ptr<AbstractDomain> BoundedSet::unaryMinus() { return nullptr; }
+unique_ptr<AbstractDomain> BoundedSet::unaryMinus() {
+  std::set<APInt, Comparator> newValues{};
+  APInt tmp;
+  for (auto &val : values) {
+    tmp = APInt(val);
+    tmp *= -1;
+    newValues.insert(tmp);
+  }
+  return unique_ptr<BoundedSet>(new BoundedSet(newValues));
+}
 unique_ptr<AbstractDomain> BoundedSet::increment() { return nullptr; }
 unique_ptr<AbstractDomain> BoundedSet::decrement() { return nullptr; }
 
@@ -89,7 +96,22 @@ unique_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
   }
   return nullptr;
 }
-bool BoundedSet::lessOrEqual(AbstractDomain &other) { return false; }
+
+// implements contains
+bool BoundedSet::lessOrEqual(AbstractDomain &other) {
+  if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
+    auto end = otherB->values.end();
+    for (auto &val : values) {
+      if (otherB->values.find(val) == end) {
+        // val is not contained int otherB->values
+        return false;
+      }
+    }
+    return true;
+  }
+  // TODO: throw exception if comparison is not implemented
+  return false;
+}
 
 void BoundedSet::printOut() {
   //   errs() << "BoundedSet@" << this << std::endl;
