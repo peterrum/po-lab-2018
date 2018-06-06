@@ -1,3 +1,5 @@
+#ifndef ABSTRACTDOMAIN_H_
+#define ABSTRACTDOMAIN_H_
 namespace pcpo {
 
 class AbstractDomain {
@@ -14,3 +16,4 @@ public:
   // TODO: bitwise operations
 }
 } // namespace pcpo
+#endif
