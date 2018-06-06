@@ -16,40 +16,49 @@
 #include "llvm/IR/Function.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
+#include "vsa_visitor.h"
+#include <queue>
+
 using namespace llvm;
+using namespace pcpo;
 
 #define DEBUG_TYPE "hello"
 
-STATISTIC(HelloCounter, "Counts number of functions greeted");
-
-namespace {
-  // Hello - The first implementation, without getAnalysisUsage.
-  struct Hello : public FunctionPass {
-    static char ID; // Pass identification, replacement for typeid
-    Hello() : FunctionPass(ID) {}
-
-    bool runOnFunction(Function &F) override {
-      ++HelloCounter;
-      errs() << "Hello: ";
-      errs().write_escaped(F.getName()) << '\n';
-      return false;
-    }
-  };
-}
-
-char Hello::ID = 0;
-static RegisterPass<Hello> X("hello", "Hello World Pass");
+//STATISTIC(HelloCounter, "Counts number of functions greeted");
 
 namespace {
   // Hello2 - The second implementation with getAnalysisUsage implemented.
-  struct Hello2 : public FunctionPass {
+  struct VsaPass : public ModulePass {
     static char ID; // Pass identification, replacement for typeid
-    Hello2() : FunctionPass(ID) {}
+      VsaPass() : ModulePass(ID) {}
 
-    bool runOnFunction(Function &F) override {
-      ++HelloCounter;
-      errs() << "Hello: ";
-      errs().write_escaped(F.getName()) << '\n';
+    bool runOnModule(Module &M) override {
+
+      std::queue<Instruction*> worklist;
+      VsaVisitor vis(worklist);
+      //vis.visit(M);
+
+      for(auto& function: M){
+          //errs().write_escaped(function.getName()) << '\n';
+          for(auto& bb : function){
+              //errs()<< "BB\n";
+              for(auto& instr:bb){
+                  //errs() << instr.getOpcodeName() << "\n";
+                  //const Instruction* in = &instr;
+                  worklist.push(&instr);
+              }
+          }
+      }
+
+
+
+      while(!worklist.empty()){
+          vis.visit(*worklist.front());
+          //errs() << worklist.front()->getOpcodeName() << "\n";
+          worklist.pop();
+          //errs() << instr->getOpcodeName() << "\n";
+      }
+
       return false;
     }
 
@@ -60,6 +69,5 @@ namespace {
   };
 }
 
-char Hello2::ID = 0;
-static RegisterPass<Hello2>
-Y("hello2", "Hello World Pass (with getAnalysisUsage implemented)");
+char VsaPass::ID = 0;
+static RegisterPass<VsaPass> Y("vsapass", "VSA Pass (with getAnalysisUsage implemented)");
