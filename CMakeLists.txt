@@ -12,7 +12,9 @@ endif()
 
 add_llvm_loadable_module( llvm-vsa
   src/vsa.cpp
-
+  src/BoundedSet.cpp
+  test/BoundedSetTest.cpp
+  test/TestRunner.cpp
   DEPENDS
   intrinsics_gen
   PLUGIN_TOOL

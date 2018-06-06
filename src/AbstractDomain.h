@@ -18,7 +18,7 @@ public:
 
   virtual unique_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other) = 0;
   virtual bool lessOrEqual(AbstractDomain &other) = 0;
-
+  virtual void printOut() = 0;
   // TODO: bitwise operations
 };
 } // namespace pcpo
