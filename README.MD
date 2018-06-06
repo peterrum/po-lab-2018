@@ -23,3 +23,19 @@ add_subdirectory(ValueSetAnalysis)
 ```
 
 Finally run `make` and/or `make install` again.
+
+## How to ...
+
+### ... view IR
+
+Recompile and view output with your favorite text editor: 
+```bash
+clang -Os -S -emit-llvm hello.c -o hello.ll
+```
+
+### ... use opt
+
+```bash
+clang -O3 -emit-llvm hello.c -c -o hello.bc
+opt -load llvm/lib/llvm-vsa.so -hello < hello.bc > /dev/null
+```
