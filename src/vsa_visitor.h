@@ -15,9 +15,12 @@ public:
     VsaVisitor(std::queue<Instruction*>& q):worklist(q) { };
 
     void visitInstruction(Instruction &I);
+    void visitPHINode(PHINode &I);
     void visitBinaryOperator(BinaryOperator& I);
 
 private:
+    void pushInstUsers(Instruction &I);
+
     std::queue<Instruction*>& worklist;
 };
 
