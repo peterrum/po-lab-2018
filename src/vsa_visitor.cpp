@@ -50,11 +50,10 @@ void VsaVisitor::visitBinaryOperator(BinaryOperator &I){
 }
 
 void VsaVisitor::visitAdd(BinaryOperator &I) {
-    auto op0 = I.getOperand(0);
-    auto ad0 = newState.getAbstractValues(op0);
-    //auto ad1 = newState.getAbstractValues(I.getOperand(1));
-
-    //newState.put(I, ad0->add(*ad1));
+    auto ad0 = newState.getAbstractValues(I.getOperand(0));
+    auto ad1 = newState.getAbstractValues(I.getOperand(1));
+    
+    newState.put(I, ad0->add(*ad1));
 }
 
 void VsaVisitor::visitMul(BinaryOperator& I) {
