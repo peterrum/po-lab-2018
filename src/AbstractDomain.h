@@ -11,33 +11,39 @@ using std::shared_ptr;
 
 class AbstractDomain {
 public:
-    public:
-        explicit AbstractDomain();
-        AbstractDomain(const AbstractDomain&) = delete;
-        AbstractDomain& operator=(const AbstractDomain&) = delete;
-        virtual ~AbstractDomain() = default;
+    AbstractDomain();
+    AbstractDomain(const AbstractDomain&) = delete;
+    AbstractDomain& operator=(const AbstractDomain&) = delete;
+    virtual ~AbstractDomain() = default;
   // Binary Arithmetic Operations
   virtual shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false) = 0;
+    bool nuw, bool nsw) = 0;
   virtual shared_ptr<AbstractDomain> sub(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false) = 0;
+    bool nuw, bool nsw) = 0;
   virtual shared_ptr<AbstractDomain> mul(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false) = 0;
-  virtual shared_ptr<AbstractDomain> udiv(unsigned numBits, AbstractDomain &other) = 0;
-  virtual shared_ptr<AbstractDomain> sdiv(unsigned numBits, AbstractDomain &other) = 0;
-  virtual shared_ptr<AbstractDomain> urem(unsigned numBits, AbstractDomain &other) = 0;
-  virtual shared_ptr<AbstractDomain> srem(unsigned numBits, AbstractDomain &other) = 0;
+    bool nuw, bool nsw) = 0;
+  virtual shared_ptr<AbstractDomain> udiv(unsigned numBits, AbstractDomain &other,
+    bool nuw, bool nsw) = 0;
+  virtual shared_ptr<AbstractDomain> sdiv(unsigned numBits, AbstractDomain &other,
+    bool nuw, bool nsw) = 0;
+  virtual shared_ptr<AbstractDomain> urem(unsigned numBits, AbstractDomain &other,
+    bool nuw, bool nsw) = 0;
+  virtual shared_ptr<AbstractDomain> srem(unsigned numBits, AbstractDomain &other,
+    bool nuw, bool nsw) = 0;
 
   // Binary Bitwise Operations
   virtual shared_ptr<AbstractDomain> shl(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false) = 0;
+    bool nuw, bool nsw) = 0;
   virtual shared_ptr<AbstractDomain> shlr(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false) = 0;
+    bool nuw, bool nsw) = 0;
   virtual shared_ptr<AbstractDomain> ashr(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false) = 0;
-  virtual shared_ptr<AbstractDomain> and_(unsigned numBits, AbstractDomain &other) = 0;
-  virtual shared_ptr<AbstractDomain> or_(unsigned numBits, AbstractDomain &other) = 0;
-  virtual shared_ptr<AbstractDomain> xor_(unsigned numBits, AbstractDomain &other) = 0;
+    bool nuw, bool nsw) = 0;
+  virtual shared_ptr<AbstractDomain> and_(unsigned numBits, AbstractDomain &other,
+    bool nuw, bool nsw) = 0;
+  virtual shared_ptr<AbstractDomain> or_(unsigned numBits, AbstractDomain &other,
+    bool nuw, bool nsw) = 0;
+  virtual shared_ptr<AbstractDomain> xor_(unsigned numBits, AbstractDomain &other,
+    bool nuw, bool nsw) = 0;
 
   // Conversion Operations (TODO?)
 

@@ -8,7 +8,7 @@ void testConstructor() {
 
   BoundedSet left{value};
   BoundedSet right{value};
-  auto result = left.add(right);
+  auto result = left.add(32, right, false, false);
   result->printOut();
   // result = result->unaryMinus();
   // result->printOut();

@@ -25,33 +25,33 @@ private:
 public:
   // Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> sub(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> mul(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> udiv(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> sdiv(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> urem(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> srem(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
 
   // Binary Bitwise Operations
   shared_ptr<AbstractDomain> shl(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> shlr(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> ashr(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> and_(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> or_(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
   shared_ptr<AbstractDomain> xor_(unsigned numBits, AbstractDomain &other,
-    bool nuw=false, bool nsw=false);
+    bool nuw, bool nsw);
 
   // Other operations
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
@@ -62,8 +62,8 @@ public:
   bool lessOrEqual(AbstractDomain &other);
 
   BoundedSet(std::set<APInt, Comparator> values);
-  BoundedSet(APInt value);
-  BoundedSet(bool isTop);
+  explicit BoundedSet(APInt value);
+  explicit BoundedSet(bool isTop);
   bool isTop();
   void printOut();
 };
