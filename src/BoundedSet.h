@@ -4,6 +4,7 @@
 #include "llvm/ADT/APInt.h"
 #include <functional>
 #include <set>
+#include <iostream>
 namespace pcpo {
 using llvm::APInt;
 
@@ -20,7 +21,7 @@ private:
   std::set<APInt, Comparator> values;
   bool top{false};
   shared_ptr<AbstractDomain> compute(AbstractDomain &other,
-                                     std::function<APInt(APInt, APInt)> op);
+                                     std::function<BoundedSet(const APInt&, const APInt&)> op);
 
 public:
   // Binary Arithmetic Operations
@@ -61,9 +62,15 @@ public:
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
   bool lessOrEqual(AbstractDomain &other);
 
+  bool operator==(const BoundedSet &other);
+
   BoundedSet(std::set<APInt, Comparator> values);
   explicit BoundedSet(APInt value);
+  friend std::ostream& operator<< (std::ostream& os, const BoundedSet& bs);
+
   explicit BoundedSet(bool isTop);
+  BoundedSet(std::initializer_list<APInt> vals);
+  BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
   bool isTop();
   void printOut();
 };

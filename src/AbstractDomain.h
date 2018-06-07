@@ -11,10 +11,10 @@ using std::shared_ptr;
 
 class AbstractDomain {
 public:
-    AbstractDomain();
-    AbstractDomain(const AbstractDomain&) = delete;
-    AbstractDomain& operator=(const AbstractDomain&) = delete;
+    // AbstractDomain(const AbstractDomain&) = delete;
+    // AbstractDomain& operator=(const AbstractDomain&) = delete;
     virtual ~AbstractDomain() = default;
+
   // Binary Arithmetic Operations
   virtual shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) = 0;
