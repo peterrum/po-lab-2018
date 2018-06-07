@@ -41,29 +41,78 @@ BoundedSet::compute(AbstractDomain &other,
   return nullptr;
 }
 
-shared_ptr<AbstractDomain> BoundedSet::add(AbstractDomain &other) {
-  auto opPlus = [](APInt left, APInt right) {
-    APInt newValue{left};
+shared_ptr<AbstractDomain> BoundedSet::add(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  auto opPlus = [numBits, nuw, nsw](APInt left, APInt right) {
+    APInt newValue{numBits, 0};
+    // TODO: check nsw nuw
+    newValue += left;
     newValue += right;
     return newValue;
   };
   return compute(other, opPlus);
 }
-shared_ptr<AbstractDomain> BoundedSet::sub(AbstractDomain &other) {
-  auto opMinus = [](APInt left, APInt right) {
-    APInt newValue{left};
+shared_ptr<AbstractDomain> BoundedSet::sub(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  auto opMinus = [numBits, nuw, nsw](APInt left, APInt right) {
+    APInt newValue{numBits, 0};
+    // TODO: check nsw nuw
+    newValue += left;
     newValue -= right;
     return newValue;
   };
   return compute(other, opMinus);
 }
-shared_ptr<AbstractDomain> BoundedSet::mul(AbstractDomain &other) {
-  auto opMinus = [](APInt left, APInt right) {
-    APInt newValue{left};
+shared_ptr<AbstractDomain> BoundedSet::mul(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  auto opMinus = [numBits, nuw, nsw](APInt left, APInt right) {
+    APInt newValue{numBits, 0};
+    // TODO: check nsw nuw
+    newValue += left;
     newValue *= right;
     return newValue;
   };
   return compute(other, opMinus);
+}
+shared_ptr<AbstractDomain> BoundedSet::udiv(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
+}
+shared_ptr<AbstractDomain> BoundedSet::sdiv(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
+}
+shared_ptr<AbstractDomain> BoundedSet::urem(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
+}
+shared_ptr<AbstractDomain> BoundedSet::srem(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
+}
+shared_ptr<AbstractDomain> BoundedSet::shl(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
+}
+shared_ptr<AbstractDomain> BoundedSet::shlr(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
+}
+shared_ptr<AbstractDomain> BoundedSet::ashr(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
+}
+shared_ptr<AbstractDomain> BoundedSet::and_(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
+}
+shared_ptr<AbstractDomain> BoundedSet::or_(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
+}
+shared_ptr<AbstractDomain> BoundedSet::xor_(unsigned numBits, AbstractDomain &other,
+    bool nuw=false, bool nsw=false) {
+  return shared_ptr<AbstractDomain> (new BoundedSet(true);
 }
 
 shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
