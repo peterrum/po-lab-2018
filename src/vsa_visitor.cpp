@@ -32,21 +32,20 @@ void VsaVisitor::visitPHINode(PHINode &I) {
 }
 
 void VsaVisitor::visitBinaryOperator(BinaryOperator &I) {
-
+    // todo
     errs() << "visited binary Operator"<<"\n";
     if(true)
         this->pushInstUsers(I);
-
 }
 
 void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I) {
-
+    // todo
     if(true)
         this->pushInstUsers(I);
-
 }
 
 void VsaVisitor::visitInstruction(Instruction &I){
+    // todo: top or exception
     errs() << I.getOpcodeName() << ": " << I.getValueID() << "\n";
 }
 

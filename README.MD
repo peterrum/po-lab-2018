@@ -39,3 +39,25 @@ clang -Os -S -emit-llvm hello.c -o hello.ll
 clang -O3 -emit-llvm hello.c -c -o hello.bc
 opt -load llvm/lib/llvm-vsa.so -hello < hello.bc > /dev/null
 ```
+
+## Useful methods in LLVM
+
+* Write output: errs() << "Hello World!\n"
+
+### llvm::Module
+* Iterator over all functions
+
+### llvm::Function
+* Iterator over all basic blocks
+* getName()
+
+### llvm::BasicBlock
+* Iterator over all instructions
+
+### llvm::Instruction
+* getOpcodeName()
+* getValueID()
+* users()
+
+### llvm::InstVisitor<U, V>
+* V visit(...)
