@@ -21,10 +21,17 @@ bool State::leastUpperBound(State& other){
 }
 
 shared_ptr<AbstractDomain> State::getAbstractValues(Value* v){
+    errs() << "entering abstractvalues\n";
     auto find = vars.find(v);
     if(find != vars.end()){
-        return *find;
+        errs() << "found\n";
+        return find->second;
     }
-    return shared_ptr<AbstractDomain>(BoundedSet(true));
+    errs() << " not found\n";
+    return shared_ptr<AbstractDomain>(new BoundedSet(true));
+}
+
+std::string State::toString(){
+    return std::to_string(vars.size());
 }
 

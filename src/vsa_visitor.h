@@ -17,7 +17,7 @@ namespace pcpo{
 class VsaVisitor : public InstVisitor<VsaVisitor,void> {
 
 public:
-    VsaVisitor(std::queue<BasicBlock*>& q):worklist(q) { };
+    VsaVisitor(std::queue<BasicBlock*>& q):worklist(q), newState() { };
 
     void visitBasicBlock(BasicBlock &BB);
     void visitTerminationInst(TerminatorInst &I);
@@ -42,6 +42,10 @@ public:
     /// Call and Invoke
     //void visitCallInst(CallInst &I);
     //void visitInvokeInst(InvokeInst &I);
+
+    /// BinaryOperators
+    void visitAdd(BinaryOperator& I);
+    void visitMul(BinaryOperator& I);
 
     /// if not specific get the whole class
     //void visitCastInst(CastInst &I);

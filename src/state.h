@@ -17,6 +17,7 @@ public:
     bool leastUpperBound(State &other);
 
     shared_ptr<AbstractDomain> getAbstractValues(Value* v);
+    std::string toString();
 
 private:
     std::map<Value *, std::shared_ptr < AbstractDomain>> vars;

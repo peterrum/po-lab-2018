@@ -10,6 +10,7 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB){
 
     /// empty state represents bottom
     newState = State();
+    errs() <<newState.toString() + "\n";
 
     /// least upper bound with all predecessors
     for(auto pred : predecessors(&BB)){
@@ -46,7 +47,27 @@ void VsaVisitor::visitPHINode(PHINode &I){
 }
 
 void VsaVisitor::visitBinaryOperator(BinaryOperator &I){
-    // todo
+    errs() << "visited binary instruction \n";
+    //auto ad0 = newState.getAbstractValues(I.getOperand(0));
+    //auto ad1 = newState.getAbstractValues(I.getOperand(1));
+}
+
+void VsaVisitor::visitAdd(BinaryOperator &I) {
+    errs() << "visited add instruction \n";
+    auto op0 = I.getOperand(0);
+    errs() << "after getOperand \n";
+    errs() << newState.toString() + " bla  \n";
+    auto ad0 = newState.getAbstractValues(op0);
+    //auto ad1 = newState.getAbstractValues(I.getOperand(1));
+
+    //newState.put(I, ad0->add(*ad1));
+}
+
+void VsaVisitor::visitMul(BinaryOperator& I) {
+    //auto ad0 = newState.getAbstractValues(I.getOperand(0));
+    //auto ad1 = newState.getAbstractValues(I.getOperand(1));
+    //newState.put(I, ad0->mul(*ad1));
+
 }
 
 void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I){
