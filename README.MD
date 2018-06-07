@@ -33,10 +33,26 @@ Recompile and view output with your favorite text editor:
 clang -Os -S -emit-llvm hello.c -o hello.ll
 ```
 
+In the case you have already a .bc-file run the following to get the .ll-file:
+```bash
+llvm-dis hello-opt.bc
+```
+
 ### ... use opt
+```bash
+clang -Os -S -emit-llvm hello.c -o hello.ll
+```
 
 ```bash
 clang -O3 -emit-llvm hello.c -c -o hello.bc
+opt -load llvm/lib/llvm-vsa.so -hello < hello.bc > /dev/null
+```
+
+### ... useful workflow
+
+```bash
+clang -O0 -emit-llvm hello.c -Xclang -disable-O0-optnone -c -o hello.bc
+opt -mem2reg < hello.bc > hello-opt.bc
 opt -load llvm/lib/llvm-vsa.so -hello < hello.bc > /dev/null
 ```
 
