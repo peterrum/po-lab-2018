@@ -9,6 +9,8 @@
 #include "state.h"
 #include <queue>
 #include <unordered_map>
+#include "worklist.h"
+#include "util.h"
 
 using namespace llvm;
 
@@ -17,10 +19,10 @@ namespace pcpo{
 class VsaVisitor : public InstVisitor<VsaVisitor,void> {
 
 public:
-    VsaVisitor(std::queue<BasicBlock*>& q):worklist(q), newState() { };
+    VsaVisitor(WorkList& q):worklist(q), newState() { };
 
     void visitBasicBlock(BasicBlock &BB);
-    void visitTerminationInst(TerminatorInst &I);
+    void visitTerminatorInst(TerminatorInst &I);
     /// Specific Instruction type classes
     /*void visitBranchInst(BranchInst &I);
     void visitSwitchInst(SwitchInst &I);
@@ -59,7 +61,7 @@ public:
 private:
     void pushSuccessors(TerminatorInst &I);
 
-    std::queue<BasicBlock*>& worklist;
+    WorkList& worklist;
     State newState;
     std::map<BasicBlock*,State> programPoints;
 };

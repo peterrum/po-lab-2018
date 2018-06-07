@@ -4,6 +4,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "vsa_visitor.h"
 #include <queue>
+#include "worklist.h"
 
 using namespace llvm;
 using namespace pcpo;
@@ -17,7 +18,7 @@ namespace {
     static char ID; 
     
     // worklist: instructions are handled in a FIFO manner
-    std::queue<BasicBlock*> worklist;
+    WorkList worklist;
     
     // visitor: visits instructions and pushes new instructions onto the
     // worklist
@@ -45,8 +46,7 @@ namespace {
       // pop instructions from the worklist and visit them until no more
       // are available (the visitor pushes new instructions query-based)
       while(!worklist.empty()){
-          vis.visit(*worklist.front());
-          worklist.pop();
+          vis.visit(*worklist.pop());
       }
 
       // TODO: purpose?

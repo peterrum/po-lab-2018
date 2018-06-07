@@ -17,6 +17,7 @@ add_llvm_loadable_module( llvm-vsa
   test/BoundedSetTest.cpp
   test/TestRunner.cpp
   src/vsa_visitor.cpp
+  src/worklist.cpp
 
   DEPENDS
   intrinsics_gen

@@ -11,8 +11,6 @@ using std::shared_ptr;
 
 class AbstractDomain {
 public:
-    // AbstractDomain(const AbstractDomain&) = delete;
-    // AbstractDomain& operator=(const AbstractDomain&) = delete;
     virtual ~AbstractDomain() = default;
 
   // Binary Arithmetic Operations

@@ -8,27 +8,32 @@ namespace pcpo {
 void VsaVisitor::visitBasicBlock(BasicBlock &BB){
     /// empty state represents bottom
     newState = State();
-
+    DEBUG_OUTPUT("visitBasicBlock: entered");
     /// least upper bound with all predecessors
     for(auto pred : predecessors(&BB)){
+        DEBUG_OUTPUT("visitBasicBlock: pred" << pred->getName() << " found");
         auto old = programPoints.find(pred);
         if(old != programPoints.end()){
+            DEBUG_OUTPUT("visitBasicBlock: state for" << pred->getName() << " found");
             newState.leastUpperBound(old->second);
         } /// else: its state is bottom and lub(bottom, x) = x
     }
 }
 
-void VsaVisitor::visitTerminationInst(TerminatorInst &I){
+void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
     /// something has changed in BB
+    DEBUG_OUTPUT("visitTerminationInst: entered");
     auto currentBB = I.getParent();
     auto old = programPoints.find(currentBB);
     if(old != programPoints.end()){
+        DEBUG_OUTPUT("visitTerminationInst: old state found");
         /// compute lub in place after this old state is updated
         if(old->second.leastUpperBound(newState)){
             /// new state was old state: do not push sucessors
             return;
         }
     } else {
+        DEBUG_OUTPUT("visitTerminationInst: old state not found");
         programPoints[currentBB] = newState;
     }
     pushSuccessors(I);
@@ -38,15 +43,17 @@ void VsaVisitor::visitPHINode(PHINode &I){
     /// bottom
     std::shared_ptr<AbstractDomain> bs (new BoundedSet(false));
     for(Use& val:I.incoming_values()){
-        bs->leastUpperBound(*newState.getAbstractValues(val));
+        //newState.getAbstractValues(val)->printOut();
+        bs = bs->leastUpperBound(*newState.getAbstractValues(val));
     }
+    
+    bs->printOut();
+    
     newState.put(I,bs);
 }
 
 void VsaVisitor::visitBinaryOperator(BinaryOperator &I){
-    errs() << "visited binary instruction \n";
-    //auto ad0 = newState.getAbstractValues(I.getOperand(0));
-    //auto ad1 = newState.getAbstractValues(I.getOperand(1));
+    STD_OUTPUT("visited binary instruction");
 }
 
 void VsaVisitor::visitAdd(BinaryOperator &I) {
@@ -69,12 +76,13 @@ void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I){
 
 void VsaVisitor::visitInstruction(Instruction &I){
     // todo: top or exception
-    errs() << I.getOpcodeName() << ": " << I.getValueID() << "\n";
+    STD_OUTPUT("visitInstruction: " <<I.getOpcodeName());
 }
 
 void VsaVisitor::pushSuccessors(TerminatorInst &I){
-    for(auto bb : I.successors())
+    for(auto bb : I.successors()){
         worklist.push(bb);
+    }
 
 }
 
