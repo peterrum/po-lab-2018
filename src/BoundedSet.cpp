@@ -6,6 +6,7 @@
 #include <iterator>
 #include <memory>
 #include <set>
+#include <initializer_list>
 
 namespace pcpo {
 
@@ -17,13 +18,29 @@ BoundedSet::BoundedSet(std::set<APInt, Comparator> vals) {
 }
 BoundedSet::BoundedSet(APInt val) { values.insert(val); }
 BoundedSet::BoundedSet(bool isTop) : top(isTop) {}
+BoundedSet::BoundedSet(std::initializer_list<APInt> vals) {
+  values = vals;
+}
+BoundedSet::BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals) {
+  for (auto val : vals) {
+    values.insert(APInt{numBits, val});
+  }
+}
+
+bool BoundedSet::operator==(const BoundedSet &other) {
+  if (this->top && other.top) {
+    return true;
+  } else {
+    return this->values == other.values;
+  }
+}
 
 shared_ptr<AbstractDomain>
 BoundedSet::compute(AbstractDomain &other,
-                    std::function<APInt(APInt, APInt)> op) {
+                    std::function<BoundedSet(const APInt&, const APInt&)> op) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
     int count = 0;
-    std::set<APInt, Comparator> newValues{};
+    shared_ptr<AbstractDomain> newValues {new BoundedSet(false)};
     if (top || otherB->top) {
       BoundedSet *res = new BoundedSet(true);
       return shared_ptr<BoundedSet>{res};
@@ -34,12 +51,11 @@ BoundedSet::compute(AbstractDomain &other,
           shared_ptr<BoundedSet> topSet{new BoundedSet(true)};
         }
 
-        APInt newVal = op(leftVal, rightVal);
-        newValues.insert(newVal);
+        BoundedSet res = op(leftVal, rightVal);
+        newValues = newValues->leastUpperBound(res);
       }
     }
-    shared_ptr<AbstractDomain> result{new BoundedSet(newValues)};
-    return result;
+    return newValues;
   }
   return nullptr;
 }
@@ -48,10 +64,19 @@ shared_ptr<AbstractDomain> BoundedSet::add(unsigned numBits, AbstractDomain &oth
     bool nuw, bool nsw) {
   auto opPlus = [numBits, nuw, nsw](APInt left, APInt right) {
     APInt newValue{numBits, 0};
-    // TODO: check nsw nuw
     newValue += left;
     newValue += right;
-    return newValue;
+    bool overflow {false};
+    overflow |= (nsw &&
+      left.isNonNegative() == right.isNonNegative() &&
+      left.isNonNegative() != newValue.isNonNegative());
+    overflow |= (nuw &&
+      newValue.ult(right));
+    if (overflow) {
+      return BoundedSet{true};
+    } else {
+      return BoundedSet{newValue};
+    }
   };
   return compute(other, opPlus);
 }
@@ -62,7 +87,7 @@ shared_ptr<AbstractDomain> BoundedSet::sub(unsigned numBits, AbstractDomain &oth
     // TODO: check nsw nuw
     newValue += left;
     newValue -= right;
-    return newValue;
+    return BoundedSet{newValue};
   };
   return compute(other, opMinus);
 }
@@ -73,7 +98,7 @@ shared_ptr<AbstractDomain> BoundedSet::mul(unsigned numBits, AbstractDomain &oth
     // TODO: check nsw nuw
     newValue += left;
     newValue *= right;
-    return newValue;
+    return BoundedSet{newValue};
   };
   return compute(other, opMinus);
 }
