@@ -34,7 +34,7 @@ public:
   // Binary Bitwise Operations
   virtual shared_ptr<AbstractDomain> shl(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) = 0;
-  virtual shared_ptr<AbstractDomain> shlr(unsigned numBits, AbstractDomain &other,
+  virtual shared_ptr<AbstractDomain> lshr(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) = 0;
   virtual shared_ptr<AbstractDomain> ashr(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) = 0;

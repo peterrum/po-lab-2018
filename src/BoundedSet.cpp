@@ -128,19 +128,43 @@ shared_ptr<AbstractDomain> BoundedSet::mul(unsigned numBits, AbstractDomain &oth
 }
 shared_ptr<AbstractDomain> BoundedSet::udiv(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+  auto opUDiv = [numBits](APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res = res.udiv(rhs);
+    return BoundedSet{res};
+  };
+  return compute(other, opUDiv);
 }
 shared_ptr<AbstractDomain> BoundedSet::sdiv(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+  auto opSDiv = [numBits](APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res = res.sdiv(rhs);
+    return BoundedSet{res};
+  };
+  return compute(other, opSDiv);
 }
 shared_ptr<AbstractDomain> BoundedSet::urem(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+  auto opURem = [numBits](APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res = res.urem(rhs);
+    return BoundedSet{res};
+  };
+  return compute(other, opURem);
 }
 shared_ptr<AbstractDomain> BoundedSet::srem(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+  auto opSRem = [numBits](APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res = res.srem(rhs);
+    return BoundedSet{res};
+  };
+  return compute(other, opSRem);
 }
 shared_ptr<AbstractDomain> BoundedSet::shl(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
@@ -162,28 +186,62 @@ shared_ptr<AbstractDomain> BoundedSet::shl(unsigned numBits, AbstractDomain &oth
   };
   return compute(other, opShl);
 }
-shared_ptr<AbstractDomain> BoundedSet::shlr(unsigned numBits, AbstractDomain &other,
+
+//TODO: Discuss whether to implement lshr or ashr
+shared_ptr<AbstractDomain> BoundedSet::lshr(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+  auto opLShr = [numBits](APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res = res.lshr(rhs);
+    return BoundedSet{res};
+  };
+  return compute(other, opLShr);
 }
+
 shared_ptr<AbstractDomain> BoundedSet::ashr(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+  auto opAShr = [numBits] (APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res = res.ashr(rhs);
+    return BoundedSet{res};
+  };
+  return compute(other, opAShr);
 }
 shared_ptr<AbstractDomain> BoundedSet::and_(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+  auto opAnd = [numBits] (APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res &= rhs;
+    return BoundedSet{res};
+  };
+  return compute(other, opAnd);
 }
 shared_ptr<AbstractDomain> BoundedSet::or_(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+  auto opOr = [numBits] (APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res |= rhs;
+    return BoundedSet{res};
+  };
+  return compute(other, opOr);
 }
 shared_ptr<AbstractDomain> BoundedSet::xor_(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+  auto opNot = [numBits] (APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res ^= rhs;
+    return BoundedSet{res};
+  };
+  return compute(other, opNot);
 }
-  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-  BoundedSet::icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other) {
+
+std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+BoundedSet::icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other) {
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
     (shared_ptr<AbstractDomain>(new BoundedSet(true)), shared_ptr<AbstractDomain>(new BoundedSet(true)));
 }

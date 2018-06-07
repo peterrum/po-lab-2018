@@ -43,7 +43,7 @@ public:
   // Binary Bitwise Operations
   shared_ptr<AbstractDomain> shl(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw);
-  shared_ptr<AbstractDomain> shlr(unsigned numBits, AbstractDomain &other,
+  shared_ptr<AbstractDomain> lshr(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw);
   shared_ptr<AbstractDomain> ashr(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw);
