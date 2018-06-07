@@ -3,32 +3,24 @@
 
 #include "llvm/IR/InstVisitor.h"
 #include "llvm/IR/InstrTypes.h"
+#include "llvm/IR/CFG.h"
 #include "AbstractDomain.h"
+#include "BoundedSet.h"
+#include "state.h"
 #include <queue>
 #include <unordered_map>
-#include <map>
 
 using namespace llvm;
 
 namespace pcpo{
 
-class State{
-
-public:
-    State() = default;
-
-    bool put(Value& v, std::shared_ptr<AbstractDomain> ad);
-    void leastUpperBound(State& other);
-
-private:
-    std::map<Value*,std::shared_ptr<AbstractDomain>> vars;
-};
-
 class VsaVisitor : public InstVisitor<VsaVisitor,void> {
 
 public:
-    VsaVisitor(std::queue<Instruction*>& q):worklist(q) { };
+    VsaVisitor(std::queue<BasicBlock*>& q):worklist(q) { };
 
+    void visitBasicBlock(BasicBlock &BB);
+    void visitTerminationInst(TerminatorInst &I);
     /// Specific Instruction type classes
     /*void visitBranchInst(BranchInst &I);
     void visitSwitchInst(SwitchInst &I);
@@ -61,10 +53,11 @@ public:
     void visitInstruction(Instruction &I);
 
 private:
-    void pushInstUsers(Instruction &I);
+    void pushSuccessors(TerminatorInst &I);
 
-    std::queue<Instruction*>& worklist;
-    std::map<BasicBlock,State> programPoints;
+    std::queue<BasicBlock*>& worklist;
+    State newState;
+    std::map<BasicBlock*,State> programPoints;
 };
 
 }

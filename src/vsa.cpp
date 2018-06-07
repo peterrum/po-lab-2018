@@ -17,7 +17,7 @@ namespace {
     static char ID; 
     
     // worklist: instructions are handled in a FIFO manner
-    std::queue<Instruction*> worklist;
+    std::queue<BasicBlock*> worklist;
     
     // visitor: visits instructions and pushes new instructions onto the
     // worklist
@@ -34,14 +34,13 @@ namespace {
     }
     
     bool runOnModule(Module &M) override {
-      // push all instructions onto the worklist: for that loop over...
-      // ... all functions
-      for(auto& function: M)
-          // ... basic blocks
+      /// push all instructions onto the worklist: for that loop over...
+      /// ... all functions
+      for(auto& function : M)
+          /// ... basic blocks
           for(auto& bb : function)
-              // and instructions
-              for(auto& instr:bb)
-                  worklist.push(&instr);
+              /// and instructions
+              worklist.push(&bb);
           
       // pop instructions from the worklist and visit them until no more
       // are available (the visitor pushes new instructions query-based)

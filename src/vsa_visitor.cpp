@@ -5,44 +5,52 @@ using namespace llvm;
 
 namespace pcpo {
 
+void VsaVisitor::visitBasicBlock(BasicBlock &BB){
+    //errs() << "visited basic blocks" << "\n";
 
-bool State::put(Value& v, std::shared_ptr<AbstractDomain> ad){
-    const auto find = vars.find(&v);
-    if(find != vars.end()){
-        if(ad->lessOrEqual(*vars[&v]))
-            return false;
-        vars[&v] = vars[&v]->leastUpperBound(*ad);
+    /// empty state represents bottom
+    newState = State();
 
+    /// least upper bound with all predecessors
+    for(auto pred : predecessors(&BB)){
+        auto old = programPoints.find(pred);
+        if(old != programPoints.end()){
+            newState.leastUpperBound(old->second);
+        } /// else: its state is bottom and lub(bottom, x) = x
+    }
+}
+
+void VsaVisitor::visitTerminationInst(TerminatorInst &I){
+    /// something has changed in BB
+    auto currentBB = I.getParent();
+    auto old = programPoints.find(currentBB);
+    if(old != programPoints.end()){
+        /// compute lub in place after this old state is updated
+        if(old->second.leastUpperBound(newState)){
+            /// new state was old state: do not push sucessors
+            return;
+        }
     } else {
-        vars[&v] = ad;
+        programPoints[currentBB] = newState;
     }
-    return true;
+    pushSuccessors(I);
 }
 
-void State::leastUpperBound(State& other){
-    for(auto& var : vars){
-        put(*var.first,var.second);
+void VsaVisitor::visitPHINode(PHINode &I){
+    /// bottom
+    std::shared_ptr<AbstractDomain> bs (new BoundedSet(false));
+    for(Use& val:I.incoming_values()){
+        bs->leastUpperBound(*newState.getAbstractValues(val));
     }
+    newState.put(I,bs);
 }
 
-void VsaVisitor::visitPHINode(PHINode &I) {
-    /// todo: merge
-    if(true){
-        this->pushInstUsers(I);
-    }
-}
-
-void VsaVisitor::visitBinaryOperator(BinaryOperator &I) {
+void VsaVisitor::visitBinaryOperator(BinaryOperator &I){
     // todo
-    errs() << "visited binary Operator"<<"\n";
-    if(true)
-        this->pushInstUsers(I);
 }
 
-void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I) {
+void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I){
     // todo
-    if(true)
-        this->pushInstUsers(I);
 }
 
 void VsaVisitor::visitInstruction(Instruction &I){
@@ -50,13 +58,10 @@ void VsaVisitor::visitInstruction(Instruction &I){
     errs() << I.getOpcodeName() << ": " << I.getValueID() << "\n";
 }
 
-void VsaVisitor::pushInstUsers(Instruction &I) {
-    for(auto values: I.users()){
-        if(Instruction::classof(values)) {
-            Instruction *v = reinterpret_cast<Instruction *>(values);
-            worklist.push(v);
-        }
-    }
+void VsaVisitor::pushSuccessors(TerminatorInst &I){
+    for(auto bb : I.successors())
+        worklist.push(bb);
+
 }
 
 }
