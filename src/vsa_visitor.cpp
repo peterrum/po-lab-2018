@@ -1,4 +1,5 @@
 #include "vsa_visitor.h"
+#include "llvm/Support/raw_os_ostream.h"
 
 using namespace llvm;
 

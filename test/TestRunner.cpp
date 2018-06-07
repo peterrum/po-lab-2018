@@ -21,18 +21,13 @@ using namespace llvm;
 
 #define DEBUG_TYPE "testBS"
 
-STATISTIC(HelloCounter, "Counts number of functions greeted");
-
 namespace {
-// Hello - The first implementation, without getAnalysisUsage.
 struct Hello : public FunctionPass {
   static char ID; // Pass identification, replacement for typeid
   Hello() : FunctionPass(ID) {}
 
   bool runOnFunction(Function &F) override {
-    pcpo::testConstructor();
-    pcpo::testLeastUpperBound();
-    pcpo::testTop();
+    pcpo::run();
     return false;
   }
 };

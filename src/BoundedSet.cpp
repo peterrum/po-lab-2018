@@ -7,6 +7,7 @@
 #include <memory>
 #include <set>
 #include <initializer_list>
+#include <iostream>
 
 namespace pcpo {
 

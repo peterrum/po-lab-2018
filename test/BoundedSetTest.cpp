@@ -29,7 +29,7 @@ void testConstructor() {
 void testLeastUpperBound() {
   auto result = set2_5.leastUpperBound(set1_3);
   BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
-  BoundedSet expRes {32, {0, 1, 2, 5}};
+  BoundedSet expRes {32, {1, 2, 3, 5}};
   if (!(res == expRes)) {
     errs() << "testLeastUpperBound failed\n";
   }
@@ -60,14 +60,14 @@ void testLeastUpperBoundTop() {
   BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
   if (!(res == top)) {
     errs() << "testLeastUpperBoundTop failed\n";
+    result->printOut();
   }
 }
 
-int main() {
+void run() {
   testConstructor();
   testLeastUpperBound();
   testAdd();
   testLeastUpperBoundTop();
-  return 0;
 }
 } // namespace pcpo
