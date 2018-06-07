@@ -13,7 +13,7 @@ public:
         explicit AbstractDomain();
         AbstractDomain(const AbstractDomain&) = delete;
         AbstractDomain& operator=(const AbstractDomain&) = delete;
-        ~AbstractDomain() = default;
+        virtual ~AbstractDomain() = default;
     
   virtual shared_ptr<AbstractDomain> add(AbstractDomain &other) = 0;
   virtual shared_ptr<AbstractDomain> sub(AbstractDomain &other) = 0;

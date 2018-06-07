@@ -10,7 +10,7 @@ using llvm::APInt;
 const int SET_LIMIT = 10;
 
 struct Comparator {
-  bool operator()(const APInt &left, const APInt &right) {
+  bool operator()(const APInt &left, const APInt &right) const {
     return left.ule(right);
   }
 };
