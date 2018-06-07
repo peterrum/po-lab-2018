@@ -6,11 +6,8 @@ using namespace llvm;
 namespace pcpo {
 
 void VsaVisitor::visitBasicBlock(BasicBlock &BB){
-    //errs() << "visited basic blocks" << "\n";
-
     /// empty state represents bottom
     newState = State();
-    errs() <<newState.toString() + "\n";
 
     /// least upper bound with all predecessors
     for(auto pred : predecessors(&BB)){
@@ -53,10 +50,7 @@ void VsaVisitor::visitBinaryOperator(BinaryOperator &I){
 }
 
 void VsaVisitor::visitAdd(BinaryOperator &I) {
-    errs() << "visited add instruction \n";
     auto op0 = I.getOperand(0);
-    errs() << "after getOperand \n";
-    errs() << newState.toString() + " bla  \n";
     auto ad0 = newState.getAbstractValues(op0);
     //auto ad1 = newState.getAbstractValues(I.getOperand(1));
 

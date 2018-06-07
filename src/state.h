@@ -2,6 +2,11 @@
 #define PROJECT_STATE_H
 
 #include <map>
+#include <memory>
+#include "AbstractDomain.h"
+#include "llvm/IR/Value.h"
+#include "llvm/Support/raw_ostream.h"
+#include "BoundedSet.h"
 
 using namespace llvm;
 namespace pcpo {
@@ -17,7 +22,6 @@ public:
     bool leastUpperBound(State &other);
 
     shared_ptr<AbstractDomain> getAbstractValues(Value* v);
-    std::string toString();
 
 private:
     std::map<Value *, std::shared_ptr < AbstractDomain>> vars;

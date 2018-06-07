@@ -11,6 +11,7 @@ if(WIN32 OR CYGWIN)
 endif()
 
 add_llvm_loadable_module( llvm-vsa
+  src/state.cpp
   src/vsa.cpp
   src/BoundedSet.cpp
   test/BoundedSetTest.cpp
