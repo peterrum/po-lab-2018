@@ -22,7 +22,7 @@ void testConstructor() {
   bot.printOut();
   errs() << "[testConstructor] singleton: ";
   set0.printOut();
-  errs() << "[testConstructor] mulit: ";
+  errs() << "[testConstructor] multi: ";
   set1_3.printOut();
 }
 

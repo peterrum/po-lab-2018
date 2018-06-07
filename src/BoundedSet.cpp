@@ -83,25 +83,48 @@ shared_ptr<AbstractDomain> BoundedSet::add(unsigned numBits, AbstractDomain &oth
 }
 shared_ptr<AbstractDomain> BoundedSet::sub(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  auto opMinus = [numBits, nuw, nsw](APInt left, APInt right) {
+  auto opPlus = [numBits, nuw, nsw](APInt left, APInt right) {
     APInt newValue{numBits, 0};
-    // TODO: check nsw nuw
     newValue += left;
     newValue -= right;
-    return BoundedSet{newValue};
+    bool overflow {false};
+    overflow |= (nsw &&
+      left.isNonNegative() != right.isNonNegative() &&
+      left.isNonNegative() != newValue.isNonNegative());
+    overflow |= (nuw &&
+      newValue.ugt(right));
+    if (overflow) {
+      return BoundedSet{true};
+    } else {
+      return BoundedSet{newValue};
+    }
   };
-  return compute(other, opMinus);
+  return compute(other, opPlus);
 }
 shared_ptr<AbstractDomain> BoundedSet::mul(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  auto opMinus = [numBits, nuw, nsw](APInt left, APInt right) {
-    APInt newValue{numBits, 0};
-    // TODO: check nsw nuw
-    newValue += left;
-    newValue *= right;
-    return BoundedSet{newValue};
+    auto opMul = [numBits, nuw, nsw](APInt lhs, APInt rhs) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res *= rhs;
+    bool overflow {false};
+    if (nsw) {
+      if (lhs != 0 && lhs != 0) {
+        overflow |= res.udiv(rhs) != lhs || res.udiv(lhs) != rhs;
+      }
+    }
+    if (nuw) {
+      if (lhs != 0 && rhs != 0) {
+        overflow |= res.udiv(rhs) != lhs || res.udiv(res) != rhs;
+      }
+    }
+    if (overflow) {
+      return BoundedSet{true};
+    } else {
+      return BoundedSet{res};
+    }
   };
-  return compute(other, opMinus);
+  return compute(other, opMul);
 }
 shared_ptr<AbstractDomain> BoundedSet::udiv(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
@@ -121,7 +144,23 @@ shared_ptr<AbstractDomain> BoundedSet::srem(unsigned numBits, AbstractDomain &ot
 }
 shared_ptr<AbstractDomain> BoundedSet::shl(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
-  return shared_ptr<AbstractDomain> (new BoundedSet(true));
+    auto opShl = [numBits, nuw, nsw](APInt lhs, APInt shAmt) {
+    APInt res{numBits, 0};
+    res += lhs;
+    res.shl(shAmt);
+    bool overflow {shAmt.uge(numBits)};
+    if (lhs.isNonNegative()) {
+      overflow |= shAmt.uge(lhs.countLeadingZeros());
+    } else {
+      overflow |= shAmt.uge(lhs.countLeadingZeros());
+    }
+    if (overflow) {
+      return BoundedSet{true};
+    } else {
+      return BoundedSet{res};
+    }
+  };
+  return compute(other, opShl);
 }
 shared_ptr<AbstractDomain> BoundedSet::shlr(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
