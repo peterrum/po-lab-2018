@@ -49,7 +49,7 @@ shared_ptr<AbstractDomain> BoundedSet::add(AbstractDomain &other) {
   };
   return compute(other, opPlus);
 }
-shared_ptr<AbstractDomain> BoundedSet::subtract(AbstractDomain &other) {
+shared_ptr<AbstractDomain> BoundedSet::sub(AbstractDomain &other) {
   auto opMinus = [](APInt left, APInt right) {
     APInt newValue{left};
     newValue -= right;
@@ -57,7 +57,7 @@ shared_ptr<AbstractDomain> BoundedSet::subtract(AbstractDomain &other) {
   };
   return compute(other, opMinus);
 }
-shared_ptr<AbstractDomain> BoundedSet::multiply(AbstractDomain &other) {
+shared_ptr<AbstractDomain> BoundedSet::mul(AbstractDomain &other) {
   auto opMinus = [](APInt left, APInt right) {
     APInt newValue{left};
     newValue *= right;
@@ -65,18 +65,6 @@ shared_ptr<AbstractDomain> BoundedSet::multiply(AbstractDomain &other) {
   };
   return compute(other, opMinus);
 }
-shared_ptr<AbstractDomain> BoundedSet::unaryMinus() {
-  std::set<APInt, Comparator> newValues{};
-  APInt tmp;
-  for (auto &val : values) {
-    tmp = APInt(val);
-    tmp *= -1;
-    newValues.insert(tmp);
-  }
-  return shared_ptr<BoundedSet>(new BoundedSet(newValues));
-}
-shared_ptr<AbstractDomain> BoundedSet::increment() { return nullptr; }
-shared_ptr<AbstractDomain> BoundedSet::decrement() { return nullptr; }
 
 shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {

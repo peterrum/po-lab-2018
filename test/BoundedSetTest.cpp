@@ -10,8 +10,8 @@ void testConstructor() {
   BoundedSet right{value};
   auto result = left.add(right);
   result->printOut();
-  result = result->unaryMinus();
-  result->printOut();
+  // result = result->unaryMinus();
+  // result->printOut();
 }
 
 void testTop() {

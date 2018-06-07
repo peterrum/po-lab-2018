@@ -24,11 +24,8 @@ private:
 
 public:
   shared_ptr<AbstractDomain> add(AbstractDomain &other);
-  shared_ptr<AbstractDomain> subtract(AbstractDomain &other);
-  shared_ptr<AbstractDomain> multiply(AbstractDomain &other);
-  shared_ptr<AbstractDomain> unaryMinus();
-  shared_ptr<AbstractDomain> increment();
-  shared_ptr<AbstractDomain> decrement();
+  shared_ptr<AbstractDomain> sub(AbstractDomain &other);
+  shared_ptr<AbstractDomain> mul(AbstractDomain &other);
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
   bool lessOrEqual(AbstractDomain &other);
 
