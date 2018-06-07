@@ -13,17 +13,27 @@ using namespace pcpo;
 namespace {
     
   struct VsaPass : public ModulePass {
-    static char ID; // Pass identification, replacement for typeid
-      VsaPass() : ModulePass(ID) {}
+    // Pass identification, replacement for typeid
+    static char ID; 
+    
+    // worklist: instructions are handled in a FIFO manner
+    std::queue<Instruction*> worklist;
+    
+    // visitor: visits instructions and pushes new instructions onto the
+    // worklist
+    VsaVisitor vis;
+    
+    VsaPass() : ModulePass(ID), worklist(), vis(worklist) {}
 
+    bool doInitialization(Module& m) override {
+        return ModulePass::doInitialization(m);
+    }
+    
+    bool doFinalization(Module & m) override{ 
+        return ModulePass::doFinalization(m);
+    }
+    
     bool runOnModule(Module &M) override {
-
-      // worklist: instructions are handled in a FIFO manner
-      std::queue<Instruction*> worklist;
-      // visitor: visits instructions and pushes new instructions onto the
-      // worklist
-      VsaVisitor vis(worklist);
-
       // push all instructions onto the worklist: for that loop over...
       // ... all functions
       for(auto& function: M)
