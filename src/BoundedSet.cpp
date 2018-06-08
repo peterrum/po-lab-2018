@@ -319,9 +319,15 @@ shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
   return nullptr;
 }
 
-// implements contains
+// is this boundedSet less or equal to the other?
 bool BoundedSet::lessOrEqual(AbstractDomain &other) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
+    if(otherB->isTop()){
+      return true;
+    }
+    if(isTop()){
+      return otherB->isTop();
+    }
     auto end = otherB->values.end();
     for (auto &val : values) {
       if (otherB->values.find(val) == end) {
