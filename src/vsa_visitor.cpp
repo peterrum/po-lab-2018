@@ -31,7 +31,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
     if(old != programPoints.end()){
         DEBUG_OUTPUT("visitTerminationInst: old state found");
         /// compute lub in place after this old state is updated
-        if(old->second.leastUpperBound(newState)){
+        if(!old->second.leastUpperBound(newState)){
             /// new state was old state: do not push sucessors
             return;
         }
@@ -39,6 +39,8 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
         DEBUG_OUTPUT("visitTerminationInst: old state not found");
         programPoints[currentBB] = newState;
     }
+    
+    DEBUG_OUTPUT("visitTerminationInst: state has been changed -> push successors");
     pushSuccessors(I);
 }
 
