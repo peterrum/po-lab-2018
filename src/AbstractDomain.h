@@ -60,10 +60,10 @@ public:
   virtual bool lessOrEqual(AbstractDomain &other) = 0;
   
   // |gamma(this)|
-  virtual size_t size() = 0;
+  virtual size_t size() const = 0;
 
   // Debugging methodes
-  virtual void printOut() = 0;
+  virtual void printOut() const = 0;
   // TODO: bitwise operations
 };
 } // namespace pcpo

@@ -372,7 +372,7 @@ bool BoundedSet::lessOrEqual(AbstractDomain &other) {
   return false;
 }
 
-void BoundedSet::printOut() {
+void BoundedSet::printOut() const {
   //   errs() << "BoundedSet@" << this << std::endl;
   errs() << "BoundedSet@" << this << "\n";
   if (top) {
@@ -384,11 +384,29 @@ void BoundedSet::printOut() {
   }
 }
 
-llvm::raw_ostream& BoundedSet::print(llvm::raw_ostream & os){
-    os << "The BoundedSet is on coffee break.";
-    return os;
+llvm::raw_ostream& BoundedSet::print(llvm::raw_ostream &os){
+  
+  if(isTop()){
+    os << "T";
+  } else {
+    os << "{";
+    auto current = values.begin();
+    auto end = values.end();
+    if(current!=end){
+      os << current->toString(OUTPUT_BASE, OUTPUT_SIGNED);
+      current++;
+    }
+    for (; current != end; current++){
+      os << ", ";
+      os << current->toString(OUTPUT_BASE, OUTPUT_SIGNED);
+    }
+    os << "}";
+  }
+  return os;
 }
 
-bool BoundedSet::isTop() { return top; }
-size_t BoundedSet::size() { return values.size(); }
+bool BoundedSet::isTop() const { return top; }
+
+size_t BoundedSet::size() const { return values.size(); }
+
 } // namespace pcpo
