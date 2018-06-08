@@ -30,9 +30,16 @@ void testLeastUpperBound() {
   auto result = set2_5.leastUpperBound(set1_3);
   BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
   BoundedSet expRes {32, {1, 2, 3, 5}};
-  errs() << expRes << "\n";
   if (!(res == expRes)) {
     errs() << "testLeastUpperBound failed\n";
+    errs() << res << "\n";
+  }
+  result = top.leastUpperBound(set2_5);
+  res = *(static_cast<BoundedSet*> (result.get()));
+  errs() << res << "\n";
+  if (!(res == top)) {
+    errs() << "testLeastUpperBound failed\n";
+    errs() << res << "\n";
   }
 }
 

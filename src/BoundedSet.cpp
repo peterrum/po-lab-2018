@@ -333,6 +333,9 @@ BoundedSet::icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &othe
 
 shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
+    if(isTop()||otherB->isTop()){
+      return shared_ptr<BoundedSet>{new BoundedSet(true)};
+    }
     std::set<APInt, Comparator> result;
     for (auto &val : values) {
       result.insert(val);
