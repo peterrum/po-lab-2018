@@ -187,7 +187,7 @@ shared_ptr<AbstractDomain> BoundedSet::shl(unsigned numBits, AbstractDomain &oth
   return compute(other, opShl);
 }
 
-//TODO: Discuss whether to implement lshr or ashr
+//lshr shifts the this object to the right, using a zero fill on the right  
 shared_ptr<AbstractDomain> BoundedSet::lshr(unsigned numBits, AbstractDomain &other,
     bool nuw, bool nsw) {
   auto opLShr = [numBits](APInt lhs, APInt rhs) {
