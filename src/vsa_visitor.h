@@ -24,8 +24,8 @@ public:
     void visitBasicBlock(BasicBlock &BB);
     void visitTerminatorInst(TerminatorInst &I);
     /// Specific Instruction type classes
-    /*void visitBranchInst(BranchInst &I);
-    void visitSwitchInst(SwitchInst &I);
+    void visitBranchInst(BranchInst &I);
+    /*void visitSwitchInst(SwitchInst &I);
     void visitIndirectBrInst(IndirectBrInst &I);
     void visitResumeInst(ResumeInst &I);
     void visitICmpInst(ICmpInst &I);

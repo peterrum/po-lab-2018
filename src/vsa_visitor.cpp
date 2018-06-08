@@ -18,7 +18,10 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB){
             if(incoming->second.isBottom()) continue;
             // else state is not bottom
             DEBUG_OUTPUT("visitBasicBlock: state for" << pred->getName() << " found");
+            
+            incoming->second.applyCondition(&BB);
             newState.leastUpperBound(incoming->second);
+            incoming->second.unApplyCondition();
         } /// else: its state is implicit bottom and lub(bottom, x) = x
     }
 }
@@ -55,6 +58,11 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
     DEBUG_OUTPUT("visitTerminationInst: new state in bb " << currentBB->getName());
     newState.print();
     pushSuccessors(I);
+}
+
+void VsaVisitor::visitBranchInst(BranchInst &I){
+    this->visitTerminatorInst(I);
+    DEBUG_OUTPUT("blub");
 }
 
 void VsaVisitor::visitPHINode(PHINode &I){

@@ -103,7 +103,7 @@ void State::applyCondition(BasicBlock* bb){
 
 void State::unApplyCondition(){
     
-    assert(conditionCacheUsed && "ConditionCache has not been applied last time!");
+    if(!conditionCacheUsed) return;
     
     vars[conditionCache.first] = conditionCache.second;
     conditionCacheUsed = false;
