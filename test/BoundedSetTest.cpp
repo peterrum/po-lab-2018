@@ -85,6 +85,7 @@ void testAdd() {
 }
 
 void testLeastUpperBoundTop() {
+  errs() << "[testLeastUpperBoundTop]\n";
   APInt first{32, 13, false};
   APInt second{32, 42, false};
 
@@ -98,15 +99,32 @@ void testLeastUpperBoundTop() {
     result = result->leastUpperBound(tmp);
   }
   BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
+  errs() << res << "\n";
   if (!(res == top)) {
     errs() << "testLeastUpperBoundTop failed\n";
     result->printOut();
   }
 }
 
+void testLeastUpperBoundWithAdd(){
+  errs() << "[testLeastUpperBoundWithAdd]\n";
+  BoundedSet a{32, {3}};
+  shared_ptr<AbstractDomain> result{new BoundedSet{32,{1,2}}};
+  shared_ptr<AbstractDomain> tmp{new BoundedSet{false}};
+
+  BoundedSet res{false};
+  for (int i = 0; i < 4; i++) {
+    tmp = result->add(32, a, false, false);
+    res = *(static_cast<BoundedSet *>(tmp.get()));
+    errs() << res << "\n";
+    result = result->leastUpperBound(res);
+  }
+}
+
 void run() {
   testConstructor();
   testLeastUpperBound();
+  testLeastUpperBoundWithAdd();
   testLeastUpperBoundUnique();
   testAdd();
   testLeastUpperBoundTop();
