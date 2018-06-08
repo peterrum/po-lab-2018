@@ -35,14 +35,23 @@ void testLeastUpperBound() {
   }
 }
 
+void testEquals() { 
+  BoundedSet set0_4{32, {0, 1, 2, 3, 4}};
+  BoundedSet set0_4P{32, {0, 1, 2, 3, 4}};
+  if (!(set0_4 == set0_4P)) {
+    errs() << "testEquals failed\n";
+  }
+}
+
 void testLeastUpperBoundUnique() { 
   BoundedSet set0_4{32, {0, 1, 2, 3, 4}};
   BoundedSet set0_4P{32, {0, 1, 2, 3, 4}};
   auto result = set0_4.leastUpperBound(set0_4P);
   BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
-  res.printOut();
-  if (!(res == set0_4)) {
+  if (!(res == set0_4P)) {
     errs() << "testLeastUpperBoundUnique failed\n";
+    errs() << "[testLeastUpperBoundUnique]: ";
+    res.printOut();
   }
 }
 
