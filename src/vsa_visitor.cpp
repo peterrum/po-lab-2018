@@ -60,7 +60,8 @@ void VsaVisitor::visitAdd(BinaryOperator &I) {
     auto ad0 = newState.getAbstractValues(I.getOperand(0));
     auto ad1 = newState.getAbstractValues(I.getOperand(1));
     
-    newState.put(I, ad0->add(*ad1));
+    // TODO: meaning of arguments?
+    newState.put(I, ad0->add(I.getType()->getIntegerBitWidth(),*ad1, false, false));
 }
 
 void VsaVisitor::visitMul(BinaryOperator& I) {
