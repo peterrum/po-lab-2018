@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 #include <stdio.h>
 
+=======
+>>>>>>> ff568f570849c487d987c80925893bc626deb865
 int main(int argc, char const *argv[]) {
   int x = 0;
 
