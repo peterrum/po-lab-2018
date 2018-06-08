@@ -8,7 +8,7 @@
 namespace pcpo {
 using llvm::APInt;
 
-const int SET_LIMIT = 10;
+const int SET_LIMIT = 40;
 const int OUTPUT_BASE = 10;
 const int OUTPUT_SIGNED = false;
 

@@ -44,8 +44,8 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
         /// compute lub in place after this old state is updated
         if(!old->second.leastUpperBound(newState)){
             /// new state was old state: do not push successors
-            DEBUG_OUTPUT("visitTerminationInst: state has been changed -> push successors");
-            DEBUG_OUTPUT("visitTerminationInst: new state in bb " << currentBB->getName());
+            DEBUG_OUTPUT("visitTerminationInst: state has not been changed");
+            DEBUG_OUTPUT("visitTerminationInst: new state equals old state in " << currentBB->getName());
             newState.print();
             return;
         }
@@ -56,6 +56,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
     
     DEBUG_OUTPUT("visitTerminationInst: state has been changed -> push successors");
     DEBUG_OUTPUT("visitTerminationInst: new state in bb " << currentBB->getName());
+    programPoints[currentBB].print();
     newState.print();
     pushSuccessors(I);
 }
@@ -69,14 +70,15 @@ void VsaVisitor::visitBranchInst(BranchInst &I){
         auto cmpInst = reinterpret_cast<ICmpInst*>(cond);
         auto ad0 = newState.getAbstractValue(cmpInst->getOperand(0));
         auto ad1 = newState.getAbstractValue(cmpInst->getOperand(1));
-        
+
+        // TODO: we assume that only the first argument is a variable
         auto temp = ad0->icmp(cmpInst->getPredicate(), cmpInst->getType()->getIntegerBitWidth(), *ad1);
 
         DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
-        ad0->printOut();
-        ad1->printOut();
-        temp.first->printOut();
-        temp.second->printOut();
+        DEBUG_OUTPUT("   " << *ad0);
+        DEBUG_OUTPUT("   " << *ad1);
+        DEBUG_OUTPUT("T: " << *temp.first);
+        DEBUG_OUTPUT("F: " << *temp.second);
         
     }
     
