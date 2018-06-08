@@ -54,14 +54,13 @@ void VsaVisitor::visitPHINode(PHINode &I){
         
         /// Check if basic block containing use is bottom
         if(Instruction::classof(val)){
-            auto incomingBlock = reinterpret_cast<Instruction*>(v)->getParent();
-            auto incomingState = programPoints.find(incomingBlock);
+            auto incomingBlock = reinterpret_cast<Instruction*>(&val)->getParent();
             
             /// block has not been visited yet -> implicit bottom
-            if(incomingState == programPoints.end()) continue;
+            if(programPoints.find(incomingBlock) == programPoints.end()) continue;
             
             /// explicit bottom
-            if(programPoints[incomingState].isBottom()) continue;
+            if(programPoints[incomingBlock].isBottom()) continue;
         }
         
         /// if state of basic block was not bottom, include abstract value
