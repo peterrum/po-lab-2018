@@ -69,7 +69,7 @@ public:
     icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
   
   // |gamma(this)|
-  size_t size() const;
+  size_t size();
 
 
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
@@ -81,14 +81,12 @@ public:
   BoundedSet(std::set<APInt, Comparator> values);
   explicit BoundedSet(APInt value);
   friend std::ostream& operator<< (std::ostream& os, const BoundedSet& bs);
-  
-  virtual llvm::raw_ostream& print(llvm::raw_ostream & os);
 
   explicit BoundedSet(bool isTop);
   BoundedSet(std::initializer_list<APInt> vals);
   BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
-  bool isTop() const;
-  void printOut() const;
+  bool isTop();
+  void printOut();
   
   static shared_ptr<AbstractDomain> create_bottom(){
       return std::shared_ptr<AbstractDomain> (new BoundedSet(false));
