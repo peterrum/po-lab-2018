@@ -33,13 +33,16 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
     auto old = programPoints.find(currentBB);
     if(old != programPoints.end()){
         DEBUG_OUTPUT("visitTerminationInst: old state found");
-        assert(!old->second.isBottom() && "Pruning with bottom!");
+        
+        // TODO: revert
+        //assert(!old->second.isBottom() && "Pruning with bottom!");
         
         // From the merge of states, there are values in the map that are in
         // reality only defined for certain paths.
         // All values actually defined are also defined after the first pass.
         // Therefore remove all values that were not defined in the previous state
-        newState.prune(old->second);
+        if(!old->second.isBottom())
+            newState.prune(old->second);
         
         /// compute lub in place after this old state is updated
         if(!old->second.leastUpperBound(newState)){
@@ -49,6 +52,8 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
             newState.print();
             return;
         }
+        old->second.transferBranchConditions(newState);
+        old->second.transferBottomness(newState);
     } else {
         DEBUG_OUTPUT("visitTerminationInst: old state not found");
         programPoints[currentBB] = newState;
@@ -79,6 +84,10 @@ void VsaVisitor::visitBranchInst(BranchInst &I){
         DEBUG_OUTPUT("   " << *ad1);
         DEBUG_OUTPUT("T: " << *temp.first);
         DEBUG_OUTPUT("F: " << *temp.second);
+        
+        // TODO: visit only if not bottom
+        newState.putBranchConditions(I.getSuccessor(0), cmpInst->getOperand(0), temp.first);
+        newState.putBranchConditions(I.getSuccessor(1), cmpInst->getOperand(0), temp.second);
         
     }
     

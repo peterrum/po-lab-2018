@@ -13,7 +13,7 @@ State::State() : bottom(true){
 
 bool State::put(Value& v, std::shared_ptr<AbstractDomain> ad){
     
-    assert(!bottom && "Visited although bottom!");
+    //assert(!bottom && "Visited although bottom!");
     
     if(ad->lessOrEqual(*BoundedSet::create_bottom())){
         DEBUG_OUTPUT("State::put: set to bottom because of " << v.getName());
@@ -129,6 +129,20 @@ void State::print(){
         //var.second->printOut();
     }
     
+}
+
+void State::putBranchConditions(BasicBlock* bb, Value * val, std::shared_ptr < AbstractDomain> ad){
+
+    branchConditions[bb] = std::pair<Value *, std::shared_ptr < AbstractDomain>>(val, ad);
+    
+}
+
+void State::transferBranchConditions(State& other) {
+    this->branchConditions = other.branchConditions;
+}
+
+void State::transferBottomness(State& other){
+    this->bottom = other.bottom;
 }
 
 }

@@ -38,6 +38,11 @@ public:
     
     void print();
     
+    void putBranchConditions(BasicBlock* bb, Value * val, std::shared_ptr < AbstractDomain> ad);
+    
+    void transferBranchConditions(State& other);
+    
+    void transferBottomness(State& other);
     
 private:
     std::map<Value *, std::shared_ptr < AbstractDomain>> vars;
