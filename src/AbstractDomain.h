@@ -54,7 +54,7 @@ public:
   virtual bool lessOrEqual(AbstractDomain &other) = 0;
   
   // |gamma(this)|
-  size_t size();
+  virtual size_t size();
 
   // Debugging methodes
   virtual void printOut() = 0;
