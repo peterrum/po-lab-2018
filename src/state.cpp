@@ -74,7 +74,7 @@ shared_ptr<AbstractDomain> State::getAbstractValue(Value* v){
     
     DEBUG_OUTPUT( "State::getAbstractValue " << v->getName() <<" : failed" );
     
-    return BoundedSet::create_top();
+    return AD_TYPE::create_top();
 }
 
 std::pair<Value *, std::shared_ptr < AbstractDomain>> State::get_branch_condition(BasicBlock* bb){

@@ -97,7 +97,7 @@ void VsaVisitor::visitBranchInst(BranchInst &I){
 
 void VsaVisitor::visitPHINode(PHINode &I){
     /// bottom
-    auto bs = BoundedSet::create_bottom();
+    auto bs = AD_TYPE::create_bottom();
     for(Use& val:I.incoming_values()){
         //newState.getAbstractValue(val)->printOut();
             
