@@ -1,5 +1,6 @@
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>
+#include <llvm/Analysis/AliasAnalysis.h>
 
 #include "util.h"
 #include "state.h"
@@ -43,6 +44,21 @@ bool State::leastUpperBound(State& other){
     return change;
 }
 
+/// remove all <key,value> from this state where other does not have the key 
+/// \param other other state
+void State::prune(State& other){
+    auto temp = vars;
+    for(auto& var : vars){
+        DEBUG_OUTPUT("State::prune has: " << var.first->getName());
+        if(other.vars.find(var.first)==other.vars.end()){
+            temp.erase(var.first);
+            DEBUG_OUTPUT("   and removes");
+            
+        }
+    }
+    vars = temp;
+}
+
 shared_ptr<AbstractDomain> State::getAbstractValue(Value* v){
     
     if(ConstantInt::classof(v)){
@@ -82,7 +98,7 @@ void State::applyCondition(BasicBlock* bb){
                 value, getAbstractValue(value));
         
         vars[value] = branchCondition.second;
-    }
+    } 
 }
 
 void State::unApplyCondition(){
@@ -99,6 +115,19 @@ bool State::isBottom(){
 
 void State::setNotBottom(){
     bottom = false;
+}
+
+void State::print(){
+    if(bottom){
+        STD_OUTPUT("bottom");
+        return;
+    }
+    
+    for(auto & var : vars){
+        STD_OUTPUT(var.first->getName() << " -> ");
+        var.second->printOut();
+    }
+    
 }
 
 }

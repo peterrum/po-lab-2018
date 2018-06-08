@@ -47,6 +47,11 @@ namespace {
       // are available (the visitor pushes new instructions query-based)
       while(!worklist.empty()){
           vis.visit(*worklist.pop());
+          vis.print();
+          DEBUG_OUTPUT("");
+          DEBUG_OUTPUT("");
+          DEBUG_OUTPUT("");
+          DEBUG_OUTPUT("");
       }
 
       // TODO: purpose?

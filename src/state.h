@@ -21,6 +21,8 @@ public:
     bool put(Value &v, std::shared_ptr <AbstractDomain> ad);
     /// true -> change, false -> no change (see State::put)
     bool leastUpperBound(State &other);
+    
+    void prune(State &other);
 
     shared_ptr<AbstractDomain> getAbstractValue(Value* v);
 
@@ -33,6 +35,8 @@ public:
     bool isBottom();
     
     void setNotBottom();
+    
+    void print();
     
     
 private:

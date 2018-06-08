@@ -3,7 +3,7 @@
 
 #include "llvm/Support/raw_ostream.h"
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
     #define DEBUG_OUTPUT(text) errs() << text << "\n"

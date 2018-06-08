@@ -58,12 +58,15 @@ public:
     /// default
     void visitInstruction(Instruction &I);
 
+    void print();
+    
 private:
     void pushSuccessors(TerminatorInst &I);
 
     WorkList& worklist;
     State newState;
     std::map<BasicBlock*,State> programPoints;
+    
 };
 
 }

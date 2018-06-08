@@ -30,9 +30,20 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
     auto old = programPoints.find(currentBB);
     if(old != programPoints.end()){
         DEBUG_OUTPUT("visitTerminationInst: old state found");
+        assert(!old->second.isBottom() && "Pruning with bottom!");
+        
+        // From the merge of states, there are values in the map that are in
+        // reality only defined for certain paths.
+        // All values actually defined are also defined after the first pass.
+        // Therefore remove all values that were not defined in the previous state
+        newState.prune(old->second);
+        
         /// compute lub in place after this old state is updated
         if(!old->second.leastUpperBound(newState)){
-            /// new state was old state: do not push sucessors
+            /// new state was old state: do not push successors
+            DEBUG_OUTPUT("visitTerminationInst: state has been changed -> push successors");
+            DEBUG_OUTPUT("visitTerminationInst: new state in bb " << currentBB->getName());
+            newState.print();
             return;
         }
     } else {
@@ -41,6 +52,8 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
     }
     
     DEBUG_OUTPUT("visitTerminationInst: state has been changed -> push successors");
+    DEBUG_OUTPUT("visitTerminationInst: new state in bb " << currentBB->getName());
+    newState.print();
     pushSuccessors(I);
 }
 
@@ -70,7 +83,7 @@ void VsaVisitor::visitPHINode(PHINode &I){
         bs = bs->leastUpperBound(*newState.getAbstractValue(val));
     }
     
-    bs->printOut();
+    //bs->printOut();
     
     newState.put(I,bs);
 }
@@ -108,6 +121,13 @@ void VsaVisitor::pushSuccessors(TerminatorInst &I){
         worklist.push(bb);
     }
 
+}
+
+void VsaVisitor::print(){
+    for(auto & pp : programPoints){
+        DEBUG_OUTPUT("VsaVisitor::print():" << pp.first->getName());
+        pp.second.print();
+    }
 }
 
 }
