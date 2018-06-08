@@ -41,7 +41,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
 
 void VsaVisitor::visitPHINode(PHINode &I){
     /// bottom
-    std::shared_ptr<AbstractDomain> bs (new BoundedSet(false));
+    auto bs = BoundedSet::create_bottom();
     for(Use& val:I.incoming_values()){
         //newState.getAbstractValues(val)->printOut();
         bs = bs->leastUpperBound(*newState.getAbstractValues(val));

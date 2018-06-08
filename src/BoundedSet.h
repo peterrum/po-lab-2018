@@ -73,6 +73,15 @@ public:
   BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
   bool isTop();
   void printOut();
+  
+  static shared_ptr<AbstractDomain> create_bottom(){
+      return std::shared_ptr<AbstractDomain> (new BoundedSet(false));
+  }
+  
+  static shared_ptr<AbstractDomain> create_top(){
+      return std::shared_ptr<AbstractDomain> (new BoundedSet(true));
+  }
+  
 };
 } // namespace pcpo
 #endif

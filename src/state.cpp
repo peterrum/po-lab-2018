@@ -45,7 +45,7 @@ shared_ptr<AbstractDomain> State::getAbstractValues(Value* v){
     
     DEBUG_OUTPUT( "State::getAbstractValues " << v->getName() <<" : failed" );
     
-    return shared_ptr<AbstractDomain>(new BoundedSet(true));
+    return BoundedSet::create_top();
 }
 
 }
