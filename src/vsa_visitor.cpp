@@ -61,6 +61,25 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
 }
 
 void VsaVisitor::visitBranchInst(BranchInst &I){
+    auto cond = I.getOperand(0);
+    
+    
+    DEBUG_OUTPUT("CONDITIONAL BRANCHES: TEST");
+    if(ICmpInst::classof(cond)){
+        auto cmpInst = reinterpret_cast<ICmpInst*>(cond);
+        auto ad0 = newState.getAbstractValue(cmpInst->getOperand(0));
+        auto ad1 = newState.getAbstractValue(cmpInst->getOperand(1));
+        
+        auto temp = ad0->icmp(cmpInst->getPredicate(), cmpInst->getType()->getIntegerBitWidth(), *ad1);
+
+        DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
+        ad0->printOut();
+        ad1->printOut();
+        temp.first->printOut();
+        temp.second->printOut();
+        
+    }
+    
     this->visitTerminatorInst(I);
     DEBUG_OUTPUT("blub");
 }

@@ -241,14 +241,14 @@ shared_ptr<AbstractDomain> BoundedSet::xor_(unsigned numBits, AbstractDomain &ot
 }
 
 // returns a shared pointer to a new BoundedSet
-// if the flag is set, it returs a top, otherwise a bottomstd::make_pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(std::make_shared<AbstractDomain>(new BoundedSet(true)), std::make_shared<AbstractDomain>(new BoundedSet(true)));
-shared_ptr<AbstractDomain> createBoundedSetPointer(bool  top){
+// if the flag is set, it returns a top, otherwise a bottomstd::make_pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(std::make_shared<AbstractDomain>(new BoundedSet(true)), std::make_shared<AbstractDomain>(new BoundedSet(true)));
+shared_ptr<AbstractDomain> BoundedSet::createBoundedSetPointer(bool  top){
   std::shared_ptr<AbstractDomain> resultPtr(new BoundedSet(top));
   return resultPtr;
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-createBoundedSetPointerPair(bool firstTop, bool secondTop){
+BoundedSet::createBoundedSetPointerPair(bool firstTop, bool secondTop){
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(createBoundedSetPointer(firstTop), createBoundedSetPointer(secondTop));
 }
 
