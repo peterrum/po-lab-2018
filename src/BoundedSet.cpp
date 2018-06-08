@@ -8,6 +8,7 @@
 #include <set>
 #include <initializer_list>
 #include <iostream>
+#include <utility>
 
 namespace pcpo {
 
@@ -238,6 +239,59 @@ shared_ptr<AbstractDomain> BoundedSet::xor_(unsigned numBits, AbstractDomain &ot
     return BoundedSet{res};
   };
   return compute(other, opNot);
+}
+
+// returns a shared pointer to a new BoundedSet
+// if the flag is set, it returs a top, otherwise a bottomstd::make_pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(std::make_shared<AbstractDomain>(new BoundedSet(true)), std::make_shared<AbstractDomain>(new BoundedSet(true)));
+shared_ptr<AbstractDomain> createBoundedSetPointer(bool  top){
+  std::shared_ptr<AbstractDomain> resultPtr(new BoundedSet(top));
+  return resultPtr;
+}
+
+std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+createBoundedSetPointerPair(bool firstTop, bool secondTop){
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(createBoundedSetPointer(firstTop), createBoundedSetPointer(secondTop));
+}
+
+//Returns two subsets of the values of this BoundedSet that that can lead to a true and a false evaluation, respectively
+//Note that a given value may be contained in both sets of the return pair.
+std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+BoundedSet::subsetsForPredicate(unsigned numBits, AbstractDomain &other, std::function<bool(const APInt&, const APInt&)> comparision){
+  if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
+    
+    if(isTop()){
+      // if this set is top, it will be top in both branches afterwards
+      return createBoundedSetPointerPair(true, true);
+    }
+
+    if(otherB->isTop()){
+      // if the other set is top; we cannot infer more details about our set in both branches afterwards
+      // thus, the set stays the same
+      shared_ptr<AbstractDomain> copy {new BoundedSet(*this)};
+      return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+          copy,
+          createBoundedSetPointer(true));
+    }
+    std::set<APInt, Comparator> trueValues;
+    std::set<APInt, Comparator> falseValues;
+
+    for(auto &leftVal : values){
+      for(auto &rightVal : otherB->values){
+        if(comparision(leftVal, rightVal)){
+          trueValues.insert(leftVal);
+        } else {
+          falseValues.insert(leftVal);
+        }
+      }
+    }
+
+    shared_ptr<AbstractDomain> trueSet{new BoundedSet(trueValues)};
+    shared_ptr<AbstractDomain> falseSet{new BoundedSet(falseValues)};
+    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+        trueSet, falseSet);
+  }
+
+  return createBoundedSetPointerPair(true, true);
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>

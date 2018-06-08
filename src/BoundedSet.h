@@ -22,6 +22,13 @@ private:
   bool top{false};
   shared_ptr<AbstractDomain> compute(AbstractDomain &other,
                                      std::function<BoundedSet(const APInt&, const APInt&)> op);
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+  subsetsForPredicate(unsigned numBits, AbstractDomain &other,
+       std::function<bool(const APInt &, const APInt &)> op);
+
+  shared_ptr<AbstractDomain> createBoundedSetPointer(bool top);
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+    createBoundedSetPointerPair(bool firstTop, bool secondTop);
 
 public:
   // Binary Arithmetic Operations
