@@ -12,10 +12,10 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB){
     /// least upper bound with all predecessors
     for(auto pred : predecessors(&BB)){
         DEBUG_OUTPUT("visitBasicBlock: pred" << pred->getName() << " found");
-        auto old = programPoints.find(pred);
-        if(old != programPoints.end()){
+        auto incoming = programPoints.find(pred);
+        if(incoming != programPoints.end()){
             DEBUG_OUTPUT("visitBasicBlock: state for" << pred->getName() << " found");
-            newState.leastUpperBound(old->second);
+            newState.leastUpperBound(incoming->second);
         } /// else: its state is bottom and lub(bottom, x) = x
     }
 }
@@ -43,8 +43,8 @@ void VsaVisitor::visitPHINode(PHINode &I){
     /// bottom
     auto bs = BoundedSet::create_bottom();
     for(Use& val:I.incoming_values()){
-        //newState.getAbstractValues(val)->printOut();
-        bs = bs->leastUpperBound(*newState.getAbstractValues(val));
+        //newState.getAbstractValue(val)->printOut();
+        bs = bs->leastUpperBound(*newState.getAbstractValue(val));
     }
     
     bs->printOut();
@@ -57,16 +57,16 @@ void VsaVisitor::visitBinaryOperator(BinaryOperator &I){
 }
 
 void VsaVisitor::visitAdd(BinaryOperator &I) {
-    auto ad0 = newState.getAbstractValues(I.getOperand(0));
-    auto ad1 = newState.getAbstractValues(I.getOperand(1));
+    auto ad0 = newState.getAbstractValue(I.getOperand(0));
+    auto ad1 = newState.getAbstractValue(I.getOperand(1));
     
     // TODO: meaning of arguments?
     newState.put(I, ad0->add(I.getType()->getIntegerBitWidth(),*ad1, false, false));
 }
 
 void VsaVisitor::visitMul(BinaryOperator& I) {
-    //auto ad0 = newState.getAbstractValues(I.getOperand(0));
-    //auto ad1 = newState.getAbstractValues(I.getOperand(1));
+    //auto ad0 = newState.getAbstractValue(I.getOperand(0));
+    //auto ad1 = newState.getAbstractValue(I.getOperand(1));
     //newState.put(I, ad0->mul(*ad1));
 
 }

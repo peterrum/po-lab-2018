@@ -7,6 +7,7 @@
 #include "llvm/IR/Value.h"
 #include "llvm/Support/raw_ostream.h"
 #include "BoundedSet.h"
+#include <utility>
 
 using namespace llvm;
 namespace pcpo {
@@ -21,10 +22,22 @@ public:
     /// true -> change, false -> no change (see State::put)
     bool leastUpperBound(State &other);
 
-    shared_ptr<AbstractDomain> getAbstractValues(Value* v);
+    shared_ptr<AbstractDomain> getAbstractValue(Value* v);
 
+    std::pair<Value *, std::shared_ptr < AbstractDomain>> get_branch_condition(BasicBlock* bb);
+    
+    void applyCondition(BasicBlock* bb);
+    
+    void unApplyCondition();
+    
+    
 private:
     std::map<Value *, std::shared_ptr < AbstractDomain>> vars;
+    std::map<BasicBlock*, std::pair<Value *, std::shared_ptr < AbstractDomain>>> 
+            branchConditions;
+    
+    std::pair<Value *, std::shared_ptr < AbstractDomain>> conditionCache;
+    bool conditionCacheUsed;
 };
 
 } /// namespace

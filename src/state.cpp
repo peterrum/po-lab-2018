@@ -30,7 +30,7 @@ bool State::leastUpperBound(State& other){
     return change;
 }
 
-shared_ptr<AbstractDomain> State::getAbstractValues(Value* v){
+shared_ptr<AbstractDomain> State::getAbstractValue(Value* v){
     
     if(ConstantInt::classof(v)){
         auto temp = reinterpret_cast<ConstantInt*>(v);
@@ -43,9 +43,41 @@ shared_ptr<AbstractDomain> State::getAbstractValues(Value* v){
     }
     
     
-    DEBUG_OUTPUT( "State::getAbstractValues " << v->getName() <<" : failed" );
+    DEBUG_OUTPUT( "State::getAbstractValue " << v->getName() <<" : failed" );
     
     return BoundedSet::create_top();
+}
+
+std::pair<Value *, std::shared_ptr < AbstractDomain>> State::get_branch_condition(BasicBlock* bb){
+    if(branchConditions.find(bb)!=branchConditions.end()){
+        return branchConditions[bb];
+    }else{
+        return std::pair<Value *, std::shared_ptr < AbstractDomain>>(nullptr, nullptr);
+    }
+}
+
+void State::applyCondition(BasicBlock* bb){
+    
+    assert(!conditionCacheUsed && "ConditionCache has not been correctly unapplied last time!");
+    
+    if(branchConditions.find(bb)!=branchConditions.end()){
+        auto& branchCondition = branchConditions[bb];
+        conditionCacheUsed = true;
+        
+        auto value = branchCondition.first;
+        conditionCache = std::pair<Value *, std::shared_ptr < AbstractDomain>>(
+                value, getAbstractValue(value));
+        
+        vars[value] = branchCondition.second;
+    }
+}
+
+void State::unApplyCondition(){
+    
+    assert(conditionCacheUsed && "ConditionCache has not been applied last time!");
+    
+    vars[conditionCache.first] = conditionCache.second;
+    conditionCacheUsed = false;
 }
 
 }
