@@ -41,7 +41,6 @@ shared_ptr<AbstractDomain>
 BoundedSet::compute(AbstractDomain &other,
                     std::function<BoundedSet(const APInt&, const APInt&)> op) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
-    int count = 0;
     shared_ptr<AbstractDomain> newValues {new BoundedSet(false)};
     if (top || otherB->top) {
       BoundedSet *res = new BoundedSet(true);
@@ -49,12 +48,12 @@ BoundedSet::compute(AbstractDomain &other,
     }
     for (auto &leftVal : values) {
       for (auto &rightVal : otherB->values) {
-        if (++count > SET_LIMIT) {
-          shared_ptr<BoundedSet> topSet{new BoundedSet(true)};
-        }
-
         BoundedSet res = op(leftVal, rightVal);
         newValues = newValues->leastUpperBound(res);
+        if (newValues->size() > SET_LIMIT) {
+          shared_ptr<BoundedSet> topSet{new BoundedSet(true)};
+          return topSet;
+        }
       }
     }
     return newValues;
@@ -354,4 +353,5 @@ void BoundedSet::printOut() {
 }
 
 bool BoundedSet::isTop() { return top; }
+size_t BoundedSet::size() { return values.size(); }
 } // namespace pcpo

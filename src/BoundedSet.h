@@ -64,10 +64,14 @@ public:
   // Other operations
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
     icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
+  
+  // |gamma(this)|
+  size_t size();
 
 
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
   bool lessOrEqual(AbstractDomain &other);
+
 
   bool operator==(const BoundedSet &other);
 
