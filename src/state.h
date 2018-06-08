@@ -15,7 +15,7 @@ namespace pcpo {
 class State {
 
 public:
-    State() = default;
+    State();
 
     /// true -> change, false -> no change
     bool put(Value &v, std::shared_ptr <AbstractDomain> ad);
@@ -30,6 +30,10 @@ public:
     
     void unApplyCondition();
     
+    bool isBottom();
+    
+    void setNotBottom();
+    
     
 private:
     std::map<Value *, std::shared_ptr < AbstractDomain>> vars;
@@ -38,6 +42,8 @@ private:
     
     std::pair<Value *, std::shared_ptr < AbstractDomain>> conditionCache;
     bool conditionCacheUsed;
+    
+    bool bottom;
 };
 
 } /// namespace

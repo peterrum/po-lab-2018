@@ -8,15 +8,18 @@ namespace pcpo {
 void VsaVisitor::visitBasicBlock(BasicBlock &BB){
     /// empty state represents bottom
     newState = State();
+    newState.setNotBottom();
     DEBUG_OUTPUT("visitBasicBlock: entered");
     /// least upper bound with all predecessors
     for(auto pred : predecessors(&BB)){
         DEBUG_OUTPUT("visitBasicBlock: pred" << pred->getName() << " found");
         auto incoming = programPoints.find(pred);
         if(incoming != programPoints.end()){
+            if(incoming->second.isBottom()) continue;
+            // else state is not bottom
             DEBUG_OUTPUT("visitBasicBlock: state for" << pred->getName() << " found");
             newState.leastUpperBound(incoming->second);
-        } /// else: its state is bottom and lub(bottom, x) = x
+        } /// else: its state is implicit bottom and lub(bottom, x) = x
     }
 }
 
@@ -44,6 +47,24 @@ void VsaVisitor::visitPHINode(PHINode &I){
     auto bs = BoundedSet::create_bottom();
     for(Use& val:I.incoming_values()){
         //newState.getAbstractValue(val)->printOut();
+            
+        /// if the basic block where a value comes from is bottom,
+        /// the corresponding alternative in the phi node is never taken
+        /// the next 20 lines handle all the cases for that
+        
+        /// Check if basic block containing use is bottom
+        if(Instruction::classof(val)){
+            auto incomingBlock = reinterpret_cast<Instruction*>(&val)->getParent();
+            
+            /// block has not been visited yet -> implicit bottom
+            if(programPoints.find(incomingBlock) == programPoints.end()) continue;
+            
+            /// explicit bottom
+            if(programPoints[incomingBlock].isBottom()) continue;
+        }
+        
+        /// if state of basic block was not bottom, include abstract value
+        /// in appropriate block in lub for phi
         bs = bs->leastUpperBound(*newState.getAbstractValue(val));
     }
     

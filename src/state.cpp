@@ -6,8 +6,19 @@
 
 using namespace llvm;
 namespace pcpo {
+    
+State::State() : bottom(true){
+}
 
 bool State::put(Value& v, std::shared_ptr<AbstractDomain> ad){
+    
+    assert(!bottom && "Visited although bottom!");
+    
+    if(ad->lessOrEqual(*BoundedSet::create_bottom())){
+        bottom = true;
+        return true;
+    }
+        
     
     DEBUG_OUTPUT("State::put for " << v.getName());
     //ad->printOut();
@@ -78,6 +89,14 @@ void State::unApplyCondition(){
     
     vars[conditionCache.first] = conditionCache.second;
     conditionCacheUsed = false;
+}
+
+bool State::isBottom(){
+    return bottom;
+}
+
+void State::setNotBottom(){
+    bottom = false;
 }
 
 }
