@@ -23,8 +23,9 @@ private:
   shared_ptr<AbstractDomain> compute(AbstractDomain &other,
                                      std::function<BoundedSet(const APInt&, const APInt&)> op);
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-  subsetsForPredicate(unsigned numBits, AbstractDomain &other,
-       std::function<bool(const APInt &, const APInt &)> op);
+  subsetsForPredicate(
+      AbstractDomain &other,
+      std::function<bool(const APInt &, const APInt &)> comparision);
 
   shared_ptr<AbstractDomain> createBoundedSetPointer(bool top);
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>

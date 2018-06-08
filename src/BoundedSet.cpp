@@ -255,7 +255,7 @@ createBoundedSetPointerPair(bool firstTop, bool secondTop){
 //Returns two subsets of the values of this BoundedSet that that can lead to a true and a false evaluation, respectively
 //Note that a given value may be contained in both sets of the return pair.
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-BoundedSet::subsetsForPredicate(unsigned numBits, AbstractDomain &other, std::function<bool(const APInt&, const APInt&)> comparision){
+BoundedSet::subsetsForPredicate(AbstractDomain &other, std::function<bool(const APInt&, const APInt&)> comparision){
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
     
     if(isTop()){
@@ -293,10 +293,42 @@ BoundedSet::subsetsForPredicate(unsigned numBits, AbstractDomain &other, std::fu
   return createBoundedSetPointerPair(true, true);
 }
 
+std::function<bool(const APInt&, const APInt&)> getComparisionFunction(CmpInst::Predicate pred){
+  switch (pred) {
+  case CmpInst::Predicate::ICMP_EQ:
+    return [](APInt lhs, APInt rhs) { return lhs == rhs; };
+  case CmpInst::Predicate::ICMP_NE:
+    return [](APInt lhs, APInt rhs) { return !(lhs == rhs); };
+  case CmpInst::Predicate::ICMP_UGT:
+    return [](APInt lhs, APInt rhs) { return lhs.ugt(rhs); };
+  case CmpInst::Predicate::ICMP_UGE:
+    return [](APInt lhs, APInt rhs) { return lhs.uge(rhs); };
+  case CmpInst::Predicate::ICMP_ULT:
+    return [](APInt lhs, APInt rhs) { return lhs.ult(rhs); };
+  case CmpInst::Predicate::ICMP_ULE:
+    return [](APInt lhs, APInt rhs) { return lhs.ule(rhs); };
+  case CmpInst::Predicate::ICMP_SGT:
+    return [](APInt lhs, APInt rhs) { return lhs.sgt(rhs); };
+  case CmpInst::Predicate::ICMP_SGE:
+    return [](APInt lhs, APInt rhs) { return lhs.sge(rhs); };
+  case CmpInst::Predicate::ICMP_SLT:
+    return [](APInt lhs, APInt rhs) { return lhs.slt(rhs); };
+  case CmpInst::Predicate::ICMP_SLE:
+    return [](APInt lhs, APInt rhs) { return lhs.sle(rhs); };
+  default:
+    // We don't handle this case
+    return nullptr;
+  }
+}
+
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
 BoundedSet::icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other) {
+  if(pred >= CmpInst::Predicate::ICMP_EQ && pred <= CmpInst::Predicate::ICMP_SLE){
+    auto comparisionFunction = getComparisionFunction(pred);
+    return subsetsForPredicate(other, comparisionFunction);
+  }
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-    (shared_ptr<AbstractDomain>(new BoundedSet(true)), shared_ptr<AbstractDomain>(new BoundedSet(true)));
+          (shared_ptr<AbstractDomain>(new BoundedSet(true)), shared_ptr<AbstractDomain>(new BoundedSet(true)));
 }
 
 shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
