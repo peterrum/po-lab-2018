@@ -30,6 +30,7 @@ void testLeastUpperBound() {
   auto result = set2_5.leastUpperBound(set1_3);
   BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
   BoundedSet expRes {32, {1, 2, 3, 5}};
+  errs() << expRes << "\n";
   if (!(res == expRes)) {
     errs() << "testLeastUpperBound failed\n";
   }
@@ -45,9 +46,12 @@ void testEquals() {
 
 void testICompEquals(){
   BoundedSet set1{32, {0,1,2,3,4,14}};
-  BoundedSet set2{32, {0,2,14,21,332}};
+  BoundedSet set2{32, {14,21,332}};
 
   auto resultPair = set1.icmp(CmpInst::Predicate::ICMP_EQ, 32, set2);
+  resultPair.first->printOut();
+  resultPair.second->printOut();
+  resultPair = set1.icmp(CmpInst::Predicate::ICMP_UGE, 32, set2);
   resultPair.first->printOut();
   resultPair.second->printOut();
 }

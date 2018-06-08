@@ -8,7 +8,9 @@
 namespace pcpo {
 using llvm::APInt;
 
-const int SET_LIMIT = 10;
+const int SET_LIMIT = 100;
+const int OUTPUT_BASE = 10;
+const int OUTPUT_SIGNED = false;
 
 struct Comparator {
   bool operator()(const APInt &left, const APInt &right) const {
@@ -67,7 +69,7 @@ public:
     icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
   
   // |gamma(this)|
-  size_t size();
+  size_t size() const;
 
 
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
@@ -78,13 +80,13 @@ public:
 
   BoundedSet(std::set<APInt, Comparator> values);
   explicit BoundedSet(APInt value);
-  friend std::ostream& operator<< (std::ostream& os, const BoundedSet& bs);
+  friend llvm::raw_ostream& operator<< (llvm::raw_ostream&, const BoundedSet& bs);
 
   explicit BoundedSet(bool isTop);
   BoundedSet(std::initializer_list<APInt> vals);
   BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
-  bool isTop();
-  void printOut();
+  bool isTop() const;
+  void printOut() const;
   
   static shared_ptr<AbstractDomain> create_bottom(){
       return std::shared_ptr<AbstractDomain> (new BoundedSet(false));
