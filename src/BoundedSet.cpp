@@ -384,6 +384,11 @@ void BoundedSet::printOut() {
   }
 }
 
+llvm::raw_ostream& BoundedSet::print(llvm::raw_ostream & os){
+    os << "The BoundedSet is on coffee break.";
+    return os;
+}
+
 bool BoundedSet::isTop() { return top; }
 size_t BoundedSet::size() { return values.size(); }
 } // namespace pcpo

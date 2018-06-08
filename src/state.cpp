@@ -124,8 +124,9 @@ void State::print(){
     }
     
     for(auto & var : vars){
-        STD_OUTPUT(var.first->getName() << " -> ");
-        var.second->printOut();
+        //std::cout << *var.second << std::endl;
+        STD_OUTPUT(var.first->getName() << " -> " << *var.second);
+        //var.second->printOut();
     }
     
 }

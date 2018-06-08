@@ -79,6 +79,8 @@ public:
   BoundedSet(std::set<APInt, Comparator> values);
   explicit BoundedSet(APInt value);
   friend std::ostream& operator<< (std::ostream& os, const BoundedSet& bs);
+  
+  virtual llvm::raw_ostream& print(llvm::raw_ostream & os);
 
   explicit BoundedSet(bool isTop);
   BoundedSet(std::initializer_list<APInt> vals);

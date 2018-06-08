@@ -48,6 +48,12 @@ public:
   // Other operations
   virtual std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
     icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other) = 0;
+  
+  virtual llvm::raw_ostream& print(llvm::raw_ostream & os) = 0;
+  
+  friend llvm::raw_ostream& operator<< (llvm::raw_ostream& os, AbstractDomain& bs){
+      return bs.print(os);
+  }
 
   // Lattice interface
   virtual shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other) = 0;
