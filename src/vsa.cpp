@@ -70,7 +70,7 @@ struct VsaPass : public ModulePass {
     /// print trance
     errs() << "TRACE\n";
     for (auto t : trance) {
-      errs() << t.first << ": ";
+      errs() << t.first << "#" << t.second.size() << ": ";
       for (auto s : t.second)
         errs() << s << " ";
       errs() << "\n";
