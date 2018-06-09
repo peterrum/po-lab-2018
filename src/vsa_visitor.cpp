@@ -18,7 +18,7 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB){
             if(incoming->second.isBottom()) continue;
             // else state is not bottom
             DEBUG_OUTPUT("visitBasicBlock: state for" << pred->getName() << " found");
-            
+
             incoming->second.applyCondition(&BB);
             newState.leastUpperBound(incoming->second);
             incoming->second.unApplyCondition();
@@ -33,17 +33,17 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
     auto old = programPoints.find(currentBB);
     if(old != programPoints.end()){
         DEBUG_OUTPUT("visitTerminationInst: old state found");
-        
+
         // TODO: revert
         //assert(!old->second.isBottom() && "Pruning with bottom!");
-        
+
         // From the merge of states, there are values in the map that are in
         // reality only defined for certain paths.
         // All values actually defined are also defined after the first pass.
         // Therefore remove all values that were not defined in the previous state
         if(!old->second.isBottom())
             newState.prune(old->second);
-        
+
         /// compute lub in place after this old state is updated
         if(!old->second.leastUpperBound(newState)){
             /// new state was old state: do not push successors
@@ -58,7 +58,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
         DEBUG_OUTPUT("visitTerminationInst: old state not found");
         programPoints[currentBB] = newState;
     }
-    
+
     DEBUG_OUTPUT("visitTerminationInst: state has been changed -> push successors");
     DEBUG_OUTPUT("visitTerminationInst: new state in bb " << currentBB->getName());
     programPoints[currentBB].print();
@@ -68,8 +68,8 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
 
 void VsaVisitor::visitBranchInst(BranchInst &I){
     auto cond = I.getOperand(0);
-    
-    
+
+
     DEBUG_OUTPUT("CONDITIONAL BRANCHES: TEST");
     if(ICmpInst::classof(cond)){
         auto cmpInst = reinterpret_cast<ICmpInst*>(cond);
@@ -84,15 +84,20 @@ void VsaVisitor::visitBranchInst(BranchInst &I){
         DEBUG_OUTPUT("   " << *ad1);
         DEBUG_OUTPUT("T: " << *temp.first);
         DEBUG_OUTPUT("F: " << *temp.second);
-        
+
         // TODO: visit only if not bottom
         newState.putBranchConditions(I.getSuccessor(0), cmpInst->getOperand(0), temp.first);
         newState.putBranchConditions(I.getSuccessor(1), cmpInst->getOperand(0), temp.second);
-        
+
     }
-    
+
     this->visitTerminatorInst(I);
     DEBUG_OUTPUT("blub");
+}
+
+void VsaVisitor::visitLoadInst(LoadInst &I){
+    // not strictly necessary (non-present vars are T ) but good for clearity
+    newState.put(I, AD_TYPE::create_top());
 }
 
 void VsaVisitor::visitPHINode(PHINode &I){
@@ -100,29 +105,29 @@ void VsaVisitor::visitPHINode(PHINode &I){
     auto bs = AD_TYPE::create_bottom();
     for(Use& val:I.incoming_values()){
         //newState.getAbstractValue(val)->printOut();
-            
+
         /// if the basic block where a value comes from is bottom,
         /// the corresponding alternative in the phi node is never taken
         /// the next 20 lines handle all the cases for that
-        
+
         /// Check if basic block containing use is bottom
         if(Instruction::classof(val)){
             auto incomingBlock = reinterpret_cast<Instruction*>(&val)->getParent();
-            
+
             /// block has not been visited yet -> implicit bottom
             if(programPoints.find(incomingBlock) == programPoints.end()) continue;
-            
+
             /// explicit bottom
             if(programPoints[incomingBlock].isBottom()) continue;
         }
-        
+
         /// if state of basic block was not bottom, include abstract value
         /// in appropriate block in lub for phi
         bs = bs->leastUpperBound(*newState.getAbstractValue(val));
     }
-    
+
     //bs->printOut();
-    
+
     newState.put(I,bs);
 }
 
@@ -133,7 +138,7 @@ void VsaVisitor::visitBinaryOperator(BinaryOperator &I){
 void VsaVisitor::visitAdd(BinaryOperator &I) {
     auto ad0 = newState.getAbstractValue(I.getOperand(0));
     auto ad1 = newState.getAbstractValue(I.getOperand(1));
-    
+
     // TODO: meaning of arguments?
     newState.put(I, ad0->add(I.getType()->getIntegerBitWidth(),*ad1, false, false));
 }
@@ -141,7 +146,7 @@ void VsaVisitor::visitAdd(BinaryOperator &I) {
 void VsaVisitor::visitMul(BinaryOperator& I) {
     auto ad0 = newState.getAbstractValue(I.getOperand(0));
     auto ad1 = newState.getAbstractValue(I.getOperand(1));
-    
+
     // TODO: meaning of arguments?
     newState.put(I, ad0->mul(I.getType()->getIntegerBitWidth(),*ad1, false, false));
 
@@ -171,4 +176,3 @@ void VsaVisitor::print(){
 }
 
 }
-

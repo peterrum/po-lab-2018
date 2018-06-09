@@ -28,9 +28,9 @@ public:
     /*void visitSwitchInst(SwitchInst &I);
     void visitIndirectBrInst(IndirectBrInst &I);
     void visitResumeInst(ResumeInst &I);
-    void visitICmpInst(ICmpInst &I);
+    void visitICmpInst(ICmpInst &I); */
     void visitLoadInst(LoadInst &I);
-    void visitAtomicCmpXchgInst(AtomicCmpXchgInst &I);*/
+    /* void visitAtomicCmpXchgInst(AtomicCmpXchgInst &I);*/
     void visitPHINode(PHINode &I);
     /*void visitTruncInst(TruncInst &I);
     void visitZExtInst(ZExtInst &I);
@@ -59,14 +59,14 @@ public:
     void visitInstruction(Instruction &I);
 
     void print();
-    
+
 private:
     void pushSuccessors(TerminatorInst &I);
 
     WorkList& worklist;
     State newState;
     std::map<BasicBlock*,State> programPoints;
-    
+
 };
 
 }
