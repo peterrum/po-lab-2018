@@ -79,23 +79,44 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
   DEBUG_OUTPUT("CONDITIONAL BRANCHES: TEST");
   if (ICmpInst::classof(cond)) {
     auto cmpInst = reinterpret_cast<ICmpInst *>(cond);
-    auto ad0 = newState.getAbstractValue(cmpInst->getOperand(0));
-    auto ad1 = newState.getAbstractValue(cmpInst->getOperand(1));
+    auto op0 = cmpInst->getOperand(0);
+    auto op1 = cmpInst->getOperand(1);
+    auto ad0 = newState.getAbstractValue(op0);
+    auto ad1 = newState.getAbstractValue(op1);
 
-    // TODO: we assume that only the first argument is a variable
-    auto temp = ad0->icmp(cmpInst->getPredicate(),
-                          cmpInst->getType()->getIntegerBitWidth(), *ad1);
+    // left argument
+    if (Instruction::classof(op0)) {
+      auto temp = ad0->icmp(cmpInst->getPredicate(),
+                            cmpInst->getType()->getIntegerBitWidth(), *ad1);
 
-    DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
-    DEBUG_OUTPUT("   " << *ad0);
-    DEBUG_OUTPUT("   " << *ad1);
-    DEBUG_OUTPUT("T: " << *temp.first);
-    DEBUG_OUTPUT("F: " << *temp.second);
+      DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
+      DEBUG_OUTPUT("   " << *ad0);
+      DEBUG_OUTPUT("   " << *ad1);
+      DEBUG_OUTPUT("T: " << *temp.first);
+      DEBUG_OUTPUT("F: " << *temp.second);
 
-    newState.putBranchConditions(I.getSuccessor(0), cmpInst->getOperand(0),
-                                 temp.first);
-    newState.putBranchConditions(I.getSuccessor(1), cmpInst->getOperand(0),
-                                 temp.second);
+      newState.putBranchConditions(I.getSuccessor(0), cmpInst->getOperand(0),
+                                   temp.first);
+      newState.putBranchConditions(I.getSuccessor(1), cmpInst->getOperand(0),
+                                   temp.second);
+    }
+
+    // right argument
+    if (Instruction::classof(op1)) {
+      auto temp = ad1->icmp(cmpInst->getInversePredicate(),
+                            cmpInst->getType()->getIntegerBitWidth(), *ad0);
+
+      DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
+      DEBUG_OUTPUT("   " << *ad0);
+      DEBUG_OUTPUT("   " << *ad1);
+      DEBUG_OUTPUT("T: " << *temp.first);
+      DEBUG_OUTPUT("F: " << *temp.second);
+
+      newState.putBranchConditions(I.getSuccessor(0), cmpInst->getOperand(1),
+                                   temp.first);
+      newState.putBranchConditions(I.getSuccessor(1), cmpInst->getOperand(1),
+                                   temp.second);
+    }
   }
 
   this->visitTerminatorInst(I);
