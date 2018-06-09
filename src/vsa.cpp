@@ -47,6 +47,10 @@ struct VsaPass : public ModulePass {
     int visits = 0;
 
     std::map<std::string, std::vector<int>> trance;
+    for (auto &function : M)
+      /// ... basic blocks
+      for (auto &bb : function)
+        trance[std::string(bb.getName())].clear();
 
     // pop instructions from the worklist and visit them until no more
     // are available (the visitor pushes new instructions query-based)
