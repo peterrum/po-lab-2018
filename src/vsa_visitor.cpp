@@ -9,15 +9,15 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB){
     /// empty state represents bottom
     newState = State();
     newState.setNotBottom();
-    DEBUG_OUTPUT("visitBasicBlock: entered");
+    DEBUG_OUTPUT("visitBasicBlock: entered " << BB.getName());
     /// least upper bound with all predecessors
     for(auto pred : predecessors(&BB)){
-        DEBUG_OUTPUT("visitBasicBlock: pred" << pred->getName() << " found");
+        DEBUG_OUTPUT("visitBasicBlock: pred " << pred->getName() << " found");
         auto incoming = programPoints.find(pred);
         if(incoming != programPoints.end()){
             if(incoming->second.isBottom()) continue;
             // else state is not bottom
-            DEBUG_OUTPUT("visitBasicBlock: state for" << pred->getName() << " found");
+            DEBUG_OUTPUT("visitBasicBlock: state for " << pred->getName() << " found");
 
             incoming->second.applyCondition(&BB);
             newState.leastUpperBound(incoming->second);
@@ -61,6 +61,8 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I){
 
     DEBUG_OUTPUT("visitTerminationInst: state has been changed -> push successors");
     DEBUG_OUTPUT("visitTerminationInst: new state in bb " << currentBB->getName());
+
+    DEBUG_OUTPUT("\t (the two following lines need to be identical)");
     programPoints[currentBB].print();
     newState.print();
     pushSuccessors(I);
@@ -85,10 +87,8 @@ void VsaVisitor::visitBranchInst(BranchInst &I){
         DEBUG_OUTPUT("T: " << *temp.first);
         DEBUG_OUTPUT("F: " << *temp.second);
 
-        // TODO: visit only if not bottom
         newState.putBranchConditions(I.getSuccessor(0), cmpInst->getOperand(0), temp.first);
         newState.putBranchConditions(I.getSuccessor(1), cmpInst->getOperand(0), temp.second);
-
     }
 
     this->visitTerminatorInst(I);
@@ -157,15 +157,21 @@ void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I){
 }
 
 void VsaVisitor::visitInstruction(Instruction &I){
-    // todo: top or exception
     STD_OUTPUT("visitInstruction: " <<I.getOpcodeName());
 }
 
 void VsaVisitor::pushSuccessors(TerminatorInst &I){
     for(auto bb : I.successors()){
+        auto branchCondition = newState.get_branch_condition(bb).second;
+
+        if(branchCondition != nullptr && branchCondition->lessOrEqual(*AD_TYPE::create_bottom())) {
+            // This successor is currently not reachable, do not put it on the
+            // worklist now
+            continue;
+        }
+
         worklist.push(bb);
     }
-
 }
 
 void VsaVisitor::print(){
