@@ -45,7 +45,7 @@ clang -Os -S -emit-llvm hello.c -o hello.ll
 
 ```bash
 clang -O3 -emit-llvm hello.c -c -o hello.bc
-opt -load llvm/lib/llvm-vsa.so -hello < hello.bc > /dev/null
+opt -load llvm/lib/llvm-vsa.so -vsapass < hello.bc > /dev/null
 ```
 
 ### ... useful workflow
@@ -53,7 +53,7 @@ opt -load llvm/lib/llvm-vsa.so -hello < hello.bc > /dev/null
 ```bash
 clang -O0 -emit-llvm hello.c -Xclang -disable-O0-optnone -c -o hello.bc
 opt -mem2reg < hello.bc > hello-opt.bc
-opt -load llvm/lib/llvm-vsa.so -hello < hello.bc > /dev/null
+opt -load llvm/lib/llvm-vsa.so -vsapass < hello.bc > /dev/null
 ```
 
 ## Useful methods in LLVM
