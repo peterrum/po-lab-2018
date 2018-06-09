@@ -14,6 +14,8 @@ class WorkList {
 public:
   void push(BasicBlock *bb);
 
+  BasicBlock *peek();
+
   BasicBlock *pop();
 
   bool empty();

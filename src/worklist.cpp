@@ -18,5 +18,7 @@ BasicBlock *WorkList::pop() {
   return temp;
 }
 
+BasicBlock *WorkList::peek() { return worklist.front(); }
+
 bool WorkList::empty() { return worklist.empty(); }
 }
