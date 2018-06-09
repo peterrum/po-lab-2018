@@ -39,9 +39,10 @@ struct VsaPass : public ModulePass {
     /// ... all functions
     for (auto &function : M)
       /// ... basic blocks
-      for (auto &bb : function)
-        /// and instructions
+      for (auto &bb : function) {
         worklist.push(&bb);
+        break;
+      }
 
     int visits = 0;
 
