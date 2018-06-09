@@ -46,9 +46,14 @@ struct VsaPass : public ModulePass {
 
     int visits = 0;
 
+    std::map<std::string, std::vector<int>> trance;
+
     // pop instructions from the worklist and visit them until no more
     // are available (the visitor pushes new instructions query-based)
     while (!worklist.empty()) {
+
+      trance[std::string(worklist.peek()->getName())].push_back(visits);
+
       vis.visit(*worklist.pop());
 
       DEBUG_OUTPUT("");
@@ -60,6 +65,15 @@ struct VsaPass : public ModulePass {
       DEBUG_OUTPUT("");
 
       visits++;
+    }
+
+    /// print trance
+    errs() << "TRACE\n";
+    for (auto t : trance) {
+      errs() << t.first << ": ";
+      for (auto s : t.second)
+        errs() << s << " ";
+      errs() << "\n";
     }
 
     // Our analysis does not change the IR
