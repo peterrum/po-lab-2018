@@ -1,6 +1,6 @@
 #include "../src/BoundedSet.h"
-#include <set>
 #include "llvm/Support/raw_os_ostream.h"
+#include <set>
 using namespace llvm;
 namespace pcpo {
 
@@ -9,11 +9,11 @@ APInt apint1{32, 1, false};
 APInt apint2{32, 2, false};
 APInt apint3{32, 3, false};
 APInt apint5{32, 5, false};
-BoundedSet top {true};
-BoundedSet bot {false};
-BoundedSet set0 {apint1};
-BoundedSet set1_3{std::set<APInt, Comparator> {apint1, apint3}};
-BoundedSet set2_5{std::set<APInt, Comparator> {apint2, apint5}};
+BoundedSet top{true};
+BoundedSet bot{false};
+BoundedSet set0{apint1};
+BoundedSet set1_3{std::set<APInt, Comparator>{apint1, apint3}};
+BoundedSet set2_5{std::set<APInt, Comparator>{apint2, apint5}};
 
 void testConstructor() {
   errs() << "[testConstructor] top: ";
@@ -28,14 +28,14 @@ void testConstructor() {
 
 void testLeastUpperBound() {
   auto result = set2_5.leastUpperBound(set1_3);
-  BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
-  BoundedSet expRes {32, {1, 2, 3, 5}};
+  BoundedSet res = *(static_cast<BoundedSet *>(result.get()));
+  BoundedSet expRes{32, {1, 2, 3, 5}};
   if (!(res == expRes)) {
     errs() << "testLeastUpperBound failed\n";
     errs() << res << "\n";
   }
   result = top.leastUpperBound(set2_5);
-  res = *(static_cast<BoundedSet*> (result.get()));
+  res = *(static_cast<BoundedSet *>(result.get()));
   errs() << res << "\n";
   if (!(res == top)) {
     errs() << "testLeastUpperBound failed\n";
@@ -43,7 +43,7 @@ void testLeastUpperBound() {
   }
 }
 
-void testEquals() { 
+void testEquals() {
   BoundedSet set0_4{32, {0, 1, 2, 3, 4}};
   BoundedSet set0_4P{32, {0, 1, 2, 3, 4}};
   if (!(set0_4 == set0_4P)) {
@@ -51,9 +51,9 @@ void testEquals() {
   }
 }
 
-void testICompEquals(){
-  BoundedSet set1{32, {0,1,2,3,4,14}};
-  BoundedSet set2{32, {14,21,332}};
+void testICompEquals() {
+  BoundedSet set1{32, {0, 1, 2, 3, 4, 14}};
+  BoundedSet set2{32, {14, 21, 332}};
 
   auto resultPair = set1.icmp(CmpInst::Predicate::ICMP_EQ, 32, set2);
   resultPair.first->printOut();
@@ -63,11 +63,11 @@ void testICompEquals(){
   resultPair.second->printOut();
 }
 
-void testLeastUpperBoundUnique() { 
+void testLeastUpperBoundUnique() {
   BoundedSet set0_4{32, {0, 1, 2, 3, 4}};
   BoundedSet set0_4P{32, {0, 1, 2, 3, 4}};
   auto result = set0_4.leastUpperBound(set0_4P);
-  BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
+  BoundedSet res = *(static_cast<BoundedSet *>(result.get()));
   if (!(res == set0_4P)) {
     errs() << "testLeastUpperBoundUnique failed\n";
     errs() << "[testLeastUpperBoundUnique]: ";
@@ -77,8 +77,8 @@ void testLeastUpperBoundUnique() {
 
 void testAdd() {
   auto result = set2_5.add(32, set1_3, false, false);
-  BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
-  BoundedSet expRes {32, {3, 5, 6, 8}};
+  BoundedSet res = *(static_cast<BoundedSet *>(result.get()));
+  BoundedSet expRes{32, {3, 5, 6, 8}};
   if (!(res == expRes)) {
     errs() << "testAdd failed\n";
   }
@@ -97,7 +97,7 @@ void testLeastUpperBoundTop() {
     BoundedSet tmp(tmpInt);
     result = result->leastUpperBound(tmp);
   }
-  BoundedSet res = *(static_cast<BoundedSet*> (result.get()));
+  BoundedSet res = *(static_cast<BoundedSet *>(result.get()));
   if (!(res == top)) {
     errs() << "testLeastUpperBoundTop failed\n";
     result->printOut();

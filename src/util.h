@@ -14,12 +14,11 @@
 /// do not to touch anything beneath here (useful functions)
 
 #ifdef DEBUG
-    #define DEBUG_OUTPUT(text) errs() << text << "\n"
+#define DEBUG_OUTPUT(text) errs() << text << "\n"
 #else
-    #define DEBUG_OUTPUT(text) 
+#define DEBUG_OUTPUT(text)
 #endif
 
 #define STD_OUTPUT(text) errs() << text << "\n"
-
 
 #endif
