@@ -2,12 +2,12 @@
 #include "AbstractDomain.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Support/raw_os_ostream.h"
+#include <initializer_list>
+#include <iostream>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <set>
-#include <initializer_list>
-#include <iostream>
 #include <utility>
 
 namespace pcpo {
@@ -15,14 +15,10 @@ namespace pcpo {
 using namespace llvm;
 using std::shared_ptr;
 
-BoundedSet::BoundedSet(std::set<APInt, Comparator> vals) {
-  values = vals;
-}
+BoundedSet::BoundedSet(std::set<APInt, Comparator> vals) { values = vals; }
 BoundedSet::BoundedSet(APInt val) { values.insert(val); }
 BoundedSet::BoundedSet(bool isTop) : top(isTop) {}
-BoundedSet::BoundedSet(std::initializer_list<APInt> vals) {
-  values = vals;
-}
+BoundedSet::BoundedSet(std::initializer_list<APInt> vals) { values = vals; }
 BoundedSet::BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals) {
   for (auto val : vals) {
     values.insert(APInt{numBits, val});
@@ -37,11 +33,11 @@ bool BoundedSet::operator==(const BoundedSet &other) {
   }
 }
 
-shared_ptr<AbstractDomain>
-BoundedSet::compute(AbstractDomain &other,
-                    std::function<BoundedSet(const APInt&, const APInt&)> op) {
+shared_ptr<AbstractDomain> BoundedSet::compute(
+    AbstractDomain &other,
+    std::function<BoundedSet(const APInt &, const APInt &)> op) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
-    shared_ptr<AbstractDomain> newValues {new BoundedSet(false)};
+    shared_ptr<AbstractDomain> newValues{new BoundedSet(false)};
     if (top || otherB->top) {
       BoundedSet *res = new BoundedSet(true);
       return shared_ptr<BoundedSet>{res};
@@ -61,18 +57,16 @@ BoundedSet::compute(AbstractDomain &other,
   return nullptr;
 }
 
-shared_ptr<AbstractDomain> BoundedSet::add(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
+shared_ptr<AbstractDomain>
+BoundedSet::add(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   auto opPlus = [numBits, nuw, nsw](APInt left, APInt right) {
     APInt newValue{numBits, 0};
     newValue += left;
     newValue += right;
-    bool overflow {false};
-    overflow |= (nsw &&
-      left.isNonNegative() == right.isNonNegative() &&
-      left.isNonNegative() != newValue.isNonNegative());
-    overflow |= (nuw &&
-      newValue.ult(right));
+    bool overflow{false};
+    overflow |= (nsw && left.isNonNegative() == right.isNonNegative() &&
+                 left.isNonNegative() != newValue.isNonNegative());
+    overflow |= (nuw && newValue.ult(right));
     if (overflow) {
       return BoundedSet{true};
     } else {
@@ -81,18 +75,16 @@ shared_ptr<AbstractDomain> BoundedSet::add(unsigned numBits, AbstractDomain &oth
   };
   return compute(other, opPlus);
 }
-shared_ptr<AbstractDomain> BoundedSet::sub(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
+shared_ptr<AbstractDomain>
+BoundedSet::sub(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   auto opPlus = [numBits, nuw, nsw](APInt left, APInt right) {
     APInt newValue{numBits, 0};
     newValue += left;
     newValue -= right;
-    bool overflow {false};
-    overflow |= (nsw &&
-      left.isNonNegative() != right.isNonNegative() &&
-      left.isNonNegative() != newValue.isNonNegative());
-    overflow |= (nuw &&
-      newValue.ugt(right));
+    bool overflow{false};
+    overflow |= (nsw && left.isNonNegative() != right.isNonNegative() &&
+                 left.isNonNegative() != newValue.isNonNegative());
+    overflow |= (nuw && newValue.ugt(right));
     if (overflow) {
       return BoundedSet{true};
     } else {
@@ -101,13 +93,13 @@ shared_ptr<AbstractDomain> BoundedSet::sub(unsigned numBits, AbstractDomain &oth
   };
   return compute(other, opPlus);
 }
-shared_ptr<AbstractDomain> BoundedSet::mul(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
-    auto opMul = [numBits, nuw, nsw](APInt lhs, APInt rhs) {
+shared_ptr<AbstractDomain>
+BoundedSet::mul(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  auto opMul = [numBits, nuw, nsw](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
     res *= rhs;
-    bool overflow {false};
+    bool overflow{false};
     if (nsw) {
       if (lhs != 0 && lhs != 0) {
         overflow |= res.udiv(rhs) != lhs || res.udiv(lhs) != rhs;
@@ -126,8 +118,8 @@ shared_ptr<AbstractDomain> BoundedSet::mul(unsigned numBits, AbstractDomain &oth
   };
   return compute(other, opMul);
 }
-shared_ptr<AbstractDomain> BoundedSet::udiv(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
+shared_ptr<AbstractDomain>
+BoundedSet::udiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   auto opUDiv = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
@@ -136,8 +128,8 @@ shared_ptr<AbstractDomain> BoundedSet::udiv(unsigned numBits, AbstractDomain &ot
   };
   return compute(other, opUDiv);
 }
-shared_ptr<AbstractDomain> BoundedSet::sdiv(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
+shared_ptr<AbstractDomain>
+BoundedSet::sdiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   auto opSDiv = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
@@ -146,8 +138,8 @@ shared_ptr<AbstractDomain> BoundedSet::sdiv(unsigned numBits, AbstractDomain &ot
   };
   return compute(other, opSDiv);
 }
-shared_ptr<AbstractDomain> BoundedSet::urem(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
+shared_ptr<AbstractDomain>
+BoundedSet::urem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   auto opURem = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
@@ -156,8 +148,8 @@ shared_ptr<AbstractDomain> BoundedSet::urem(unsigned numBits, AbstractDomain &ot
   };
   return compute(other, opURem);
 }
-shared_ptr<AbstractDomain> BoundedSet::srem(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
+shared_ptr<AbstractDomain>
+BoundedSet::srem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   auto opSRem = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
@@ -166,13 +158,13 @@ shared_ptr<AbstractDomain> BoundedSet::srem(unsigned numBits, AbstractDomain &ot
   };
   return compute(other, opSRem);
 }
-shared_ptr<AbstractDomain> BoundedSet::shl(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
-    auto opShl = [numBits, nuw, nsw](APInt lhs, APInt shAmt) {
+shared_ptr<AbstractDomain>
+BoundedSet::shl(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  auto opShl = [numBits, nuw, nsw](APInt lhs, APInt shAmt) {
     APInt res{numBits, 0};
     res += lhs;
     res.shl(shAmt);
-    bool overflow {shAmt.uge(numBits)};
+    bool overflow{shAmt.uge(numBits)};
     if (lhs.isNonNegative()) {
       overflow |= shAmt.uge(lhs.countLeadingZeros());
     } else {
@@ -187,9 +179,9 @@ shared_ptr<AbstractDomain> BoundedSet::shl(unsigned numBits, AbstractDomain &oth
   return compute(other, opShl);
 }
 
-//lshr shifts the this object to the right, using a zero fill on the right  
-shared_ptr<AbstractDomain> BoundedSet::lshr(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
+// lshr shifts the this object to the right, using a zero fill on the right
+shared_ptr<AbstractDomain>
+BoundedSet::lshr(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   auto opLShr = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
@@ -199,9 +191,9 @@ shared_ptr<AbstractDomain> BoundedSet::lshr(unsigned numBits, AbstractDomain &ot
   return compute(other, opLShr);
 }
 
-shared_ptr<AbstractDomain> BoundedSet::ashr(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
-  auto opAShr = [numBits] (APInt lhs, APInt rhs) {
+shared_ptr<AbstractDomain>
+BoundedSet::ashr(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  auto opAShr = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
     res = res.ashr(rhs);
@@ -209,9 +201,9 @@ shared_ptr<AbstractDomain> BoundedSet::ashr(unsigned numBits, AbstractDomain &ot
   };
   return compute(other, opAShr);
 }
-shared_ptr<AbstractDomain> BoundedSet::and_(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
-  auto opAnd = [numBits] (APInt lhs, APInt rhs) {
+shared_ptr<AbstractDomain>
+BoundedSet::and_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  auto opAnd = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
     res &= rhs;
@@ -219,9 +211,9 @@ shared_ptr<AbstractDomain> BoundedSet::and_(unsigned numBits, AbstractDomain &ot
   };
   return compute(other, opAnd);
 }
-shared_ptr<AbstractDomain> BoundedSet::or_(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
-  auto opOr = [numBits] (APInt lhs, APInt rhs) {
+shared_ptr<AbstractDomain>
+BoundedSet::or_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  auto opOr = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
     res |= rhs;
@@ -229,9 +221,9 @@ shared_ptr<AbstractDomain> BoundedSet::or_(unsigned numBits, AbstractDomain &oth
   };
   return compute(other, opOr);
 }
-shared_ptr<AbstractDomain> BoundedSet::xor_(unsigned numBits, AbstractDomain &other,
-    bool nuw, bool nsw) {
-  auto opNot = [numBits] (APInt lhs, APInt rhs) {
+shared_ptr<AbstractDomain>
+BoundedSet::xor_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  auto opNot = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
     res ^= rhs;
@@ -241,42 +233,49 @@ shared_ptr<AbstractDomain> BoundedSet::xor_(unsigned numBits, AbstractDomain &ot
 }
 
 // returns a shared pointer to a new BoundedSet
-// if the flag is set, it returns a top, otherwise a bottomstd::make_pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(std::make_shared<AbstractDomain>(new BoundedSet(true)), std::make_shared<AbstractDomain>(new BoundedSet(true)));
-shared_ptr<AbstractDomain> BoundedSet::createBoundedSetPointer(bool  top){
+// if the flag is set, it returns a top, otherwise a
+// bottomstd::make_pair<shared_ptr<AbstractDomain>,
+// shared_ptr<AbstractDomain>>(std::make_shared<AbstractDomain>(new
+// BoundedSet(true)), std::make_shared<AbstractDomain>(new BoundedSet(true)));
+shared_ptr<AbstractDomain> BoundedSet::createBoundedSetPointer(bool top) {
   std::shared_ptr<AbstractDomain> resultPtr(new BoundedSet(top));
   return resultPtr;
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-BoundedSet::createBoundedSetPointerPair(bool firstTop, bool secondTop){
-  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(createBoundedSetPointer(firstTop), createBoundedSetPointer(secondTop));
+BoundedSet::createBoundedSetPointerPair(bool firstTop, bool secondTop) {
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+      createBoundedSetPointer(firstTop), createBoundedSetPointer(secondTop));
 }
 
-//Returns two subsets of the values of this BoundedSet that that can lead to a true and a false evaluation, respectively
-//Note that a given value may be contained in both sets of the return pair.
+// Returns two subsets of the values of this BoundedSet that that can lead to a
+// true and a false evaluation, respectively
+// Note that a given value may be contained in both sets of the return pair.
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-BoundedSet::subsetsForPredicate(AbstractDomain &other, std::function<bool(const APInt&, const APInt&)> comparision){
+BoundedSet::subsetsForPredicate(
+    AbstractDomain &other,
+    std::function<bool(const APInt &, const APInt &)> comparision) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
-    
-    if(isTop()){
+
+    if (isTop()) {
       // if this set is top, it will be top in both branches afterwards
       return createBoundedSetPointerPair(true, true);
     }
 
-    if(otherB->isTop()){
-      // if the other set is top; we cannot infer more details about our set in both branches afterwards
+    if (otherB->isTop()) {
+      // if the other set is top; we cannot infer more details about our set in
+      // both branches afterwards
       // thus, the set stays the same
-      shared_ptr<AbstractDomain> copy {new BoundedSet(*this)};
+      shared_ptr<AbstractDomain> copy{new BoundedSet(*this)};
       return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-          copy,
-          createBoundedSetPointer(true));
+          copy, createBoundedSetPointer(true));
     }
     std::set<APInt, Comparator> trueValues;
     std::set<APInt, Comparator> falseValues;
 
-    for(auto &leftVal : values){
-      for(auto &rightVal : otherB->values){
-        if(comparision(leftVal, rightVal)){
+    for (auto &leftVal : values) {
+      for (auto &rightVal : otherB->values) {
+        if (comparision(leftVal, rightVal)) {
           trueValues.insert(leftVal);
         } else {
           falseValues.insert(leftVal);
@@ -293,7 +292,8 @@ BoundedSet::subsetsForPredicate(AbstractDomain &other, std::function<bool(const 
   return createBoundedSetPointerPair(true, true);
 }
 
-std::function<bool(const APInt&, const APInt&)> getComparisionFunction(CmpInst::Predicate pred){
+std::function<bool(const APInt &, const APInt &)>
+getComparisionFunction(CmpInst::Predicate pred) {
   switch (pred) {
   case CmpInst::Predicate::ICMP_EQ:
     return [](APInt lhs, APInt rhs) { return lhs == rhs; };
@@ -322,18 +322,21 @@ std::function<bool(const APInt&, const APInt&)> getComparisionFunction(CmpInst::
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-BoundedSet::icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other) {
-  if(pred >= CmpInst::Predicate::ICMP_EQ && pred <= CmpInst::Predicate::ICMP_SLE){
+BoundedSet::icmp(CmpInst::Predicate pred, unsigned numBits,
+                 AbstractDomain &other) {
+  if (pred >= CmpInst::Predicate::ICMP_EQ &&
+      pred <= CmpInst::Predicate::ICMP_SLE) {
     auto comparisionFunction = getComparisionFunction(pred);
     return subsetsForPredicate(other, comparisionFunction);
   }
-  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-          (shared_ptr<AbstractDomain>(new BoundedSet(true)), shared_ptr<AbstractDomain>(new BoundedSet(true)));
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+      shared_ptr<AbstractDomain>(new BoundedSet(true)),
+      shared_ptr<AbstractDomain>(new BoundedSet(true)));
 }
 
 shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
-    if(isTop()||otherB->isTop()){
+    if (isTop() || otherB->isTop()) {
       return shared_ptr<BoundedSet>{new BoundedSet(true)};
     }
     std::set<APInt, Comparator> result;
@@ -356,10 +359,10 @@ shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
 // is this boundedSet less or equal to the other?
 bool BoundedSet::lessOrEqual(AbstractDomain &other) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
-    if(otherB->isTop()){
+    if (otherB->isTop()) {
       return true;
     }
-    if(isTop()){
+    if (isTop()) {
       return otherB->isTop();
     }
     auto end = otherB->values.end();
@@ -387,19 +390,19 @@ void BoundedSet::printOut() const {
   }
 }
 
-llvm::raw_ostream& BoundedSet::print(llvm::raw_ostream &os){
-  
-  if(isTop()){
+llvm::raw_ostream &BoundedSet::print(llvm::raw_ostream &os) {
+
+  if (isTop()) {
     os << "T";
   } else {
     os << "{";
     auto current = values.begin();
     auto end = values.end();
-    if(current!=end){
+    if (current != end) {
       os << current->toString(OUTPUT_BASE, OUTPUT_SIGNED);
       current++;
     }
-    for (; current != end; current++){
+    for (; current != end; current++) {
       os << ", ";
       os << current->toString(OUTPUT_BASE, OUTPUT_SIGNED);
     }
