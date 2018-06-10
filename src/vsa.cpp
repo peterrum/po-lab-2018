@@ -35,50 +35,47 @@ struct VsaPass : public ModulePass {
   }
 
   bool runOnModule(Module &M) override {
-    /// push all instructions onto the worklist: for that loop over...
-    /// ... all functions
-    for (auto &function : M)
-      /// ... basic blocks
+    /// loop over all functions in the module
+    for (auto &function : M) {
+      /// get the first basic block and push it into the worklist
       for (auto &bb : function) {
         worklist.push(&bb);
         break;
       }
+      int visits = 0;
 
-    int visits = 0;
-
-    std::map<std::string, std::vector<int>> trance;
-    for (auto &function : M)
-      /// ... basic blocks
+      std::map<std::string, std::vector<int>> trance;
       for (auto &bb : function)
         trance[std::string(bb.getName())].clear();
 
-    // pop instructions from the worklist and visit them until no more
-    // are available (the visitor pushes new instructions query-based)
-    while (!worklist.empty()) {
+      // pop instructions from the worklist and visit them until no more
+      // are available (the visitor pushes new instructions query-based)
+      while (!worklist.empty()) {
 
-      trance[std::string(worklist.peek()->getName())].push_back(visits);
+        trance[std::string(worklist.peek()->getName())].push_back(visits);
 
-      vis.visit(*worklist.pop());
+        vis.visit(*worklist.pop());
 
-      DEBUG_OUTPUT("");
-      DEBUG_OUTPUT("Global state after " << visits << " visits");
-      vis.print();
-      DEBUG_OUTPUT("");
-      DEBUG_OUTPUT("");
-      DEBUG_OUTPUT("");
-      DEBUG_OUTPUT("");
+        DEBUG_OUTPUT("");
+        DEBUG_OUTPUT("Global state after " << visits << " visits");
+        vis.print();
+        DEBUG_OUTPUT("");
+        DEBUG_OUTPUT("");
+        DEBUG_OUTPUT("");
+        DEBUG_OUTPUT("");
 
-      visits++;
-    }
+        visits++;
+      }
 
-    /// print trance
-    errs() << "TRACE\n";
-    for (auto t : trance) {
-      errs() << t.first << "#" << t.second.size() << ": ";
-      for (auto s : t.second)
-        errs() << s << " ";
-      errs() << "\n";
-    }
+      /// print trance
+      errs() << "\nTRACE OF FUNCTION " << function.getName() << ":\n";
+      for (auto t : trance) {
+        errs() << t.first << "#" << t.second.size() << ": ";
+        for (auto s : t.second)
+          errs() << s << " ";
+        errs() << "\n";
+      }
+    } // go to next function
 
     // Our analysis does not change the IR
     return false;
