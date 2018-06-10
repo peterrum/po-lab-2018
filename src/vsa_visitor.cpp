@@ -36,8 +36,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
   if (old != programPoints.end()) {
     DEBUG_OUTPUT("visitTerminationInst: old state found");
 
-    // TODO: revert
-    // assert(!old->second.isBottom() && "Pruning with bottom!");
+     assert(!old->second.isBottom() && "Pruning with bottom!");
 
     // From the merge of states, there are values in the map that are in
     // reality only defined for certain paths.

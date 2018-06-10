@@ -12,7 +12,7 @@ State::State() : conditionCacheUsed(false), bottom(true) {}
 
 bool State::put(Value &v, std::shared_ptr<AbstractDomain> ad) {
 
-  // assert(!bottom && "Visited although bottom!");
+   assert(!bottom && "Visited although bottom!");
 
   if (ad->lessOrEqual(*BoundedSet::create_bottom())) {
     DEBUG_OUTPUT("State::put: set to bottom because of " << v.getName());
