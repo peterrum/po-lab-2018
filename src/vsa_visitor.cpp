@@ -94,7 +94,7 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
     DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
     DEBUG_OUTPUT("     " << *ad0);
     DEBUG_OUTPUT("     " << *ad1);
-    
+
     /// left argument (l)
     if (Instruction::classof(op0)) {
       /// perform comparison
@@ -136,11 +136,9 @@ void VsaVisitor::visitLoadInst(LoadInst &I) {
 }
 
 void VsaVisitor::visitPHINode(PHINode &I) {
-  /// bottom
+  /// bottom as initial value
   auto bs = AD_TYPE::create_bottom();
   for (Use &val : I.incoming_values()) {
-    // newState.getAbstractValue(val)->printOut();
-
     /// if the basic block where a value comes from is bottom,
     /// the corresponding alternative in the phi node is never taken
     /// the next 20 lines handle all the cases for that
@@ -163,8 +161,10 @@ void VsaVisitor::visitPHINode(PHINode &I) {
     bs = bs->leastUpperBound(*newState.getAbstractValue(val));
   }
 
-  // bs->printOut();
+  assert(!bs->lessOrEqual(*AD_TYPE::create_bottom()) &&
+         "VsaVisitor::visitPHINode: new value is bottom!");
 
+  /// save new value into state
   newState.put(I, bs);
 }
 

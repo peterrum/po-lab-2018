@@ -65,10 +65,10 @@ bool State::copyState(State &other) {
 }
 
 void State::prune(State &other) {
-    
+
   assert(!this->isBottom() && "State::prune: this is bottom!");
   assert(!other.isBottom() && "State::prune: other is bottom!");
-    
+
   std::map<Value *, std::shared_ptr<AbstractDomain>> temp;
 
   auto il = this->vars.begin();

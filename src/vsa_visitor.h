@@ -21,22 +21,35 @@ class VsaVisitor : public InstVisitor<VsaVisitor, void> {
 public:
   VsaVisitor(WorkList &q) : worklist(q), newState(){};
 
+  /// create lub of states of preceeding basic blocks and use it as newState;
+  /// the visitor automatically visits all instructions of this basic block
   void visitBasicBlock(BasicBlock &BB);
+
+  /// visit TerminatorInstruction:
+  /// compare lub(oldState, newState) with oldState of basic block; if state
+  /// has changed: update state and push direct successors basic block into
+  /// the working list
   void visitTerminatorInst(TerminatorInst &I);
-  /// Specific Instruction type classes
-  
+
   /// visit BranchInstruction:
-  /// before calling visitTerminatorInst, it evaluates branch conditions  
+  /// before calling visitTerminatorInst, it evaluates branch conditions
   void visitBranchInst(BranchInst &I);
-  
+
+  /// visit LoadInstruction:
+  /// set variable explicitly top
+  void visitLoadInst(LoadInst &I);
+
+  /// visit PHINode:
+  /// visitBasicBlock has already created lub of states of preceeding bbs
+  /// here we only add the
+  void visitPHINode(PHINode &I);
+
   /*void visitSwitchInst(SwitchInst &I);
   void visitIndirectBrInst(IndirectBrInst &I);
   void visitResumeInst(ResumeInst &I);
-  void visitICmpInst(ICmpInst &I); */
-  void visitLoadInst(LoadInst &I);
-  /* void visitAtomicCmpXchgInst(AtomicCmpXchgInst &I);*/
-  void visitPHINode(PHINode &I);
-  /*void visitTruncInst(TruncInst &I);
+  void visitICmpInst(ICmpInst &I);
+  void visitAtomicCmpXchgInst(AtomicCmpXchgInst &I);
+  void visitTruncInst(TruncInst &I);
   void visitZExtInst(ZExtInst &I);
   void visitSExtInst(SExtInst &I);
   void visitBitCastInst(BitCastInst &I);
@@ -62,9 +75,11 @@ public:
   /// default
   void visitInstruction(Instruction &I);
 
+  /// print state of all basic blocks
   void print();
 
 private:
+  /// push directly reachable basic blocks onto worklist
   void pushSuccessors(TerminatorInst &I);
 
   WorkList &worklist;
