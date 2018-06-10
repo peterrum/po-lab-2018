@@ -38,8 +38,9 @@ struct VsaPass : public ModulePass {
     /// loop over all functions in the module
     for (auto &function : M) {
       /// ignore empty functions and go to the next function
-      if (function.empty()) continue;
-      
+      if (function.empty())
+        continue;
+
       /// get the first basic block and push it into the worklist
       worklist.push(&function.front());
 
