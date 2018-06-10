@@ -52,6 +52,9 @@ shared_ptr<AbstractDomain> State::getAbstractValue(Value *v) {
 }
 
 bool State::leastUpperBound(State &other) {
+  /// lub of bottom
+  this->bottom = this->bottom && other.bottom;
+
   /// case 1: lub(bottom, bottom) = bottom -> definitely no change
   if (this->isBottom() && other.isBottom())
     return false;
@@ -109,8 +112,6 @@ void State::prune(State &other) {
 bool State::isBottom() { return bottom; }
 
 void State::markVisited() { bottom = false; }
-
-void State::transferBottomness(State &other) { this->bottom = other.bottom; }
 
 void State::print() {
   if (bottom) {

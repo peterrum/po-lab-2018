@@ -41,9 +41,6 @@ public:
   /// mark state has been visited, i.e.: set bottom to false
   void markVisited();
 
-  /// copy bottom flag from other
-  void transferBottomness(State &other);
-
   /// print abstract domain of each variable
   void print();
 

@@ -62,9 +62,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
       DEBUG_OUTPUT("visitTerminationInst: new state equals old state in "
                    << currentBB->getName());
       return;
-    }
-    /// copy stuff regarding branch conditions (TODO: remove)
-    oldState->second.transferBottomness(newState);
+    } // else: state has changed
   } else {
     DEBUG_OUTPUT("visitTerminationInst: old state not found");
     programPoints[currentBB] = newState;
