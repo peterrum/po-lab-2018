@@ -12,7 +12,7 @@ State::State() : conditionCacheUsed(false), bottom(true) {}
 
 bool State::put(Value &v, std::shared_ptr<AbstractDomain> ad) {
 
-   assert(!bottom && "Visited although bottom!");
+  assert(!bottom && "Visited although bottom!");
 
   if (ad->lessOrEqual(*BoundedSet::create_bottom())) {
     DEBUG_OUTPUT("State::put: set to bottom because of " << v.getName());
@@ -73,14 +73,15 @@ shared_ptr<AbstractDomain> State::getAbstractValue(Value *v) {
   return AD_TYPE::create_top();
 }
 
-std::pair<Value *, std::shared_ptr<AbstractDomain>>
-State::get_branch_condition(BasicBlock *bb) {
+bool State::isBasicBlockReachable(BasicBlock *bb) {
   if (branchConditions.find(bb) != branchConditions.end()) {
-    return branchConditions[bb];
-  } else {
-    return std::pair<Value *, std::shared_ptr<AbstractDomain>>(nullptr,
-                                                               nullptr);
+    auto &branchConditions_map = branchConditions[bb];
+
+    for (auto &branchCondition : branchConditions_map)
+      if (branchCondition.second->lessOrEqual(*AD_TYPE::create_bottom()))
+        return false;
   }
+  return true;
 }
 
 void State::applyCondition(BasicBlock *bb) {
@@ -89,14 +90,16 @@ void State::applyCondition(BasicBlock *bb) {
          "ConditionCache has not been correctly unapplied last time!");
 
   if (branchConditions.find(bb) != branchConditions.end()) {
-    auto &branchCondition = branchConditions[bb];
     conditionCacheUsed = true;
+    auto &branchConditions_map = branchConditions[bb];
 
-    auto value = branchCondition.first;
-    conditionCache = std::pair<Value *, std::shared_ptr<AbstractDomain>>(
-        value, getAbstractValue(value));
-
-    vars[value] = branchCondition.second;
+    for (auto &branchCondition : branchConditions_map) {
+      auto value = branchCondition.first;
+      // buffer old value
+      conditionCache[value] = getAbstractValue(value);
+      // overwrite value with condition
+      vars[value] = branchCondition.second;
+    }
   }
 }
 
@@ -105,7 +108,10 @@ void State::unApplyCondition() {
   if (!conditionCacheUsed)
     return;
 
-  vars[conditionCache.first] = conditionCache.second;
+  for (auto &condition : conditionCache)
+    vars[condition.first] = condition.second;
+
+  conditionCache.clear();
   conditionCacheUsed = false;
 }
 
@@ -129,8 +135,7 @@ void State::print() {
 void State::putBranchConditions(BasicBlock *bb, Value *val,
                                 std::shared_ptr<AbstractDomain> ad) {
 
-  branchConditions[bb] =
-      std::pair<Value *, std::shared_ptr<AbstractDomain>>(val, ad);
+  branchConditions[bb][val] = ad;
 }
 
 void State::transferBranchConditions(State &other) {

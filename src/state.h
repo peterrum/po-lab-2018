@@ -26,8 +26,7 @@ public:
 
   shared_ptr<AbstractDomain> getAbstractValue(Value *v);
 
-  std::pair<Value *, std::shared_ptr<AbstractDomain>>
-  get_branch_condition(BasicBlock *bb);
+  bool isBasicBlockReachable(BasicBlock *bb);
 
   void applyCondition(BasicBlock *bb);
 
@@ -48,10 +47,10 @@ public:
 
 private:
   std::map<Value *, std::shared_ptr<AbstractDomain>> vars;
-  std::map<BasicBlock *, std::pair<Value *, std::shared_ptr<AbstractDomain>>>
+  std::map<BasicBlock *, std::map<Value *, std::shared_ptr<AbstractDomain>>>
       branchConditions;
 
-  std::pair<Value *, std::shared_ptr<AbstractDomain>> conditionCache;
+  std::map<Value *, std::shared_ptr<AbstractDomain>> conditionCache;
   bool conditionCacheUsed;
 
   bool bottom;

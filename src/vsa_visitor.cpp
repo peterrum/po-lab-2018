@@ -36,7 +36,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
   if (old != programPoints.end()) {
     DEBUG_OUTPUT("visitTerminationInst: old state found");
 
-     assert(!old->second.isBottom() && "Pruning with bottom!");
+    assert(!old->second.isBottom() && "Pruning with bottom!");
 
     // From the merge of states, there are values in the map that are in
     // reality only defined for certain paths.
@@ -191,15 +191,10 @@ void VsaVisitor::visitInstruction(Instruction &I) {
 }
 
 void VsaVisitor::pushSuccessors(TerminatorInst &I) {
+  // put all currently reachable successors into the worklist
   for (auto bb : I.successors()) {
-    auto branchCondition = newState.get_branch_condition(bb).second;
-
-    if (branchCondition != nullptr &&
-        branchCondition->lessOrEqual(*AD_TYPE::create_bottom())) {
-      // This successor is currently not reachable, do not put it on the
-      // worklist now
-      continue;
-    }
+    if (!newState.isBasicBlockReachable(bb))
+      continue; // do not put it on the worklist now
 
     worklist.push(bb);
   }
