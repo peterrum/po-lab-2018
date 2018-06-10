@@ -22,6 +22,8 @@ public:
   /// true -> change, false -> no change (see State::put)
   bool leastUpperBound(State &other);
 
+  void copyState(State &other);
+
   void prune(State &other);
 
   shared_ptr<AbstractDomain> getAbstractValue(Value *v);

@@ -6,26 +6,40 @@ using namespace llvm;
 namespace pcpo {
 
 void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
-  /// empty state represents bottom
+  /// create new empty BOTTOM state
   newState = State();
-  newState.setNotBottom();
   DEBUG_OUTPUT("visitBasicBlock: entered " << BB.getName());
+
+  /// bb has no predecessors: return empty state which is not bottom!
+  if (pred_size(&BB) == 0) {
+    // mark state such that it is not bottom any more
+    newState.setNotBottom();
+    return;
+  }
+
   /// least upper bound with all predecessors
   for (auto pred : predecessors(&BB)) {
     DEBUG_OUTPUT("visitBasicBlock: pred " << pred->getName() << " found");
     auto incoming = programPoints.find(pred);
     if (incoming != programPoints.end()) {
-      if (incoming->second.isBottom())
+      if (incoming->second.isBottom()) // case 1: lub(x, bottom) = x
         continue;
       // else state is not bottom
       DEBUG_OUTPUT("visitBasicBlock: state for " << pred->getName()
                                                  << " found");
 
       incoming->second.applyCondition(&BB);
-      newState.leastUpperBound(incoming->second);
+      if (newState.isBottom()) // case 2: lub(bottom, y) = y
+        newState.copyState(incoming->second);
+      else // case 3: lub(x, y)
+        newState.leastUpperBound(incoming->second);
       incoming->second.unApplyCondition();
-    } /// else: its state is implicit bottom and lub(bottom, x) = x
+    }
   }
+
+  /// visited and still bottom: something is wrong...
+  assert(!newState.isBottom() &&
+         "VsaVisitor::visitBasicBlock: newState is still bottom!");
 }
 
 void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {

@@ -42,6 +42,14 @@ bool State::leastUpperBound(State &other) {
   return change;
 }
 
+void State::copyState(State &other) {
+  // basic block has been visited
+  bottom = false;
+  // coyp map
+  for (auto &var : other.vars)
+    vars[var.first] = var.second;
+}
+
 /// remove all <key,value> from this state where other does not have the key
 /// \param other other state
 void State::prune(State &other) {
