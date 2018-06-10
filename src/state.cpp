@@ -8,7 +8,7 @@
 using namespace llvm;
 namespace pcpo {
 
-State::State() : conditionCacheUsed(false), bottom(true) {}
+State::State() : bottom(true), conditionCacheUsed(false) {}
 
 bool State::put(Value &v, std::shared_ptr<AbstractDomain> ad) {
 
@@ -32,6 +32,23 @@ bool State::put(Value &v, std::shared_ptr<AbstractDomain> ad) {
     vars[&v] = ad;
   }
   return true;
+}
+
+shared_ptr<AbstractDomain> State::getAbstractValue(Value *v) {
+
+  if (ConstantInt::classof(v)) {
+    auto temp = reinterpret_cast<ConstantInt *>(v);
+    return shared_ptr<AbstractDomain>(new BoundedSet(temp->getValue()));
+  }
+
+  auto find = vars.find(v);
+  if (find != vars.end()) {
+    return find->second;
+  }
+
+  DEBUG_OUTPUT("State::getAbstractValue " << v->getName() << " : failed");
+
+  return AD_TYPE::create_top();
 }
 
 bool State::leastUpperBound(State &other) {
@@ -89,21 +106,20 @@ void State::prune(State &other) {
   vars = temp;
 }
 
-shared_ptr<AbstractDomain> State::getAbstractValue(Value *v) {
+bool State::isBottom() { return bottom; }
 
-  if (ConstantInt::classof(v)) {
-    auto temp = reinterpret_cast<ConstantInt *>(v);
-    return shared_ptr<AbstractDomain>(new BoundedSet(temp->getValue()));
+void State::markVisited() { bottom = false; }
+
+void State::transferBottomness(State &other) { this->bottom = other.bottom; }
+
+void State::print() {
+  if (bottom) {
+    STD_OUTPUT("bottom");
+    return;
   }
 
-  auto find = vars.find(v);
-  if (find != vars.end()) {
-    return find->second;
-  }
-
-  DEBUG_OUTPUT("State::getAbstractValue " << v->getName() << " : failed");
-
-  return AD_TYPE::create_top();
+  for (auto &var : vars)
+    STD_OUTPUT(var.first->getName() << " -> " << *var.second);
 }
 
 bool State::isBasicBlockReachable(BasicBlock *bb) {
@@ -148,23 +164,6 @@ void State::unApplyCondition() {
   conditionCacheUsed = false;
 }
 
-bool State::isBottom() { return bottom; }
-
-void State::markVisited() { bottom = false; }
-
-void State::print() {
-  if (bottom) {
-    STD_OUTPUT("bottom");
-    return;
-  }
-
-  for (auto &var : vars) {
-    // std::cout << *var.second << std::endl;
-    STD_OUTPUT(var.first->getName() << " -> " << *var.second);
-    // var.second->printOut();
-  }
-}
-
 void State::putBranchConditions(BasicBlock *bb, Value *val,
                                 std::shared_ptr<AbstractDomain> ad) {
 
@@ -174,6 +173,4 @@ void State::putBranchConditions(BasicBlock *bb, Value *val,
 void State::transferBranchConditions(State &other) {
   this->branchConditions = other.branchConditions;
 }
-
-void State::transferBottomness(State &other) { this->bottom = other.bottom; }
 }
