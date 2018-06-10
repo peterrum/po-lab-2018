@@ -91,43 +91,43 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
     auto ad0 = newState.getAbstractValue(op0);
     auto ad1 = newState.getAbstractValue(op1);
 
-    // left argument
+    DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
+    DEBUG_OUTPUT("     " << *ad0);
+    DEBUG_OUTPUT("     " << *ad1);
+    
+    /// left argument (l)
     if (Instruction::classof(op0)) {
+      /// perform comparison
       auto temp = ad0->icmp(cmpInst->getPredicate(),
                             cmpInst->getType()->getIntegerBitWidth(), *ad1);
 
-      DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
-      DEBUG_OUTPUT("   " << *ad0);
-      DEBUG_OUTPUT("   " << *ad1);
-      DEBUG_OUTPUT("T: " << *temp.first);
-      DEBUG_OUTPUT("F: " << *temp.second);
+      DEBUG_OUTPUT("T-l: " << *temp.first);
+      DEBUG_OUTPUT("F-l: " << *temp.second);
 
-      newState.putBranchConditions(I.getSuccessor(0), cmpInst->getOperand(0),
-                                   temp.first);
-      newState.putBranchConditions(I.getSuccessor(1), cmpInst->getOperand(0),
-                                   temp.second);
+      /// true
+      newState.putBranchConditions(I.getSuccessor(0), op0, temp.first);
+      /// false
+      newState.putBranchConditions(I.getSuccessor(1), op0, temp.second);
     }
 
-    // right argument
+    /// right argument (r)
     if (Instruction::classof(op1)) {
+      /// perform comparison with inverted predicate
       auto temp = ad1->icmp(cmpInst->getInversePredicate(),
                             cmpInst->getType()->getIntegerBitWidth(), *ad0);
 
-      DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
-      DEBUG_OUTPUT("   " << *ad0);
-      DEBUG_OUTPUT("   " << *ad1);
-      DEBUG_OUTPUT("T: " << *temp.first);
-      DEBUG_OUTPUT("F: " << *temp.second);
+      DEBUG_OUTPUT("T-r: " << *temp.first);
+      DEBUG_OUTPUT("F-r: " << *temp.second);
 
-      newState.putBranchConditions(I.getSuccessor(0), cmpInst->getOperand(1),
-                                   temp.first);
-      newState.putBranchConditions(I.getSuccessor(1), cmpInst->getOperand(1),
-                                   temp.second);
+      /// true
+      newState.putBranchConditions(I.getSuccessor(0), op1, temp.first);
+      /// false
+      newState.putBranchConditions(I.getSuccessor(1), op1, temp.second);
     }
   }
 
+  /// continue as it were a simple terminator
   this->visitTerminatorInst(I);
-  DEBUG_OUTPUT("blub");
 }
 
 void VsaVisitor::visitLoadInst(LoadInst &I) {

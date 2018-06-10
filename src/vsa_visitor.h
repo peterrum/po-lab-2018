@@ -24,7 +24,11 @@ public:
   void visitBasicBlock(BasicBlock &BB);
   void visitTerminatorInst(TerminatorInst &I);
   /// Specific Instruction type classes
+  
+  /// visit BranchInstruction:
+  /// before calling visitTerminatorInst, it evaluates branch conditions  
   void visitBranchInst(BranchInst &I);
+  
   /*void visitSwitchInst(SwitchInst &I);
   void visitIndirectBrInst(IndirectBrInst &I);
   void visitResumeInst(ResumeInst &I);
