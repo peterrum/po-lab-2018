@@ -38,7 +38,8 @@ public:
 
   bool isBottom();
 
-  void setNotBottom();
+  /// mark state has been visited, i.e.: set bottom to false
+  void markVisited();
 
   void print();
 

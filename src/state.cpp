@@ -150,7 +150,7 @@ void State::unApplyCondition() {
 
 bool State::isBottom() { return bottom; }
 
-void State::setNotBottom() { bottom = false; }
+void State::markVisited() { bottom = false; }
 
 void State::print() {
   if (bottom) {

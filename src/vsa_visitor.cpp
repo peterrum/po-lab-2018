@@ -13,7 +13,7 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
   /// bb has no predecessors: return empty state which is not bottom!
   if (pred_size(&BB) == 0) {
     // mark state such that it is not bottom any more
-    newState.setNotBottom();
+    newState.markVisited();
     return;
   }
 
