@@ -41,33 +41,31 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
 }
 
 void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
-  /// something has changed in BB
   DEBUG_OUTPUT("visitTerminationInst: entered");
   auto currentBB = I.getParent();
-  auto old = programPoints.find(currentBB);
-  if (old != programPoints.end()) {
+  auto oldState = programPoints.find(currentBB);
+  if (oldState != programPoints.end()) {
     DEBUG_OUTPUT("visitTerminationInst: old state found");
 
-    assert(!old->second.isBottom() && "Pruning with bottom!");
+    assert(!oldState->second.isBottom() && "Pruning with bottom!");
 
     // From the merge of states, there are values in the map that are in
     // reality only defined for certain paths.
     // All values actually defined are also defined after the first pass.
     // Therefore remove all values that were not defined in the previous state
-    if (!old->second.isBottom())
-      newState.prune(old->second);
+    newState.prune(oldState->second);
 
     /// compute lub in place after this old state is updated
-    if (!old->second.leastUpperBound(newState)) {
+    if (!oldState->second.leastUpperBound(newState)) {
       /// new state was old state: do not push successors
       DEBUG_OUTPUT("visitTerminationInst: state has not been changed");
       DEBUG_OUTPUT("visitTerminationInst: new state equals old state in "
                    << currentBB->getName());
-      newState.print();
       return;
     }
-    old->second.transferBranchConditions(newState);
-    old->second.transferBottomness(newState);
+    /// copy stuff regarding branch conditions (TODO: remove)
+    oldState->second.transferBranchConditions(newState);
+    oldState->second.transferBottomness(newState);
   } else {
     DEBUG_OUTPUT("visitTerminationInst: old state not found");
     programPoints[currentBB] = newState;
@@ -78,9 +76,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
   DEBUG_OUTPUT("visitTerminationInst: new state in bb "
                << currentBB->getName());
 
-  DEBUG_OUTPUT("\t (the two following lines need to be identical)");
-  programPoints[currentBB].print();
-  newState.print();
+  /// push currently reachable successors
   pushSuccessors(I);
 }
 
@@ -207,7 +203,7 @@ void VsaVisitor::pushSuccessors(TerminatorInst &I) {
   for (auto bb : I.successors()) {
     if (!newState.isBasicBlockReachable(bb))
       continue; // do not put it on the worklist now
-
+    DEBUG_OUTPUT("\t-" << bb->getName());
     worklist.push(bb);
   }
 }
