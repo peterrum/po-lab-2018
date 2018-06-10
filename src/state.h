@@ -22,7 +22,7 @@ public:
   /// true -> change, false -> no change (see State::put)
   bool leastUpperBound(State &other);
 
-  void copyState(State &other);
+  bool copyState(State &other);
 
   void prune(State &other);
 

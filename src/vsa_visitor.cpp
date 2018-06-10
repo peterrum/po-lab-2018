@@ -29,15 +29,13 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
                                                  << " found");
 
       incoming->second.applyCondition(&BB);
-      if (newState.isBottom()) // case 2: lub(bottom, y) = y
-        newState.copyState(incoming->second);
-      else // case 3: lub(x, y)
-        newState.leastUpperBound(incoming->second);
+      newState.leastUpperBound(incoming->second);
       incoming->second.unApplyCondition();
     }
   }
 
   /// visited and still bottom: something is wrong...
+  /// none of the preceeding basic blocks has been visited!?
   assert(!newState.isBottom() &&
          "VsaVisitor::visitBasicBlock: newState is still bottom!");
 }

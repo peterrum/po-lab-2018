@@ -35,19 +35,33 @@ bool State::put(Value &v, std::shared_ptr<AbstractDomain> ad) {
 }
 
 bool State::leastUpperBound(State &other) {
+  /// case 1: lub(bottom, bottom) = bottom -> definitely no change
+  if (this->isBottom() && other.isBottom())
+    return false;
+
+  // case 2: lub(x,bottom) = x -> definitely no change
+  if (other.isBottom())
+    return false;
+
+  // case 3: lub(bottom,y) = y -> definitely change
+  if (this->isBottom()) 
+    return !this->copyState(other);
+
+  // case 4: lub(x, y) -> possibly change
   bool change = false;
-  for (auto &var : other.vars) {
+  for (auto &var : other.vars) 
     change |= put(*var.first, var.second);
-  }
   return change;
 }
 
-void State::copyState(State &other) {
+bool State::copyState(State &other) {
   // basic block has been visited
-  bottom = false;
-  // coyp map
+  bottom = other.bottom;
+  // copy map
+  vars.clear();
   for (auto &var : other.vars)
     vars[var.first] = var.second;
+  return bottom;
 }
 
 /// remove all <key,value> from this state where other does not have the key
