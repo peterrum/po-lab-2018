@@ -4,7 +4,6 @@
 #include "llvm/Support/raw_os_ostream.h"
 #include <initializer_list>
 #include <iostream>
-#include <iostream>
 #include <iterator>
 #include <memory>
 #include <set>
@@ -344,11 +343,17 @@ shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
       result.insert(val);
     }
     int count = values.size();
+    auto end = result.end();
     for (auto &val : otherB->values) {
-      if (++count > SET_LIMIT) {
-        return shared_ptr<BoundedSet>{new BoundedSet(true)};
+      // if val is not in the result set yet,
+      // we have to add it and increment count
+      if (result.find(val) == end) {
+        count++;
+        if (count > SET_LIMIT) {
+          return shared_ptr<BoundedSet>{new BoundedSet(true)};
+        }
+        result.insert(val);
       }
-      result.insert(val);
     }
     shared_ptr<BoundedSet> res{new BoundedSet{result}};
     return res;
