@@ -195,7 +195,7 @@ void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I) {
 }
 
 void VsaVisitor::visitInstruction(Instruction &I) {
-  STD_OUTPUT("visitInstruction: " << I.getOpcodeName());
+  DEBUG_OUTPUT("visitInstruction: " << I.getOpcodeName());
 }
 
 void VsaVisitor::pushSuccessors(TerminatorInst &I) {
@@ -210,7 +210,7 @@ void VsaVisitor::pushSuccessors(TerminatorInst &I) {
 
 void VsaVisitor::print() {
   for (auto &pp : programPoints) {
-    DEBUG_OUTPUT("VsaVisitor::print():" << pp.first->getName());
+    STD_OUTPUT("VsaVisitor::print():" << pp.first->getName());
     pp.second.print();
   }
 }

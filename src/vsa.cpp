@@ -57,17 +57,16 @@ struct VsaPass : public ModulePass {
         trance[std::string(worklist.peek()->getName())].push_back(visits);
 
         vis.visit(*worklist.pop());
-
-        DEBUG_OUTPUT("");
-        DEBUG_OUTPUT("Global state after " << visits << " visits");
-        vis.print();
-        DEBUG_OUTPUT("");
-        DEBUG_OUTPUT("");
-        DEBUG_OUTPUT("");
-        DEBUG_OUTPUT("");
+#ifdef DEBUG
+        print(visits);
+#endif
 
         visits++;
       }
+
+#ifndef DEBUG
+      print(visits - 1);
+#endif
 
       /// print trance
       errs() << "\nTRACE OF FUNCTION " << function.getName() << ":\n";
@@ -81,6 +80,17 @@ struct VsaPass : public ModulePass {
 
     // Our analysis does not change the IR
     return false;
+  }
+
+  void print(int visits) {
+
+    STD_OUTPUT("");
+    STD_OUTPUT("Global state after " << visits << " visits");
+    vis.print();
+    STD_OUTPUT("");
+    STD_OUTPUT("");
+    STD_OUTPUT("");
+    STD_OUTPUT("");
   }
 
   // We don't modify the program, so we preserve all analyses.

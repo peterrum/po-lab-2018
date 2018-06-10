@@ -6,7 +6,7 @@
 /// settings
 
 /// should debug output enabled?
-#define DEBUG
+//#define DEBUG
 
 /// type of abstract domain
 #define AD_TYPE BoundedSet
