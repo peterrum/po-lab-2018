@@ -37,11 +37,12 @@ struct VsaPass : public ModulePass {
   bool runOnModule(Module &M) override {
     /// loop over all functions in the module
     for (auto &function : M) {
+      /// ignore empty functions and go to the next function
+      if (function.empty()) continue;
+      
       /// get the first basic block and push it into the worklist
-      for (auto &bb : function) {
-        worklist.push(&bb);
-        break;
-      }
+      worklist.push(&function.front());
+
       int visits = 0;
 
       std::map<std::string, std::vector<int>> trance;
