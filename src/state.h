@@ -24,6 +24,8 @@ public:
 
   bool copyState(State &other);
 
+  /// overwrite state with intersection of this and other state
+  /// only working if both states not bottom
   void prune(State &other);
 
   shared_ptr<AbstractDomain> getAbstractValue(Value *v);

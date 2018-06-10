@@ -44,12 +44,12 @@ bool State::leastUpperBound(State &other) {
     return false;
 
   // case 3: lub(bottom,y) = y -> definitely change
-  if (this->isBottom()) 
+  if (this->isBottom())
     return !this->copyState(other);
 
   // case 4: lub(x, y) -> possibly change
   bool change = false;
-  for (auto &var : other.vars) 
+  for (auto &var : other.vars)
     change |= put(*var.first, var.second);
   return change;
 }
@@ -64,17 +64,28 @@ bool State::copyState(State &other) {
   return bottom;
 }
 
-/// remove all <key,value> from this state where other does not have the key
-/// \param other other state
 void State::prune(State &other) {
-  auto temp = vars;
-  for (auto &var : vars) {
-    DEBUG_OUTPUT("State::prune has: " << var.first->getName());
-    if (other.vars.find(var.first) == other.vars.end()) {
-      temp.erase(var.first);
-      DEBUG_OUTPUT("   and removes");
+    
+  assert(!this->isBottom() && "State::prune: this is bottom!");
+  assert(!other.isBottom() && "State::prune: other is bottom!");
+    
+  std::map<Value *, std::shared_ptr<AbstractDomain>> temp;
+
+  auto il = this->vars.begin();
+  auto ir = other.vars.begin();
+
+  while (il != this->vars.end() && ir != other.vars.end()) {
+    if (il->first < ir->first)
+      ++il;
+    else if (ir->first < il->first)
+      ++ir;
+    else {
+      temp.insert(*il);
+      ++il;
+      ++ir;
     }
   }
+
   vars = temp;
 }
 
