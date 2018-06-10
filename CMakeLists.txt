@@ -18,6 +18,7 @@ add_llvm_loadable_module( llvm-vsa
   test/TestRunner.cpp
   src/vsa_visitor.cpp
   src/worklist.cpp
+  src/branch_conditions.cpp
 
   DEPENDS
   intrinsics_gen

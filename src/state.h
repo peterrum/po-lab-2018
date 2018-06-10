@@ -47,28 +47,10 @@ public:
   /// print abstract domain of each variable
   void print();
 
-private:
   std::map<Value *, std::shared_ptr<AbstractDomain>> vars;
-  bool bottom;
-
-public:
-  bool isBasicBlockReachable(BasicBlock *bb);
-
-  void applyCondition(BasicBlock *bb);
-
-  void unApplyCondition();
-
-  void putBranchConditions(BasicBlock *bb, Value *val,
-                           std::shared_ptr<AbstractDomain> ad);
-
-  void transferBranchConditions(State &other);
 
 private:
-  std::map<BasicBlock *, std::map<Value *, std::shared_ptr<AbstractDomain>>>
-      branchConditions;
-
-  std::map<Value *, std::shared_ptr<AbstractDomain>> conditionCache;
-  bool conditionCacheUsed;
+  bool bottom;
 };
 
 } /// namespace

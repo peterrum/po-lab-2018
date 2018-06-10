@@ -28,9 +28,9 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
       DEBUG_OUTPUT("visitBasicBlock: state for " << pred->getName()
                                                  << " found");
 
-      incoming->second.applyCondition(&BB);
+      bcs.applyCondition(pred, &BB);
       newState.leastUpperBound(incoming->second);
-      incoming->second.unApplyCondition();
+      bcs.unApplyCondition(pred);
     }
   }
 
@@ -64,7 +64,6 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
       return;
     }
     /// copy stuff regarding branch conditions (TODO: remove)
-    oldState->second.transferBranchConditions(newState);
     oldState->second.transferBottomness(newState);
   } else {
     DEBUG_OUTPUT("visitTerminationInst: old state not found");
@@ -105,9 +104,11 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
       DEBUG_OUTPUT("F-l: " << *temp.second);
 
       /// true
-      newState.putBranchConditions(I.getSuccessor(0), op0, temp.first);
+      bcs.putBranchConditions(I.getParent(), I.getSuccessor(0), op0,
+                              temp.first);
       /// false
-      newState.putBranchConditions(I.getSuccessor(1), op0, temp.second);
+      bcs.putBranchConditions(I.getParent(), I.getSuccessor(1), op0,
+                              temp.second);
     }
 
     /// right argument (r)
@@ -120,9 +121,11 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
       DEBUG_OUTPUT("F-r: " << *temp.second);
 
       /// true
-      newState.putBranchConditions(I.getSuccessor(0), op1, temp.first);
+      bcs.putBranchConditions(I.getParent(), I.getSuccessor(0), op1,
+                              temp.first);
       /// false
-      newState.putBranchConditions(I.getSuccessor(1), op1, temp.second);
+      bcs.putBranchConditions(I.getParent(), I.getSuccessor(1), op1,
+                              temp.second);
     }
   }
 
@@ -201,7 +204,7 @@ void VsaVisitor::visitInstruction(Instruction &I) {
 void VsaVisitor::pushSuccessors(TerminatorInst &I) {
   // put all currently reachable successors into the worklist
   for (auto bb : I.successors()) {
-    if (!newState.isBasicBlockReachable(bb))
+    if (!bcs.isBasicBlockReachable(I.getParent(), bb))
       continue; // do not put it on the worklist now
     DEBUG_OUTPUT("\t-" << bb->getName());
     worklist.push(bb);

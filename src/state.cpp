@@ -8,7 +8,7 @@
 using namespace llvm;
 namespace pcpo {
 
-State::State() : bottom(true), conditionCacheUsed(false) {}
+State::State() : bottom(true) {}
 
 bool State::put(Value &v, std::shared_ptr<AbstractDomain> ad) {
 
@@ -120,57 +120,5 @@ void State::print() {
 
   for (auto &var : vars)
     STD_OUTPUT(var.first->getName() << " -> " << *var.second);
-}
-
-bool State::isBasicBlockReachable(BasicBlock *bb) {
-  if (branchConditions.find(bb) != branchConditions.end()) {
-    auto &branchConditions_map = branchConditions[bb];
-
-    for (auto &branchCondition : branchConditions_map)
-      if (branchCondition.second->lessOrEqual(*AD_TYPE::create_bottom()))
-        return false;
-  }
-  return true;
-}
-
-void State::applyCondition(BasicBlock *bb) {
-
-  assert(!conditionCacheUsed &&
-         "ConditionCache has not been correctly unapplied last time!");
-
-  if (branchConditions.find(bb) != branchConditions.end()) {
-    conditionCacheUsed = true;
-    auto &branchConditions_map = branchConditions[bb];
-
-    for (auto &branchCondition : branchConditions_map) {
-      auto value = branchCondition.first;
-      // buffer old value
-      conditionCache[value] = getAbstractValue(value);
-      // overwrite value with condition
-      vars[value] = branchCondition.second;
-    }
-  }
-}
-
-void State::unApplyCondition() {
-
-  if (!conditionCacheUsed)
-    return;
-
-  for (auto &condition : conditionCache)
-    vars[condition.first] = condition.second;
-
-  conditionCache.clear();
-  conditionCacheUsed = false;
-}
-
-void State::putBranchConditions(BasicBlock *bb, Value *val,
-                                std::shared_ptr<AbstractDomain> ad) {
-
-  branchConditions[bb][val] = ad;
-}
-
-void State::transferBranchConditions(State &other) {
-  this->branchConditions = other.branchConditions;
 }
 }

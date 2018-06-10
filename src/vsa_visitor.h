@@ -3,6 +3,7 @@
 
 #include "AbstractDomain.h"
 #include "BoundedSet.h"
+#include "branch_conditions.h"
 #include "state.h"
 #include "util.h"
 #include "worklist.h"
@@ -19,7 +20,7 @@ namespace pcpo {
 class VsaVisitor : public InstVisitor<VsaVisitor, void> {
 
 public:
-  VsaVisitor(WorkList &q) : worklist(q), newState(){};
+  VsaVisitor(WorkList &q) : worklist(q), newState(), bcs(programPoints){};
 
   /// create lub of states of preceeding basic blocks and use it as newState;
   /// the visitor automatically visits all instructions of this basic block
@@ -85,6 +86,7 @@ private:
   WorkList &worklist;
   State newState;
   std::map<BasicBlock *, State> programPoints;
+  BranchConditions bcs;
 };
 }
 
