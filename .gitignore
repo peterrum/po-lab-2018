@@ -43,5 +43,9 @@ build/
 *.exe
 *.out
 
+# llvm
+*.ll
+*.bc
+
 
 
