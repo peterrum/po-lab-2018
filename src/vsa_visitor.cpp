@@ -142,6 +142,24 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
   this->visitTerminatorInst(I);
 }
 
+void VsaVisitor::visitSwitchInst(SwitchInst &I) {
+  auto cond = I.getCondition();
+  auto values = newState.getAbstractValue(cond);
+
+  for(auto& kase:I.cases()) {
+    bcs.putBranchConditions(I.getParent(), kase.getCaseSuccessor(), cond,
+                            shared_ptr<AbstractDomain>
+                            (new AD_TYPE(kase.getCaseValue()->getValue())));
+  }
+
+  bcs.putBranchConditions(I.getParent(), I.getDefaultDest(), cond,
+            values);
+
+  /// continue as it were a simple terminator
+  this->visitTerminatorInst(I);
+}
+
+
 void VsaVisitor::visitLoadInst(LoadInst &I) {
   // not strictly necessary (non-present vars are T ) but good for clearity
   newState.put(I, AD_TYPE::create_top());
@@ -150,18 +168,22 @@ void VsaVisitor::visitLoadInst(LoadInst &I) {
 void VsaVisitor::visitPHINode(PHINode &I) {
   /// bottom as initial value
   auto bs = AD_TYPE::create_bottom();
-  for (Use &val : I.incoming_values()) {
+  for (Use &use : I.incoming_values()) {
     /// if the basic block where a value comes from is bottom,
     /// the corresponding alternative in the phi node is never taken
     /// the next 20 lines handle all the cases for that
-
+    Value* val = use.get();
+    // Value* val = use();
     auto newValue = AD_TYPE::create_bottom();
 
     /// Check if basic block containing use is bottom
     if (Instruction::classof(val)) {
-      auto incomingBlock = reinterpret_cast<Instruction *>(&val)->getParent();
+      auto incomingBlock = reinterpret_cast<Instruction *>(val)->getParent();
 
-      /// block has not been visited yet -> implicit bottom
+      DEBUG_OUTPUT("Name of BB " << incomingBlock->getName() << val->getName());
+      DEBUG_OUTPUT(programPoints.size());
+
+      /// block has not been visited yet -> implicit bottom=
       if (programPoints.find(incomingBlock) == programPoints.end())
         continue;
 
@@ -169,13 +191,15 @@ void VsaVisitor::visitPHINode(PHINode &I) {
       if (programPoints[incomingBlock].isBottom())
         continue;
 
-        bcs.applyCondition(incomingBlock, I.getParent());
-        newValue = programPoints[incomingBlock].getAbstractValue(val);
-        bcs.unApplyCondition(incomingBlock);
+      bcs.applyCondition(incomingBlock, I.getParent());
+      newValue = programPoints[incomingBlock].getAbstractValue(val);
+      bcs.unApplyCondition(incomingBlock);
     } else {
+      DEBUG_OUTPUT("-----other----------------");
+
       newValue = newState.getAbstractValue(val);
     }
-
+    newValue->printOut();
 
     /// if state of basic block was not bottom, include abstract value
     /// in appropriate block in lub for phi

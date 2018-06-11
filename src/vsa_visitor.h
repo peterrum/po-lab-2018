@@ -45,6 +45,10 @@ public:
   /// before calling visitTerminatorInst, it evaluates branch conditions
   void visitBranchInst(BranchInst &I);
 
+  /// visit SwitchInstruction:
+  /// before calling visitTerminatorInst, it evaluates branch conditions
+  void visitSwitchInst(SwitchInst &I);
+
   /// visit LoadInstruction:
   /// set variable explicitly top
   void visitLoadInst(LoadInst &I);
@@ -54,8 +58,7 @@ public:
   /// here we only add the
   void visitPHINode(PHINode &I);
 
-  /*void visitSwitchInst(SwitchInst &I);
-  void visitIndirectBrInst(IndirectBrInst &I);
+  /*void visitIndirectBrInst(IndirectBrInst &I);
   void visitResumeInst(ResumeInst &I);
   void visitICmpInst(ICmpInst &I);
   void visitAtomicCmpXchgInst(AtomicCmpXchgInst &I);
