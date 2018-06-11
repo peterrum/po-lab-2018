@@ -34,6 +34,10 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
     }
   }
 
+  /// prune state with predominator
+  auto predomState = programPoints[DT->getNode(&BB)->getIDom()->getBlock()];
+  newState.prune(predomState);
+
   /// visited and still bottom: something is wrong...
   /// none of the preceeding basic blocks has been visited!?
   assert(!newState.isBottom() &&
@@ -144,6 +148,8 @@ void VsaVisitor::visitPHINode(PHINode &I) {
     /// the corresponding alternative in the phi node is never taken
     /// the next 20 lines handle all the cases for that
 
+    auto newValue = AD_TYPE::create_bottom();
+
     /// Check if basic block containing use is bottom
     if (Instruction::classof(val)) {
       auto incomingBlock = reinterpret_cast<Instruction *>(&val)->getParent();
@@ -155,13 +161,20 @@ void VsaVisitor::visitPHINode(PHINode &I) {
       /// explicit bottom
       if (programPoints[incomingBlock].isBottom())
         continue;
+
+        bcs.applyCondition(incomingBlock, I.getParent());
+        newValue = programPoints[incomingBlock].getAbstractValue(val);
+        bcs.unApplyCondition(incomingBlock);
+    } else {
+      newValue = newState.getAbstractValue(val);
     }
+
 
     /// if state of basic block was not bottom, include abstract value
     /// in appropriate block in lub for phi
-    bs = bs->leastUpperBound(*newState.getAbstractValue(val));
+    bs = bs->leastUpperBound(*newValue);
   }
-
+  DEBUG_OUTPUT("phi-node!!! -------------");
   assert(!bs->lessOrEqual(*AD_TYPE::create_bottom()) &&
          "VsaVisitor::visitPHINode: new value is bottom!");
 

@@ -9,7 +9,7 @@ using namespace llvm;
 namespace pcpo {
 
 BranchConditions::BranchConditions(std::map<BasicBlock *, State> &programPoints)
-    : programPoints(programPoints) {}
+    : programPoints(programPoints), conditionCacheUsed(false) {}
 
 bool BranchConditions::isBasicBlockReachable(BasicBlock *pred, BasicBlock *bb) {
   auto bc = branchConditions.find(pred);
