@@ -101,12 +101,12 @@ BoundedSet::mul(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
     bool overflow{false};
     if (nsw) {
       if (lhs != 0 && lhs != 0) {
-        overflow |= res.udiv(rhs) != lhs || res.udiv(lhs) != rhs;
+        overflow |= res.sdiv(rhs) != lhs || res.sdiv(lhs) != rhs;
       }
     }
     if (nuw) {
       if (lhs != 0 && rhs != 0) {
-        overflow |= res.udiv(rhs) != lhs || res.udiv(res) != rhs;
+        overflow |= res.udiv(rhs) != lhs || res.udiv(lhs) != rhs;
       }
     }
     if (overflow) {
