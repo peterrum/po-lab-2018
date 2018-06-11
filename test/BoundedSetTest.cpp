@@ -63,6 +63,13 @@ void testICompEquals() {
   resultPair.second->printOut();
 }
 
+void testICompLess() {
+  BoundedSet set1{32, {49}};
+  auto result = set1.icmp(CmpInst::Predicate::ICMP_ULE, 32, top);
+  errs() << (*result.first.get()) << "\n";
+  errs() << (*result.second.get()) << "\n";
+}
+
 void testLeastUpperBoundUnique() {
   BoundedSet set0_4{32, {0, 1, 2, 3, 4}};
   BoundedSet set0_4P{32, {0, 1, 2, 3, 4}};
@@ -138,5 +145,6 @@ void run() {
   testLeastUpperBoundTop();
   testICompEquals();
   testUDiv();
+  testICompLess();
 }
 } // namespace pcpo
