@@ -104,6 +104,16 @@ void testLeastUpperBoundTop() {
   }
 }
 
+void testUDiv() {
+  BoundedSet dividend{32, {1, 2, 4}};
+  BoundedSet divisorZero{32, {0, 1}};
+  auto result = dividend.udiv(32, divisorZero, false, false);
+  if (!(*(static_cast<BoundedSet *>(result.get())) == dividend)) {
+    errs() << "testUDiv failed\n";
+    errs() << (*result.get()) << "\n";
+  }
+}
+
 void testLeastUpperBoundWithAdd() {
   errs() << "[testLeastUpperBoundWithAdd]\n";
   BoundedSet a{32, {3}};
@@ -127,5 +137,6 @@ void run() {
   testAdd();
   testLeastUpperBoundTop();
   testICompEquals();
+  testUDiv();
 }
 } // namespace pcpo
