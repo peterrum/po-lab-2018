@@ -4,8 +4,15 @@
 # Please specify the path to llvm and clang in the environment variables
 # VSA_CLANG_PATH and VSA_LLVM_PATH.
 
+# if one argument passed: only analyze the passed program
+if [ $# == 1 ] ; then
+    ARRAY=($1) 
+else # run all
+    ARRAY=($(ls -d *.c))
+fi
+
 # for all c-files...
-for f in *.c 
+for f in ${ARRAY[*]};
 do
     # ... print file name
     echo "###############################################################################"
