@@ -266,8 +266,9 @@ BoundedSet::subsetsForPredicate(
       // both branches afterwards
       // thus, the set stays the same
       shared_ptr<AbstractDomain> copy{new BoundedSet(*this)};
+      shared_ptr<AbstractDomain> anotherCopy{new BoundedSet(*this)};
       return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-          copy, createBoundedSetPointer(true));
+          copy, anotherCopy);
     }
     std::set<APInt, Comparator> trueValues;
     std::set<APInt, Comparator> falseValues;
