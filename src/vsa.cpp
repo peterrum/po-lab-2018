@@ -38,9 +38,9 @@ struct VsaPass : public ModulePass {
       /// ignore empty functions and go to the next function
       if (function.empty())
         continue;
-      
+
       VsaVisitor vis(worklist, function);
-      
+
       /// get the first basic block and push it into the worklist
       worklist.push(&function.front());
 
@@ -58,14 +58,14 @@ struct VsaPass : public ModulePass {
 
         vis.visit(*worklist.pop());
 #ifdef DEBUG
-        print(vis,visits);
+        print(vis, visits);
 #endif
 
         visits++;
       }
 
 #ifndef DEBUG
-      print(vis,visits - 1);
+      print(vis, visits - 1);
 #endif
 
       /// print trance
@@ -82,7 +82,7 @@ struct VsaPass : public ModulePass {
     return false;
   }
 
-  void print(VsaVisitor & vis, int visits) {
+  void print(VsaVisitor &vis, int visits) {
 
     STD_OUTPUT("");
     STD_OUTPUT("Global state after " << visits << " visits");

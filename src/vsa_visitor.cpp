@@ -16,7 +16,7 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
     // mark state such that it is not bottom any more
     newState.markVisited();
 
-    for(auto& arg:BB.getParent()->args()) {
+    for (auto &arg : BB.getParent()->args()) {
       // put top for all arguments
       newState.put(arg, AD_TYPE::create_top());
     }
@@ -146,19 +146,17 @@ void VsaVisitor::visitSwitchInst(SwitchInst &I) {
   auto cond = I.getCondition();
   auto values = newState.getAbstractValue(cond);
 
-  for(auto& kase:I.cases()) {
+  for (auto &kase : I.cases()) {
     bcs.putBranchConditions(I.getParent(), kase.getCaseSuccessor(), cond,
-                            shared_ptr<AbstractDomain>
-                            (new AD_TYPE(kase.getCaseValue()->getValue())));
+                            shared_ptr<AbstractDomain>(
+                                new AD_TYPE(kase.getCaseValue()->getValue())));
   }
 
-  bcs.putBranchConditions(I.getParent(), I.getDefaultDest(), cond,
-            values);
+  bcs.putBranchConditions(I.getParent(), I.getDefaultDest(), cond, values);
 
   /// continue as it were a simple terminator
   this->visitTerminatorInst(I);
 }
-
 
 void VsaVisitor::visitLoadInst(LoadInst &I) {
   // not strictly necessary (non-present vars are T ) but good for clearity
@@ -168,26 +166,26 @@ void VsaVisitor::visitLoadInst(LoadInst &I) {
 void VsaVisitor::visitPHINode(PHINode &I) {
   /// bottom as initial value
   auto bs = AD_TYPE::create_bottom();
-  
+
   /// iterator for incoming blocks and values:
-  /// we have to handle it seperatly since LLVM seems to save them not togehter  
+  /// we have to handle it seperatly since LLVM seems to save them not togehter
   auto blocks_iterator = I.block_begin();
   auto val_iterator = I.incoming_values().begin();
-  
+
   // iterate together over incoming blocks and values
-  for (; blocks_iterator!=I.block_end(); blocks_iterator++, val_iterator++) {
-      
+  for (; blocks_iterator != I.block_end(); blocks_iterator++, val_iterator++) {
+
     /// if the basic block where a value comes from is bottom,
     /// the corresponding alternative in the phi node is never taken
     /// the next 20 lines handle all the cases for that
-    Value* val = val_iterator->get();
-    
+    Value *val = val_iterator->get();
+
     /// create initial condition for lubs
     auto newValue = AD_TYPE::create_bottom();
 
     /// Check if basic block containing use is bottom
     if (Instruction::classof(val)) {
-        /// get incoming block
+      /// get incoming block
       auto incomingBlock = *blocks_iterator;
 
       /// block has not been visited yet -> implicit bottom=
@@ -204,7 +202,6 @@ void VsaVisitor::visitPHINode(PHINode &I) {
     } else {
       newValue = newState.getAbstractValue(val);
     }
-    newValue->printOut();
 
     /// if state of basic block was not bottom, include abstract value
     /// in appropriate block in lub for phi

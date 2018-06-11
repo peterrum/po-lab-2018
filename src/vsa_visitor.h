@@ -8,11 +8,11 @@
 #include "util.h"
 #include "worklist.h"
 #include "llvm/IR/CFG.h"
+#include "llvm/IR/Dominators.h"
 #include "llvm/IR/InstVisitor.h"
 #include "llvm/IR/InstrTypes.h"
 #include <queue>
 #include <unordered_map>
-#include "llvm/IR/Dominators.h"
 
 using namespace llvm;
 
@@ -21,14 +21,17 @@ namespace pcpo {
 class VsaVisitor : public InstVisitor<VsaVisitor, void> {
 
 public:
-  VsaVisitor(WorkList &q, Function & function) : worklist(q), newState(), bcs(programPoints){
-      dt.runOnFunction(function);
-      DT = &dt.getDomTree();
+  VsaVisitor(WorkList &q, Function &function)
+      : worklist(q), newState(), bcs(programPoints) {
+    dt.runOnFunction(function);
+    DT = &dt.getDomTree();
 
-      for(auto & bb : function)
-          if(DT->getNode(&bb)->getLevel()>0)
-              DEBUG_OUTPUT(bb.getName() << "  " << DT->getNode(&bb)->getIDom()->getBlock()->getName() << "\n");
-
+    for (auto &bb : function)
+      if (DT->getNode(&bb)->getLevel() > 0)
+        DEBUG_OUTPUT(bb.getName()
+                     << "  "
+                     << DT->getNode(&bb)->getIDom()->getBlock()->getName()
+                     << "\n");
   };
 
   /// create lub of states of preceeding basic blocks and use it as newState;
