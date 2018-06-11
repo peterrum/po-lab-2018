@@ -11,9 +11,16 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
   DEBUG_OUTPUT("visitBasicBlock: entered " << BB.getName());
 
   /// bb has no predecessors: return empty state which is not bottom!
+  /// and insert values s.t. arg -> T
   if (pred_size(&BB) == 0) {
     // mark state such that it is not bottom any more
     newState.markVisited();
+
+    for(auto& arg:BB.getParent()->args()) {
+      // put top for all arguments
+      newState.put(arg, AD_TYPE::create_top());
+    }
+
     return;
   }
 
@@ -174,7 +181,7 @@ void VsaVisitor::visitPHINode(PHINode &I) {
     /// in appropriate block in lub for phi
     bs = bs->leastUpperBound(*newValue);
   }
-  DEBUG_OUTPUT("phi-node!!! -------------");
+
   assert(!bs->lessOrEqual(*AD_TYPE::create_bottom()) &&
          "VsaVisitor::visitPHINode: new value is bottom!");
 
