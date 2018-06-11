@@ -168,20 +168,27 @@ void VsaVisitor::visitLoadInst(LoadInst &I) {
 void VsaVisitor::visitPHINode(PHINode &I) {
   /// bottom as initial value
   auto bs = AD_TYPE::create_bottom();
-  for (Use &use : I.incoming_values()) {
+  
+  /// iterator for incoming blocks and values:
+  /// we have to handle it seperatly since LLVM seems to save them not togehter  
+  auto blocks_iterator = I.block_begin();
+  auto val_iterator = I.incoming_values().begin();
+  
+  // iterate together over incoming blocks and values
+  for (; blocks_iterator!=I.block_end(); blocks_iterator++, val_iterator++) {
+      
     /// if the basic block where a value comes from is bottom,
     /// the corresponding alternative in the phi node is never taken
     /// the next 20 lines handle all the cases for that
-    Value* val = use.get();
-    // Value* val = use();
+    Value* val = val_iterator->get();
+    
+    /// create initial condition for lubs
     auto newValue = AD_TYPE::create_bottom();
 
     /// Check if basic block containing use is bottom
     if (Instruction::classof(val)) {
-      auto incomingBlock = reinterpret_cast<Instruction *>(val)->getParent();
-
-      DEBUG_OUTPUT("Name of BB " << incomingBlock->getName() << val->getName());
-      DEBUG_OUTPUT(programPoints.size());
+        /// get incoming block
+      auto incomingBlock = *blocks_iterator;
 
       /// block has not been visited yet -> implicit bottom=
       if (programPoints.find(incomingBlock) == programPoints.end())
@@ -195,8 +202,6 @@ void VsaVisitor::visitPHINode(PHINode &I) {
       newValue = programPoints[incomingBlock].getAbstractValue(val);
       bcs.unApplyCondition(incomingBlock);
     } else {
-      DEBUG_OUTPUT("-----other----------------");
-
       newValue = newState.getAbstractValue(val);
     }
     newValue->printOut();
