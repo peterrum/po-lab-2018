@@ -12,6 +12,7 @@
 #include "llvm/IR/InstrTypes.h"
 #include <queue>
 #include <unordered_map>
+#include "llvm/IR/Dominators.h"
 
 using namespace llvm;
 
@@ -20,7 +21,16 @@ namespace pcpo {
 class VsaVisitor : public InstVisitor<VsaVisitor, void> {
 
 public:
-  VsaVisitor(WorkList &q) : worklist(q), newState(), bcs(programPoints){};
+  VsaVisitor(WorkList &q, Function & function) : worklist(q), newState(), bcs(programPoints){
+      DominatorTreeWrapperPass dt;
+      dt.runOnFunction(function);
+      DT = &dt.getDomTree();
+      
+      for(auto & bb : function)
+          if(DT->getNode(&bb)->getLevel()>0)
+              DEBUG_OUTPUT(bb.getName() << "  " << DT->getNode(&bb)->getIDom()->getBlock()->getName() << "\n");
+      
+  };
 
   /// create lub of states of preceeding basic blocks and use it as newState;
   /// the visitor automatically visits all instructions of this basic block
@@ -84,6 +94,7 @@ private:
   void pushSuccessors(TerminatorInst &I);
 
   WorkList &worklist;
+  mutable DominatorTree *DT = nullptr;
   State newState;
   std::map<BasicBlock *, State> programPoints;
   BranchConditions bcs;

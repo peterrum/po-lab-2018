@@ -6,6 +6,8 @@
 #include "llvm/Support/raw_ostream.h"
 #include <queue>
 
+#include "llvm/IR/Dominators.h"
+
 using namespace llvm;
 using namespace pcpo;
 
@@ -20,11 +22,7 @@ struct VsaPass : public ModulePass {
   // worklist: instructions are handled in a FIFO manner
   WorkList worklist;
 
-  // visitor: visits instructions and pushes new instructions onto the
-  // worklist
-  VsaVisitor vis;
-
-  VsaPass() : ModulePass(ID), worklist(), vis(worklist) {}
+  VsaPass() : ModulePass(ID), worklist() {}
 
   bool doInitialization(Module &m) override {
     return ModulePass::doInitialization(m);
@@ -40,7 +38,9 @@ struct VsaPass : public ModulePass {
       /// ignore empty functions and go to the next function
       if (function.empty())
         continue;
-
+      
+      VsaVisitor vis(worklist, function);
+      
       /// get the first basic block and push it into the worklist
       worklist.push(&function.front());
 
@@ -58,14 +58,14 @@ struct VsaPass : public ModulePass {
 
         vis.visit(*worklist.pop());
 #ifdef DEBUG
-        print(visits);
+        print(vis,visits);
 #endif
 
         visits++;
       }
 
 #ifndef DEBUG
-      print(visits - 1);
+      print(vis,visits - 1);
 #endif
 
       /// print trance
@@ -82,7 +82,7 @@ struct VsaPass : public ModulePass {
     return false;
   }
 
-  void print(int visits) {
+  void print(VsaVisitor & vis, int visits) {
 
     STD_OUTPUT("");
     STD_OUTPUT("Global state after " << visits << " visits");
