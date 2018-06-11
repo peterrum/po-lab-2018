@@ -181,7 +181,7 @@ void VsaVisitor::visitPHINode(PHINode &I) {
     /// in appropriate block in lub for phi
     bs = bs->leastUpperBound(*newValue);
   }
-  DEBUG_OUTPUT("phi-node!!! -------------");
+
   assert(!bs->lessOrEqual(*AD_TYPE::create_bottom()) &&
          "VsaVisitor::visitPHINode: new value is bottom!");
 
