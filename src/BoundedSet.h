@@ -33,6 +33,8 @@ private:
   shared_ptr<AbstractDomain> createBoundedSetPointer(bool top);
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   createBoundedSetPointerPair(bool firstTop, bool secondTop);
+  bool containsValue(unsigned numBits, uint64_t element);
+  void warnIfContainsZero(unsigned numBits);
 
 public:
   // Binary Arithmetic Operations
@@ -85,6 +87,7 @@ public:
   BoundedSet(std::initializer_list<APInt> vals);
   BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
   bool isTop() const;
+  bool isBottom() const;
   void printOut() const;
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);

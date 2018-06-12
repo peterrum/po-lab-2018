@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 #include "BoundedSet.h"
 #include "AbstractDomain.h"
 #include "llvm/ADT/APInt.h"
@@ -101,12 +103,12 @@ BoundedSet::mul(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
     bool overflow{false};
     if (nsw) {
       if (lhs != 0 && lhs != 0) {
-        overflow |= res.udiv(rhs) != lhs || res.udiv(lhs) != rhs;
+        overflow |= res.sdiv(rhs) != lhs || res.sdiv(lhs) != rhs;
       }
     }
     if (nuw) {
       if (lhs != 0 && rhs != 0) {
-        overflow |= res.udiv(rhs) != lhs || res.udiv(res) != rhs;
+        overflow |= res.udiv(rhs) != lhs || res.udiv(lhs) != rhs;
       }
     }
     if (overflow) {
@@ -117,9 +119,16 @@ BoundedSet::mul(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   };
   return compute(other, opMul);
 }
+
 shared_ptr<AbstractDomain>
 BoundedSet::udiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  BoundedSet *otherB = static_cast<BoundedSet *>(&other);
+  otherB->warnIfContainsZero(numBits);
+
   auto opUDiv = [numBits](APInt lhs, APInt rhs) {
+    if (rhs == 0) {
+      return BoundedSet{false};
+    }
     APInt res{numBits, 0};
     res += lhs;
     res = res.udiv(rhs);
@@ -127,9 +136,16 @@ BoundedSet::udiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   };
   return compute(other, opUDiv);
 }
+
 shared_ptr<AbstractDomain>
 BoundedSet::sdiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  BoundedSet *otherB = static_cast<BoundedSet *>(&other);
+  otherB->warnIfContainsZero(numBits);
+
   auto opSDiv = [numBits](APInt lhs, APInt rhs) {
+    if (rhs == 0) {
+      return BoundedSet{false};
+    }
     APInt res{numBits, 0};
     res += lhs;
     res = res.sdiv(rhs);
@@ -137,9 +153,41 @@ BoundedSet::sdiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   };
   return compute(other, opSDiv);
 }
+
+void BoundedSet::warnIfContainsZero(unsigned numBits) {
+  if (containsValue(numBits, 0)) {
+    if (values.size() == 1) {
+      // In this case a division by zero is certain.
+      // We don't handle this and will exit.
+      errs() << "ERROR: Input program includes division by zero.\n";
+      errs() << "Exiting.\n";
+      exit(EXIT_FAILURE);
+    } else {
+      errs() << "WARNING: Input program includes possible division by zero.\n";
+    }
+  }
+}
+
+bool BoundedSet::containsValue(unsigned numBits, uint64_t n) {
+  if (isTop()) {
+    return true;
+  } else if (values.size() == 0) {
+    return false;
+  } else {
+    auto end = values.end();
+    APInt elem{numBits, n};
+    return values.find(elem) != end;
+  }
+}
+
 shared_ptr<AbstractDomain>
 BoundedSet::urem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  BoundedSet *otherB = static_cast<BoundedSet *>(&other);
+  otherB->warnIfContainsZero(numBits);
   auto opURem = [numBits](APInt lhs, APInt rhs) {
+    if (rhs == 0) {
+      return BoundedSet{false};
+    }
     APInt res{numBits, 0};
     res += lhs;
     res = res.urem(rhs);
@@ -147,9 +195,15 @@ BoundedSet::urem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   };
   return compute(other, opURem);
 }
+
 shared_ptr<AbstractDomain>
 BoundedSet::srem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+  BoundedSet *otherB = static_cast<BoundedSet *>(&other);
+  otherB->warnIfContainsZero(numBits);
   auto opSRem = [numBits](APInt lhs, APInt rhs) {
+    if (rhs == 0) {
+      return BoundedSet{false};
+    }
     APInt res{numBits, 0};
     res += lhs;
     res = res.srem(rhs);
@@ -157,12 +211,13 @@ BoundedSet::srem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   };
   return compute(other, opSRem);
 }
+
 shared_ptr<AbstractDomain>
 BoundedSet::shl(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   auto opShl = [numBits, nuw, nsw](APInt lhs, APInt shAmt) {
     APInt res{numBits, 0};
     res += lhs;
-    res.shl(shAmt);
+    res = res.shl(shAmt);
     bool overflow{shAmt.uge(numBits)};
     if (lhs.isNonNegative()) {
       overflow |= shAmt.uge(lhs.countLeadingZeros());
@@ -247,9 +302,9 @@ BoundedSet::createBoundedSetPointerPair(bool firstTop, bool secondTop) {
       createBoundedSetPointer(firstTop), createBoundedSetPointer(secondTop));
 }
 
-// Returns two subsets of the values of this BoundedSet that that can lead to a
-// true and a false evaluation, respectively
-// Note that a given value may be contained in both sets of the return pair.
+// Returns two subsets of the values of this BoundedSet that that can lead to
+// a true and a false evaluation, respectively Note that a given value may be
+// contained in both sets of the return pair.
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
 BoundedSet::subsetsForPredicate(
     AbstractDomain &other,
@@ -262,9 +317,8 @@ BoundedSet::subsetsForPredicate(
     }
 
     if (otherB->isTop()) {
-      // if the other set is top; we cannot infer more details about our set in
-      // both branches afterwards
-      // thus, the set stays the same
+      // if the other set is top; we cannot infer more details about our set
+      // in both branches afterwards thus, the set stays the same
       shared_ptr<AbstractDomain> copy{new BoundedSet(*this)};
       shared_ptr<AbstractDomain> anotherCopy{new BoundedSet(*this)};
       return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
@@ -418,6 +472,13 @@ llvm::raw_ostream &BoundedSet::print(llvm::raw_ostream &os) {
 }
 
 bool BoundedSet::isTop() const { return top; }
+bool BoundedSet::isBottom() const {
+  if (isTop()) {
+    return false;
+  } else {
+    return values.size() == 0;
+  }
+}
 
 size_t BoundedSet::size() const { return values.size(); }
 

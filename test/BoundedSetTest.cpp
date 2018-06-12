@@ -17,13 +17,13 @@ BoundedSet set2_5{std::set<APInt, Comparator>{apint2, apint5}};
 
 void testConstructor() {
   errs() << "[testConstructor] top: ";
-  top.printOut();
+  errs() << top << "\n";
   errs() << "[testConstructor] bot: ";
-  bot.printOut();
+  errs() << bot << "\n";
   errs() << "[testConstructor] singleton: ";
-  set0.printOut();
+  errs() << set0 << "\n";
   errs() << "[testConstructor] multi: ";
-  set1_3.printOut();
+  errs() << set1_3 << "\n";
 }
 
 void testLeastUpperBound() {
@@ -56,11 +56,18 @@ void testICompEquals() {
   BoundedSet set2{32, {14, 21, 332}};
 
   auto resultPair = set1.icmp(CmpInst::Predicate::ICMP_EQ, 32, set2);
-  resultPair.first->printOut();
-  resultPair.second->printOut();
+  errs() << *resultPair.first << "\n";
+  errs() << *resultPair.second << "\n";
   resultPair = set1.icmp(CmpInst::Predicate::ICMP_UGE, 32, set2);
-  resultPair.first->printOut();
-  resultPair.second->printOut();
+  errs() << *resultPair.first << "\n";
+  errs() << *resultPair.second << "\n";
+}
+
+void testICompLess() {
+  BoundedSet set1{32, {49}};
+  auto result = set1.icmp(CmpInst::Predicate::ICMP_ULE, 32, top);
+  errs() << (*result.first.get()) << "\n";
+  errs() << (*result.second.get()) << "\n";
 }
 
 void testLeastUpperBoundUnique() {
@@ -71,7 +78,7 @@ void testLeastUpperBoundUnique() {
   if (!(res == set0_4P)) {
     errs() << "testLeastUpperBoundUnique failed\n";
     errs() << "[testLeastUpperBoundUnique]: ";
-    res.printOut();
+    errs() << res << "\n";
   }
 }
 
@@ -100,7 +107,29 @@ void testLeastUpperBoundTop() {
   BoundedSet res = *(static_cast<BoundedSet *>(result.get()));
   if (!(res == top)) {
     errs() << "testLeastUpperBoundTop failed\n";
-    result->printOut();
+    errs() << *result << "\n";
+  }
+}
+
+void testUDiv() {
+  BoundedSet dividend{32, {1, 2, 4}};
+  BoundedSet divisorZero{32, {0, 1}};
+  auto result = dividend.udiv(32, divisorZero, false, false);
+  if (!(*(static_cast<BoundedSet *>(result.get())) == dividend)) {
+    errs() << "testUDiv failed\n";
+    errs() << (*result.get()) << "\n";
+  }
+}
+
+void testIsBottom() {
+  if (!BoundedSet{false}.isBottom()) {
+    errs() << "testIsBottom failed\n";
+  }
+  if (top.isBottom()) {
+    errs() << "testIsBottom failed\n";
+  }
+  if (set1_3.isBottom()) {
+    errs() << "testIsBottom failed\n";
   }
 }
 
@@ -127,5 +156,8 @@ void run() {
   testAdd();
   testLeastUpperBoundTop();
   testICompEquals();
+  testUDiv();
+  testICompLess();
+  testIsBottom();
 }
 } // namespace pcpo
