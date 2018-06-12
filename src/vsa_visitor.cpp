@@ -12,7 +12,8 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
 
   /// bb has no predecessors: return empty state which is not bottom!
   /// and insert values s.t. arg -> T
-  if (pred_size(&BB) == 0) {
+  int numPreds = std::distance(pred_begin(&BB), pred_end(&BB));
+  if (numPreds == 0) {
     // mark state such that it is not bottom any more
     newState.markVisited();
 
