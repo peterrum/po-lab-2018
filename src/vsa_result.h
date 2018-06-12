@@ -1,3 +1,6 @@
+#ifndef VSA_RESULT_H_
+#define VSA_RESULT_H_
+
 #include "state.h"
 #include "llvm/IR/BasicBlock.h"
 #include "util.h"
@@ -24,3 +27,5 @@ namespace pcpo {
     std::map<BasicBlock*, State>& globalProgramPoints;
   };
 }
+
+#endif

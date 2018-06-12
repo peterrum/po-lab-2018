@@ -1,3 +1,6 @@
+#ifndef VSA_RESULT_VALUE_H_
+#define VSA_RESULT_VALUE_H_
+
 #include "state.h"
 #include "util.h"
 #include <stdlib.h>
@@ -18,3 +21,5 @@ namespace pcpo {
     std::shared_ptr<AbstractDomain> abstractValue;
   };
 }
+
+#endif
