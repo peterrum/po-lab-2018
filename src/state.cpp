@@ -14,7 +14,7 @@ bool State::put(Value &v, std::shared_ptr<AbstractDomain> ad) {
 
   assert(!bottom && "Visited although bottom!");
 
-  if (ad->lessOrEqual(*BoundedSet::create_bottom())) {
+  if (ad->isBottom()) {
     DEBUG_OUTPUT("State::put: set to bottom because of " << v.getName());
     ad->printOut();
     bottom = true;
@@ -47,8 +47,8 @@ shared_ptr<AbstractDomain> State::getAbstractValue(Value *v) {
   }
 
   DEBUG_OUTPUT("State::getAbstractValue " << v->getName() << " : failed");
-
-  return AD_TYPE::create_top();
+  
+  return AD_TYPE::create_top(v->getType()->getIntegerBitWidth());
 }
 
 bool State::leastUpperBound(State &other) {

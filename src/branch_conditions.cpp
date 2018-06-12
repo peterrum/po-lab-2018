@@ -18,7 +18,7 @@ bool BranchConditions::isBasicBlockReachable(BasicBlock *pred, BasicBlock *bb) {
       auto &branchConditions_map = bc->second[bb];
 
       for (auto &branchCondition : branchConditions_map)
-        if (branchCondition.second->lessOrEqual(*AD_TYPE::create_bottom()))
+        if (branchCondition.second->isBottom())
           return false;
     }
   return true;

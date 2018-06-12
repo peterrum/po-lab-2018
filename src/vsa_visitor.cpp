@@ -19,7 +19,8 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
 
     for (auto &arg : BB.getParent()->args()) {
       // put top for all arguments
-      newState.put(arg, AD_TYPE::create_top());
+      if(arg.getType()->isIntegerTy())
+        newState.put(arg, AD_TYPE::create_top(arg.getType()->getIntegerBitWidth()));
     }
 
     return;
@@ -161,12 +162,12 @@ void VsaVisitor::visitSwitchInst(SwitchInst &I) {
 
 void VsaVisitor::visitLoadInst(LoadInst &I) {
   // not strictly necessary (non-present vars are T ) but good for clearity
-  newState.put(I, AD_TYPE::create_top());
+  newState.put(I, AD_TYPE::create_top(I.getType()->getIntegerBitWidth()));
 }
 
 void VsaVisitor::visitPHINode(PHINode &I) {
   /// bottom as initial value
-  auto bs = AD_TYPE::create_bottom();
+  auto bs = AD_TYPE::create_bottom(I.getType()->getIntegerBitWidth());
 
   /// iterator for incoming blocks and values:
   /// we have to handle it seperatly since LLVM seems to save them not togehter
@@ -182,7 +183,7 @@ void VsaVisitor::visitPHINode(PHINode &I) {
     Value *val = val_iterator->get();
 
     /// create initial condition for lubs
-    auto newValue = AD_TYPE::create_bottom();
+    auto newValue = AD_TYPE::create_bottom(I.getType()->getIntegerBitWidth());
 
     /// Check if basic block containing use is bottom
     if (Instruction::classof(val)) {
@@ -209,7 +210,7 @@ void VsaVisitor::visitPHINode(PHINode &I) {
     bs = bs->leastUpperBound(*newValue);
   }
 
-  assert(!bs->lessOrEqual(*AD_TYPE::create_bottom()) &&
+  assert(!bs->isBottom() &&
          "VsaVisitor::visitPHINode: new value is bottom!");
 
   /// save new value into state

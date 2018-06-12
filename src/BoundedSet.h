@@ -92,11 +92,11 @@ public:
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);
 
-  static shared_ptr<AbstractDomain> create_bottom() {
+  static shared_ptr<AbstractDomain> create_bottom(unsigned /*numBits*/) {
     return std::shared_ptr<AbstractDomain>(new BoundedSet(false));
   }
 
-  static shared_ptr<AbstractDomain> create_top() {
+  static shared_ptr<AbstractDomain> create_top(unsigned /*numBits*/) {
     return std::shared_ptr<AbstractDomain>(new BoundedSet(true));
   }
 };

@@ -27,11 +27,12 @@ public:
     DT = &dt.getDomTree();
 
     for (auto &bb : function)
-      if (DT->getNode(&bb)->getLevel() > 0)
+      if (DT->getNode(&bb)->getLevel() > 0){
         DEBUG_OUTPUT(bb.getName()
                      << "  "
                      << DT->getNode(&bb)->getIDom()->getBlock()->getName()
                      << "\n");
+      }
   };
 
   /// create lub of states of preceeding basic blocks and use it as newState;
