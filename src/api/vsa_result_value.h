@@ -7,6 +7,8 @@
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/Analysis/LazyValueInfo.h"
 
+#include "../util/util.h"
+
 using namespace llvm;
 
 namespace pcpo {
