@@ -1,8 +1,7 @@
 #ifndef PROJECT_BRANCH_CONDITIONS_H
 #define PROJECT_BRANCH_CONDITIONS_H
 
-#include "AbstractDomain.h"
-#include "BoundedSet.h"
+#include "../abstract_domain/AbstractDomain.h"
 #include "state.h"
 #include "llvm/IR/Value.h"
 #include "llvm/Support/raw_ostream.h"

@@ -11,16 +11,16 @@ if(WIN32 OR CYGWIN)
 endif()
 
 add_llvm_loadable_module( llvm-vsa
-  src/BoundedSet.cpp
-  src/StridedInterval.cpp
-  src/CompositeDomain.cpp
-  src/state.cpp
   src/vsa.cpp
-  src/vsa_visitor.cpp
-  src/worklist.cpp
-  src/branch_conditions.cpp
-  src/vsa_result.cpp
-  src/vsa_result_value.cpp
+  src/abstract_domain/BoundedSet.cpp
+  src/abstract_domain/StridedInterval.cpp
+  src/abstract_domain/CompositeDomain.cpp
+  src/fixpoint/state.cpp
+  src/fixpoint/vsa_visitor.cpp
+  src/fixpoint/worklist.cpp
+  src/fixpoint/branch_conditions.cpp
+  src/api/vsa_result.cpp
+  src/api/vsa_result_value.cpp
   test/BoundedSetTest.cpp
   test/StridedIntervalTest.cpp
   test/TestRunner.cpp

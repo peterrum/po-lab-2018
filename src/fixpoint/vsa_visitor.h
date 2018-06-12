@@ -1,11 +1,10 @@
 #ifndef PROJECT_VISITOR_H
 #define PROJECT_VISITOR_H
 
-#include "AbstractDomain.h"
-#include "BoundedSet.h"
+#include "../abstract_domain/AbstractDomain.h"
 #include "branch_conditions.h"
 #include "state.h"
-#include "util.h"
+#include "../util/util.h"
 #include "worklist.h"
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Dominators.h"

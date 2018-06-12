@@ -1,10 +1,10 @@
-#include "vsa_visitor.h"
-#include "worklist.h"
+#include "fixpoint/vsa_visitor.h"
+#include "fixpoint/worklist.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
-#include "vsa_result.h"
+#include "api/vsa_result.h"
 #include <queue>
 
 #include "llvm/IR/Dominators.h"

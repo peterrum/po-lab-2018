@@ -1,8 +1,8 @@
 #ifndef VSA_RESULT_VALUE_H_
 #define VSA_RESULT_VALUE_H_
 
-#include "state.h"
-#include "util.h"
+#include "../fixpoint/state.h"
+#include "../util/util.h"
 #include <stdlib.h>
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/Analysis/LazyValueInfo.h"

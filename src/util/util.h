@@ -3,6 +3,8 @@
 
 #include "llvm/Support/raw_ostream.h"
 
+#include "../abstract_domain/BoundedSet.h"
+
 /// settings
 
 /// should debug output enabled?

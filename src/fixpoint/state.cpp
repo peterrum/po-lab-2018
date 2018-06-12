@@ -3,7 +3,7 @@
 #include <llvm/IR/Constants.h>
 
 #include "state.h"
-#include "util.h"
+#include "../util/util.h"
 
 using namespace llvm;
 namespace pcpo {

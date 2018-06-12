@@ -1,9 +1,9 @@
 #ifndef VSA_RESULT_H_
 #define VSA_RESULT_H_
 
-#include "state.h"
+#include "../fixpoint/state.h"
 #include "llvm/IR/BasicBlock.h"
-#include "util.h"
+#include "../util/util.h"
 #include "vsa_result_value.h"
 #include <memory>
 
