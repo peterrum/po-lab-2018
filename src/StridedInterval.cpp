@@ -12,26 +12,26 @@ using llvm::APIntOps::GreatestCommonDivisor;
 
 StridedInterval::StridedInterval(APInt begin, APInt end, APInt stride)
     : bitWidth(begin.getBitWidth()), begin(begin), end(end), stride(stride),
-      isBottom(false) {
+      isBot(false) {
   assert(end.getBitWidth() == bitWidth);
   assert(stride.getBitWidth() == bitWidth);
 }
 
 StridedInterval::StridedInterval(APInt value)
     : bitWidth(value.getBitWidth()), begin(value), end(value),
-      stride({value.getBitWidth(), 0}), isBottom{false} {}
+      stride({value.getBitWidth(), 0}), isBot{false} {}
 
-StridedInterval::StridedInterval() : isBottom(true) {}
+StridedInterval::StridedInterval() : isBot(true) {}
 
 StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
     uint64_t end, uint64_t stride)
     : bitWidth(bitWidth), begin(APInt(bitWidth, begin)),
       end(APInt(bitWidth, end)), stride(APInt(bitWidth, stride)),
-      isBottom(false) {}
+      isBot(false) {}
 
 bool StridedInterval::operator==(const StridedInterval &other) {
-  if (this->isBottom) {
-    return other.isBottom;
+  if (this->isBot) {
+    return other.isBot;
   } else {
     return this->begin == other.begin && this->end == other.end &&
            this->stride == other.stride;
@@ -223,8 +223,24 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
 
 bool StridedInterval::lessOrEqual(AbstractDomain &other) { return false; }
 
+unsigned StridedInterval::getBitWidth() const {
+  return begin.getBitWidth();
+}
+
+bool StridedInterval::isTop() const {
+  if (isBot) {
+    return false;
+  } else {
+    return stride == 1 && begin == 0 && end == APInt::getMaxValue(this->getBitWidth());
+  }
+}
+
+bool StridedInterval::isBottom() const {
+  return isBot;
+}
+
 llvm::raw_ostream &StridedInterval::print(llvm::raw_ostream &os) {
-  if (isBottom) {
+  if (isBot) {
     os << "[]";
   } else {
     os << stride << "[" << begin.toString(OUTPUT_BASE, OUTPUT_SIGNED) << ", "
@@ -235,7 +251,7 @@ llvm::raw_ostream &StridedInterval::print(llvm::raw_ostream &os) {
 
 void StridedInterval::printOut() const {
   errs() << "StridedInterval@" << this << "\n";
-  if (isBottom) {
+  if (isBot) {
     errs() << "[]\n";
     return;
   }

@@ -18,7 +18,7 @@ private:
   APInt begin;
   APInt end;
   APInt stride;
-  bool isBottom;
+  bool isBot;
 
 public:
   std::shared_ptr<AbstractDomain> normalize();
@@ -74,10 +74,13 @@ public:
   StridedInterval(APInt begin, APInt end, APInt stride);
   StridedInterval(unsigned numBits, std::initializer_list<uint64_t> vals);
   StridedInterval(unsigned bitWidth, uint64_t begin, uint64_t end, uint64_t stride);
+  unsigned getBitWidth() const;
   bool isTop() const;
+  bool isBottom() const;
   void printOut() const;
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);
+
 
   static shared_ptr<AbstractDomain> create_bottom() {
     return std::shared_ptr<AbstractDomain>(new StridedInterval(false));
