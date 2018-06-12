@@ -1,6 +1,7 @@
 #ifndef STRIDED_INTERVAL_H_
 #define STRIDED_INTERVAL_H_
 #include "AbstractDomain.h"
+#include "BoundedSet.h"
 #include "llvm/ADT/APInt.h"
 #include <functional>
 #include <iostream>
@@ -8,9 +9,6 @@
 
 namespace pcpo {
 using llvm::APInt;
-
-const int OUTPUT_BASE = 10;
-const int OUTPUT_SIGNED = false;
 
 class StridedInterval : public AbstractDomain {
 private:
@@ -73,14 +71,15 @@ public:
   StridedInterval();
   StridedInterval(APInt begin, APInt end, APInt stride);
   StridedInterval(unsigned numBits, std::initializer_list<uint64_t> vals);
-  StridedInterval(unsigned bitWidth, uint64_t begin, uint64_t end, uint64_t stride);
+  StridedInterval(unsigned bitWidth, uint64_t begin, uint64_t end,
+                  uint64_t stride);
+  StridedInterval(BoundedSet &set);
   unsigned getBitWidth() const;
   bool isTop() const;
   bool isBottom() const;
   void printOut() const;
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);
-
 
   static shared_ptr<AbstractDomain> create_bottom() {
     return std::shared_ptr<AbstractDomain>(new StridedInterval(false));

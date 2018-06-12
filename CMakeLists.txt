@@ -13,6 +13,7 @@ endif()
 add_llvm_loadable_module( llvm-vsa
   src/BoundedSet.cpp
   src/StridedInterval.cpp
+  src/CompositeDomain.cpp
   src/state.cpp
   src/vsa.cpp
   src/vsa_visitor.cpp

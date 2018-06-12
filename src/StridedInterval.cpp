@@ -1,5 +1,6 @@
 #include "StridedInterval.h"
 #include "AbstractDomain.h"
+#include "BoundedSet.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Support/raw_os_ostream.h"
 #include <initializer_list>
@@ -24,10 +25,12 @@ StridedInterval::StridedInterval(APInt value)
 StridedInterval::StridedInterval() : isBot(true) {}
 
 StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
-    uint64_t end, uint64_t stride)
+                                 uint64_t end, uint64_t stride)
     : bitWidth(bitWidth), begin(APInt(bitWidth, begin)),
-      end(APInt(bitWidth, end)), stride(APInt(bitWidth, stride)),
-      isBot(false) {}
+      end(APInt(bitWidth, end)), stride(APInt(bitWidth, stride)), isBot(false) {
+}
+
+StridedInterval::StridedInterval(BoundedSet &set) : isBot(true) {}
 
 bool StridedInterval::operator==(const StridedInterval &other) {
   if (this->isBot) {
@@ -104,7 +107,7 @@ shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
   StridedInterval *otherB = static_cast<StridedInterval *>(&other);
   assert(numBits == bitWidth);
   assert(numBits == otherB->bitWidth);
-  APInt N{pow2(numBits+1, numBits)};
+  APInt N{pow2(numBits + 1, numBits)};
   APInt a{begin.zext(numBits + 1)};
   APInt b{end.zext(numBits + 1)};
   APInt s{stride.zext(numBits + 1)};
@@ -223,28 +226,25 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
 
 bool StridedInterval::lessOrEqual(AbstractDomain &other) { return false; }
 
-unsigned StridedInterval::getBitWidth() const {
-  return begin.getBitWidth();
-}
+unsigned StridedInterval::getBitWidth() const { return begin.getBitWidth(); }
 
 bool StridedInterval::isTop() const {
   if (isBot) {
     return false;
   } else {
-    return stride == 1 && begin == 0 && end == APInt::getMaxValue(this->getBitWidth());
+    return stride == 1 && begin == 0 &&
+           end == APInt::getMaxValue(this->getBitWidth());
   }
 }
 
-bool StridedInterval::isBottom() const {
-  return isBot;
-}
+bool StridedInterval::isBottom() const { return isBot; }
 
 llvm::raw_ostream &StridedInterval::print(llvm::raw_ostream &os) {
   if (isBot) {
     os << "[]";
   } else {
     os << stride << "[" << begin.toString(OUTPUT_BASE, OUTPUT_SIGNED) << ", "
-      << end.toString(OUTPUT_BASE, OUTPUT_SIGNED) << "]_" << bitWidth;
+       << end.toString(OUTPUT_BASE, OUTPUT_SIGNED) << "]_" << bitWidth;
   }
   return os;
 }

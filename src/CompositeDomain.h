@@ -1,39 +1,23 @@
-#ifndef BOUNDED_SET_H_
-#define BOUNDED_SET_H_
+#ifndef COMPOSITE_DOMAIN_H_
+#define COMPOSITE_DOMAIN_H_
 #include "AbstractDomain.h"
+#include "BoundedSet.h"
+#include "StridedInterval.h"
 #include "llvm/ADT/APInt.h"
 #include <functional>
 #include <iostream>
 #include <set>
 namespace pcpo {
 using llvm::APInt;
+using std::shared_ptr;
 
-const int SET_LIMIT = 40;
+enum DelegateType { stridedInterval, boundedSet };
 
-struct Comparator {
-  bool operator()(const APInt &left, const APInt &right) const {
-    return left.ult(right);
-  }
-};
-
-class BoundedSet : public AbstractDomain {
+class CompositeDomain : public AbstractDomain {
 private:
-  std::set<APInt, Comparator> values;
-  bool top{false};
-  shared_ptr<AbstractDomain>
-  compute(AbstractDomain &other,
-          std::function<BoundedSet(const APInt &, const APInt &)> op);
-  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-  subsetsForPredicate(
-      AbstractDomain &other,
-      std::function<bool(const APInt &, const APInt &)> comparision);
-
-  shared_ptr<AbstractDomain> createBoundedSetPointer(bool top);
-  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-  createBoundedSetPointerPair(bool firstTop, bool secondTop);
-  bool containsValue(unsigned numBits, uint64_t element);
-  void warnIfContainsZero(unsigned numBits);
-  void warnIfDivisionOverflowPossible(unsigned numBits, BoundedSet &other);
+  DelegateType delegateType;
+  shared_ptr<AbstractDomain> delegate;
+  DelegateType getDelegateType();
 
 public:
   // Binary Arithmetic Operations
@@ -78,26 +62,12 @@ public:
 
   bool operator==(const BoundedSet &other);
 
-  BoundedSet(std::set<APInt, Comparator> values);
-  explicit BoundedSet(APInt value);
   friend std::ostream &operator<<(std::ostream &os, const BoundedSet &bs);
-
-  explicit BoundedSet(bool isTop);
-  BoundedSet(std::initializer_list<APInt> vals);
-  BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
   bool isTop() const;
   bool isBottom() const;
   void printOut() const;
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);
-
-  static shared_ptr<AbstractDomain> create_bottom(unsigned /*numBits*/) {
-    return std::shared_ptr<AbstractDomain>(new BoundedSet(false));
-  }
-
-  static shared_ptr<AbstractDomain> create_top(unsigned /*numBits*/) {
-    return std::shared_ptr<AbstractDomain>(new BoundedSet(true));
-  }
 };
 } // namespace pcpo
 #endif
