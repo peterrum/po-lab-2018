@@ -17,13 +17,13 @@ BoundedSet set2_5{std::set<APInt, Comparator>{apint2, apint5}};
 
 void testConstructor() {
   errs() << "[testConstructor] top: ";
-  top.printOut();
+  errs() << top << "\n";
   errs() << "[testConstructor] bot: ";
-  bot.printOut();
+  errs() << bot << "\n";
   errs() << "[testConstructor] singleton: ";
-  set0.printOut();
+  errs() << set0 << "\n";
   errs() << "[testConstructor] multi: ";
-  set1_3.printOut();
+  errs() << set1_3 << "\n";
 }
 
 void testLeastUpperBound() {
@@ -56,11 +56,11 @@ void testICompEquals() {
   BoundedSet set2{32, {14, 21, 332}};
 
   auto resultPair = set1.icmp(CmpInst::Predicate::ICMP_EQ, 32, set2);
-  resultPair.first->printOut();
-  resultPair.second->printOut();
+  errs() << *resultPair.first << "\n";
+  errs() << *resultPair.second << "\n";
   resultPair = set1.icmp(CmpInst::Predicate::ICMP_UGE, 32, set2);
-  resultPair.first->printOut();
-  resultPair.second->printOut();
+  errs() << *resultPair.first << "\n";
+  errs() << *resultPair.second << "\n";
 }
 
 void testICompLess() {
@@ -78,7 +78,7 @@ void testLeastUpperBoundUnique() {
   if (!(res == set0_4P)) {
     errs() << "testLeastUpperBoundUnique failed\n";
     errs() << "[testLeastUpperBoundUnique]: ";
-    res.printOut();
+    errs() << res << "\n";
   }
 }
 
@@ -107,7 +107,7 @@ void testLeastUpperBoundTop() {
   BoundedSet res = *(static_cast<BoundedSet *>(result.get()));
   if (!(res == top)) {
     errs() << "testLeastUpperBoundTop failed\n";
-    result->printOut();
+    errs() << *result << "\n";
   }
 }
 
