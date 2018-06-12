@@ -58,14 +58,14 @@ struct VsaPass : public ModulePass {
 
         vis.visit(*worklist.pop());
 #ifdef DEBUG
-        print(vis, visits);
+        print_local(vis, visits);
 #endif
 
         visits++;
       }
 
 #ifndef DEBUG
-      print(vis, visits - 1);
+      print_local(vis, visits - 1);
 #endif
 
       /// print trance
@@ -82,7 +82,7 @@ struct VsaPass : public ModulePass {
     return false;
   }
 
-  void print(VsaVisitor &vis, int visits) {
+  void print_local(VsaVisitor &vis, int visits) {
 
     STD_OUTPUT("");
     STD_OUTPUT("Global state after " << visits << " visits");
