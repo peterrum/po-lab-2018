@@ -63,6 +63,9 @@ public:
   // |gamma(this)|
   virtual size_t size() const = 0;
 
+  virtual bool isTop() const = 0;
+  virtual bool isBottom() const = 0;
+
   // Debugging methodes
   virtual void printOut() const = 0;
   // TODO: bitwise operations

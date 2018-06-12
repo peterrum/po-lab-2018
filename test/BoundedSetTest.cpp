@@ -121,6 +121,18 @@ void testUDiv() {
   }
 }
 
+void testIsBottom() {
+  if (!BoundedSet{false}.isBottom()) {
+    errs() << "testIsBottom failed\n";
+  }
+  if (top.isBottom()) {
+    errs() << "testIsBottom failed\n";
+  }
+  if (set1_3.isBottom()) {
+    errs() << "testIsBottom failed\n";
+  }
+}
+
 void testLeastUpperBoundWithAdd() {
   errs() << "[testLeastUpperBoundWithAdd]\n";
   BoundedSet a{32, {3}};
@@ -146,5 +158,6 @@ void run() {
   testICompEquals();
   testUDiv();
   testICompLess();
+  testIsBottom();
 }
 } // namespace pcpo

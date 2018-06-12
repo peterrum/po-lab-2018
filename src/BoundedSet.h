@@ -87,6 +87,7 @@ public:
   BoundedSet(std::initializer_list<APInt> vals);
   BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
   bool isTop() const;
+  bool isBottom() const;
   void printOut() const;
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);

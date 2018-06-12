@@ -466,6 +466,13 @@ llvm::raw_ostream &BoundedSet::print(llvm::raw_ostream &os) {
 }
 
 bool BoundedSet::isTop() const { return top; }
+bool BoundedSet::isBottom() const {
+  if (isTop()) {
+    return false;
+  } else {
+    return values.size() == 0;
+  }
+}
 
 size_t BoundedSet::size() const { return values.size(); }
 
