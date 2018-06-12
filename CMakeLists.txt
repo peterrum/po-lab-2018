@@ -11,14 +11,16 @@ if(WIN32 OR CYGWIN)
 endif()
 
 add_llvm_loadable_module( llvm-vsa
+  src/BoundedSet.cpp
+  src/StridedInterval.cpp
   src/state.cpp
   src/vsa.cpp
-  src/BoundedSet.cpp
-  test/BoundedSetTest.cpp
-  test/TestRunner.cpp
   src/vsa_visitor.cpp
   src/worklist.cpp
   src/branch_conditions.cpp
+  test/BoundedSetTest.cpp
+  test/StridedIntervalTest.cpp
+  test/TestRunner.cpp
 
   DEPENDS
   intrinsics_gen

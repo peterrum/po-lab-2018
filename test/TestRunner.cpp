@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "BoundedSetTest.h"
+#include "StridedIntervalTest.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Pass.h"
@@ -27,7 +28,8 @@ struct Hello : public FunctionPass {
   Hello() : FunctionPass(ID) {}
 
   bool runOnFunction(Function &F) override {
-    pcpo::run();
+    pcpo::runBoundedSet();
+    pcpo::runStridedInterval();
     return false;
   }
 };
