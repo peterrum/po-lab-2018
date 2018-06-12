@@ -3,25 +3,26 @@
 
 #include "../fixpoint/state.h"
 #include "../util/util.h"
-#include <stdlib.h>
-#include "llvm/IR/InstrTypes.h"
 #include "llvm/Analysis/LazyValueInfo.h"
+#include "llvm/IR/InstrTypes.h"
+#include <stdlib.h>
 
 #include "../util/util.h"
 
 using namespace llvm;
 
 namespace pcpo {
-  class VsaResultValue {
+class VsaResultValue {
 
-  public:
-    VsaResultValue(std::shared_ptr<AbstractDomain> abstractValue) : abstractValue(abstractValue) {}
+public:
+  VsaResultValue(std::shared_ptr<AbstractDomain> abstractValue)
+      : abstractValue(abstractValue) {}
 
-    LazyValueInfo::Tristate testIf(CmpInst::Predicate predicate, Constant *C);
-    
-  private:
-    std::shared_ptr<AbstractDomain> abstractValue;
-  };
+  LazyValueInfo::Tristate testIf(CmpInst::Predicate predicate, Constant *C);
+
+private:
+  std::shared_ptr<AbstractDomain> abstractValue;
+};
 }
 
 #endif

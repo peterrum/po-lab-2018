@@ -1,10 +1,10 @@
+#include "api/vsa_result.h"
 #include "fixpoint/vsa_visitor.h"
 #include "fixpoint/worklist.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
-#include "api/vsa_result.h"
 #include <queue>
 
 #include "llvm/IR/Dominators.h"
@@ -24,7 +24,7 @@ struct VsaPass : public ModulePass {
   WorkList worklist;
 
   // global map of programPoints
-  std::map<BasicBlock*, State> globalProgramPoints;
+  std::map<BasicBlock *, State> globalProgramPoints;
 
   VsaResult result;
 
@@ -67,7 +67,8 @@ struct VsaPass : public ModulePass {
         print_local(vis, visits);
 #endif
 
-        globalProgramPoints.insert(vis.getProgramPoints().begin(),vis.getProgramPoints().end());
+        globalProgramPoints.insert(vis.getProgramPoints().begin(),
+                                   vis.getProgramPoints().end());
 
         visits++;
       }

@@ -2,9 +2,9 @@
 #define PROJECT_VISITOR_H
 
 #include "../abstract_domain/AbstractDomain.h"
+#include "../util/util.h"
 #include "branch_conditions.h"
 #include "state.h"
-#include "../util/util.h"
 #include "worklist.h"
 #include "llvm/IR/CFG.h"
 #include "llvm/IR/Dominators.h"
@@ -27,7 +27,7 @@ public:
     DT = &dt.getDomTree();
 
     for (auto &bb : function)
-      if (DT->getNode(&bb)->getLevel() > 0){
+      if (DT->getNode(&bb)->getLevel() > 0) {
         DEBUG_OUTPUT(bb.getName()
                      << "  "
                      << DT->getNode(&bb)->getIDom()->getBlock()->getName()
@@ -91,7 +91,7 @@ public:
   void visitOr(BinaryOperator &I);
   void visitXor(BinaryOperator &I);
 
-  void visitShl (Instruction &I);
+  void visitShl(Instruction &I);
   void visitLShr(Instruction &I);
   void visitAShr(Instruction &I);
 
@@ -108,7 +108,7 @@ public:
   void print();
 
   /// return the program points
-  std::map<BasicBlock*, State>& getProgramPoints();
+  std::map<BasicBlock *, State> &getProgramPoints();
 
 private:
   /// push directly reachable basic blocks onto worklist

@@ -2,8 +2,8 @@
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>
 
-#include "state.h"
 #include "../util/util.h"
+#include "state.h"
 
 using namespace llvm;
 namespace pcpo {
@@ -51,7 +51,7 @@ shared_ptr<AbstractDomain> State::getAbstractValue(Value *v) {
   return AD_TYPE::create_top(v->getType()->getIntegerBitWidth());
 }
 
-bool State::isAvailable(Value* v) {
+bool State::isAvailable(Value *v) {
   if (ConstantInt::classof(v)) {
     return true;
   }
