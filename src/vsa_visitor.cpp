@@ -226,7 +226,8 @@ void VsaVisitor::visitAdd(BinaryOperator &I) {
 
   // TODO: meaning of arguments?
   newState.put(I,
-               ad0->add(I.getType()->getIntegerBitWidth(), *ad1, false, false));
+               ad0->add(I.getType()->getIntegerBitWidth(), *ad1,
+               I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
 }
 
 void VsaVisitor::visitMul(BinaryOperator &I) {
@@ -235,7 +236,8 @@ void VsaVisitor::visitMul(BinaryOperator &I) {
 
   // TODO: meaning of arguments?
   newState.put(I,
-               ad0->mul(I.getType()->getIntegerBitWidth(), *ad1, false, false));
+               ad0->mul(I.getType()->getIntegerBitWidth(), *ad1,
+               I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
 }
 
 void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I) {
