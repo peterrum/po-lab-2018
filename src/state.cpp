@@ -38,7 +38,7 @@ shared_ptr<AbstractDomain> State::getAbstractValue(Value *v) {
 
   if (ConstantInt::classof(v)) {
     auto temp = reinterpret_cast<ConstantInt *>(v);
-    return shared_ptr<AbstractDomain>(new BoundedSet(temp->getValue()));
+    return shared_ptr<AbstractDomain>(new AD_TYPE(temp->getValue()));
   }
 
   auto find = vars.find(v);
