@@ -217,7 +217,7 @@ BoundedSet::shl(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   auto opShl = [numBits, nuw, nsw](APInt lhs, APInt shAmt) {
     APInt res{numBits, 0};
     res += lhs;
-    res.shl(shAmt);
+    res = res.shl(shAmt);
     bool overflow{shAmt.uge(numBits)};
     if (lhs.isNonNegative()) {
       overflow |= shAmt.uge(lhs.countLeadingZeros());
