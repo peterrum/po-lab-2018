@@ -216,28 +216,118 @@ void VsaVisitor::visitPHINode(PHINode &I) {
   newState.put(I, bs);
 }
 
-void VsaVisitor::visitBinaryOperator(BinaryOperator &I) {
-  STD_OUTPUT("visited binary instruction");
-}
-
 void VsaVisitor::visitAdd(BinaryOperator &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
-  // TODO: meaning of arguments?
   newState.put(I,
                ad0->add(I.getType()->getIntegerBitWidth(), *ad1,
                I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+
+void VsaVisitor::visitSub(BinaryOperator &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->sub(I.getType()->getIntegerBitWidth(), *ad1,
+                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
 }
 
 void VsaVisitor::visitMul(BinaryOperator &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
-  // TODO: meaning of arguments?
   newState.put(I,
                ad0->mul(I.getType()->getIntegerBitWidth(), *ad1,
                I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+
+void VsaVisitor::visitURem(BinaryOperator &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->urem(I.getType()->getIntegerBitWidth(), *ad1,
+                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+void VsaVisitor::visitSRem(BinaryOperator &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->srem(I.getType()->getIntegerBitWidth(), *ad1,
+                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+void VsaVisitor::visitUDiv(BinaryOperator &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->udiv(I.getType()->getIntegerBitWidth(), *ad1,
+                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+void VsaVisitor::visitSDiv(BinaryOperator &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->sdiv(I.getType()->getIntegerBitWidth(), *ad1,
+                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+void VsaVisitor::visitAnd(BinaryOperator &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->and_(I.getType()->getIntegerBitWidth(), *ad1,
+                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+void VsaVisitor::visitOr(BinaryOperator &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->or_(I.getType()->getIntegerBitWidth(), *ad1,
+                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+void VsaVisitor::visitXor(BinaryOperator &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->xor_(I.getType()->getIntegerBitWidth(), *ad1,
+                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+
+void VsaVisitor::visitShl (Instruction &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->shl(I.getType()->getIntegerBitWidth(), *ad1,
+                         I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+void VsaVisitor::visitLShr(Instruction &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->lshr(I.getType()->getIntegerBitWidth(), *ad1,
+                         I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+void VsaVisitor::visitAShr(Instruction &I){
+  auto ad0 = newState.getAbstractValue(I.getOperand(0));
+  auto ad1 = newState.getAbstractValue(I.getOperand(1));
+
+  newState.put(I,
+               ad0->ashr(I.getType()->getIntegerBitWidth(), *ad1,
+                         I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+}
+
+
+void VsaVisitor::visitBinaryOperator(BinaryOperator &I) {
+  STD_OUTPUT("visited binary instruction");
 }
 
 void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I) {

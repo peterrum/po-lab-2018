@@ -13,7 +13,7 @@ int main(int argc, char const *argv[]) {
       y = x;
       break;
     case 5:
-      y = x;
+      y = x<<1;
   }
 
   printf("%d\n", y);
