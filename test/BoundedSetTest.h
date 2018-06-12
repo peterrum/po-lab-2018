@@ -1,9 +1,6 @@
 #ifndef BOUNDED_SET_TEST_H_
 #define BOUNDED_SET_TEST_H_
 namespace pcpo {
-void testConstructor();
-void testLeastUpperBound();
-void testTop();
-void run();
+void runBoundedSet();
 } // namespace pcpo
 #endif

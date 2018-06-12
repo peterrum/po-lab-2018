@@ -148,7 +148,7 @@ void testLeastUpperBoundWithAdd() {
   }
 }
 
-void run() {
+void runBoundedSet() {
   testConstructor();
   testLeastUpperBound();
   testLeastUpperBoundWithAdd();
