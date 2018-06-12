@@ -21,27 +21,27 @@ public:
   virtual shared_ptr<AbstractDomain>
   mul(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
   virtual shared_ptr<AbstractDomain>
-  udiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
+  udiv(unsigned numBits, AbstractDomain &other, bool nuw=false, bool nsw=false) = 0;
   virtual shared_ptr<AbstractDomain>
-  sdiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
+  sdiv(unsigned numBits, AbstractDomain &other, bool nuw=false, bool nsw=false) = 0;
   virtual shared_ptr<AbstractDomain>
-  urem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
+  urem(unsigned numBits, AbstractDomain &other, bool nuw=false, bool nsw=false) = 0;
   virtual shared_ptr<AbstractDomain>
-  srem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
+  srem(unsigned numBits, AbstractDomain &other, bool nuw=false, bool nsw=false) = 0;
 
   // Binary Bitwise Operations
   virtual shared_ptr<AbstractDomain>
   shl(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
   virtual shared_ptr<AbstractDomain>
-  lshr(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
+  lshr(unsigned numBits, AbstractDomain &other, bool nuw=false, bool nsw=false) = 0;
   virtual shared_ptr<AbstractDomain>
-  ashr(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
+  ashr(unsigned numBits, AbstractDomain &other, bool nuw=false, bool nsw=false) = 0;
   virtual shared_ptr<AbstractDomain>
-  and_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
+  and_(unsigned numBits, AbstractDomain &other, bool nuw=false, bool nsw=false) = 0;
   virtual shared_ptr<AbstractDomain>
-  or_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
+  or_(unsigned numBits, AbstractDomain &other, bool nuw=false, bool nsw=false) = 0;
   virtual shared_ptr<AbstractDomain>
-  xor_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
+  xor_(unsigned numBits, AbstractDomain &other, bool nuw=false, bool nsw=false) = 0;
 
   // Conversion Operations (TODO?)
 
