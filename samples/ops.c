@@ -25,8 +25,8 @@ int fsV = a/b;
 
 unsigned guC = aU%5;
 int gsC = a%5;
-unsigned guV = aU/bU;
-int gsV = a/b;
+unsigned guV = aU%bU;
+int gsV = a%b;
 
 int hC = a << 1;
 int hV = a << bU;
