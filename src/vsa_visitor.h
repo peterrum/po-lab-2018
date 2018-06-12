@@ -11,6 +11,7 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/InstVisitor.h"
 #include "llvm/IR/InstrTypes.h"
+#include "llvm/IR/Operator.h"
 #include <queue>
 #include <unordered_map>
 

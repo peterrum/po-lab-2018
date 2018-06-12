@@ -249,56 +249,49 @@ void VsaVisitor::visitURem(BinaryOperator &I){
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I,
-               ad0->urem(I.getType()->getIntegerBitWidth(), *ad1,
-                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+               ad0->urem(I.getType()->getIntegerBitWidth(), *ad1));
 }
 void VsaVisitor::visitSRem(BinaryOperator &I){
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I,
-               ad0->srem(I.getType()->getIntegerBitWidth(), *ad1,
-                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+               ad0->srem(I.getType()->getIntegerBitWidth(), *ad1));
 }
 void VsaVisitor::visitUDiv(BinaryOperator &I){
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I,
-               ad0->udiv(I.getType()->getIntegerBitWidth(), *ad1,
-                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+               ad0->udiv(I.getType()->getIntegerBitWidth(), *ad1));
 }
 void VsaVisitor::visitSDiv(BinaryOperator &I){
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I,
-               ad0->sdiv(I.getType()->getIntegerBitWidth(), *ad1,
-                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+               ad0->sdiv(I.getType()->getIntegerBitWidth(), *ad1));
 }
 void VsaVisitor::visitAnd(BinaryOperator &I){
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I,
-               ad0->and_(I.getType()->getIntegerBitWidth(), *ad1,
-                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+               ad0->and_(I.getType()->getIntegerBitWidth(), *ad1));
 }
 void VsaVisitor::visitOr(BinaryOperator &I){
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I,
-               ad0->or_(I.getType()->getIntegerBitWidth(), *ad1,
-                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+               ad0->or_(I.getType()->getIntegerBitWidth(), *ad1));
 }
 void VsaVisitor::visitXor(BinaryOperator &I){
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I,
-               ad0->xor_(I.getType()->getIntegerBitWidth(), *ad1,
-                        I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+               ad0->xor_(I.getType()->getIntegerBitWidth(), *ad1));
 }
 
 void VsaVisitor::visitShl (Instruction &I){
@@ -314,16 +307,14 @@ void VsaVisitor::visitLShr(Instruction &I){
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I,
-               ad0->lshr(I.getType()->getIntegerBitWidth(), *ad1,
-                         I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+               ad0->lshr(I.getType()->getIntegerBitWidth(), *ad1));
 }
 void VsaVisitor::visitAShr(Instruction &I){
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I,
-               ad0->ashr(I.getType()->getIntegerBitWidth(), *ad1,
-                         I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+               ad0->ashr(I.getType()->getIntegerBitWidth(), *ad1));
 }
 
 
