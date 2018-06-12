@@ -1,3 +1,5 @@
+#undef NDEBUG
+
 #include "BoundedSet.h"
 #include "AbstractDomain.h"
 #include "llvm/ADT/APInt.h"
@@ -155,9 +157,13 @@ BoundedSet::sdiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
 void BoundedSet::warnIfContainsZero(unsigned numBits) {
   if (containsValue(numBits, 0)) {
     if (values.size() == 1) {
-      errs() << "WARNING: Division by zero.\n";
+      // In this case a division by zero is certain.
+      // We don't handle this and will exit.
+      errs() << "ERROR: Input program includes division by zero.\n";
+      errs() << "Exiting.\n";
+      exit(EXIT_FAILURE);
     } else {
-      errs() << "WARNING: Possible division by zero.\n";
+      errs() << "WARNING: Input program includes possible division by zero.\n";
     }
   }
 }

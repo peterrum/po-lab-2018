@@ -18,6 +18,9 @@ build/
 /.idea
 /cmake-build-debug
 
+# Visual Studio Code
+/.vscode
+
 # Compiled Object files
 *.slo
 *.lo
