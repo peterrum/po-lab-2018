@@ -346,4 +346,9 @@ void VsaVisitor::print() {
     pp.second.print();
   }
 }
+
+std::map<BasicBlock*, State>&  VsaVisitor::getProgramPoints() {
+  return programPoints;
+}
+
 }

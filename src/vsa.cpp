@@ -4,6 +4,7 @@
 #include "llvm/IR/Function.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
+#include "vsa_result.h"
 #include <queue>
 
 #include "llvm/IR/Dominators.h"
@@ -22,7 +23,12 @@ struct VsaPass : public ModulePass {
   // worklist: instructions are handled in a FIFO manner
   WorkList worklist;
 
-  VsaPass() : ModulePass(ID), worklist() {}
+  // global map of programPoints
+  std::map<BasicBlock*, State> globalProgramPoints;
+
+  VsaResult result;
+
+  VsaPass() : ModulePass(ID), worklist(), result(globalProgramPoints) {}
 
   bool doInitialization(Module &m) override {
     return ModulePass::doInitialization(m);
@@ -61,6 +67,8 @@ struct VsaPass : public ModulePass {
         print_local(vis, visits);
 #endif
 
+        globalProgramPoints.insert(vis.getProgramPoints().begin(),vis.getProgramPoints().end());
+
         visits++;
       }
 
@@ -77,6 +85,8 @@ struct VsaPass : public ModulePass {
         errs() << "\n";
       }
     } // go to next function
+
+    result.print();
 
     // Our analysis does not change the IR
     return false;

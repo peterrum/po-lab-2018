@@ -47,8 +47,16 @@ shared_ptr<AbstractDomain> State::getAbstractValue(Value *v) {
   }
 
   DEBUG_OUTPUT("State::getAbstractValue " << v->getName() << " : failed");
-  
+
   return AD_TYPE::create_top(v->getType()->getIntegerBitWidth());
+}
+
+bool State::isAvailable(Value* v) {
+  if (ConstantInt::classof(v)) {
+    return true;
+  }
+
+  return vars.find(v) != vars.end();
 }
 
 bool State::leastUpperBound(State &other) {

@@ -24,6 +24,9 @@ public:
   /// get abstract domain of variable
   shared_ptr<AbstractDomain> getAbstractValue(Value *v);
 
+  /// return if a global sate for this variable is available
+  bool isAvailable(Value *v);
+
   /// create least upper bound (lub) in place
   /// true -> change, false -> no change (see State::put)
   bool leastUpperBound(State &other);

@@ -108,6 +108,9 @@ public:
   /// print state of all basic blocks
   void print();
 
+  /// return the program points
+  std::map<BasicBlock*, State>& getProgramPoints();
+
 private:
   /// push directly reachable basic blocks onto worklist
   void pushSuccessors(TerminatorInst &I);

@@ -18,10 +18,11 @@ add_llvm_loadable_module( llvm-vsa
   src/vsa_visitor.cpp
   src/worklist.cpp
   src/branch_conditions.cpp
+  src/vsa_result.cpp
+  src/vsa_result_value.cpp
   test/BoundedSetTest.cpp
   test/StridedIntervalTest.cpp
   test/TestRunner.cpp
-
   DEPENDS
   intrinsics_gen
   PLUGIN_TOOL
