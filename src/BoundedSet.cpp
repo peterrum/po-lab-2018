@@ -141,9 +141,15 @@ shared_ptr<AbstractDomain>
 BoundedSet::sdiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   BoundedSet *otherB = static_cast<BoundedSet *>(&other);
   otherB->warnIfContainsZero(numBits);
-
+  this->warnIfDivisionOverflowPossible(numBits, (*otherB));
   auto opSDiv = [numBits](APInt lhs, APInt rhs) {
     if (rhs == 0) {
+      return BoundedSet{false};
+    }
+    // check if lhs==MIN_INT and rhs==-1
+    // this would lead to an overflow and undefined behavior
+    // we ignore this case.
+    if (lhs.isMinSignedValue() && rhs.isAllOnesValue()) {
       return BoundedSet{false};
     }
     APInt res{numBits, 0};
@@ -164,6 +170,27 @@ void BoundedSet::warnIfContainsZero(unsigned numBits) {
       exit(EXIT_FAILURE);
     } else {
       errs() << "WARNING: Input program includes possible division by zero.\n";
+    }
+  }
+}
+
+void BoundedSet::warnIfDivisionOverflowPossible(unsigned numBits,
+                                                BoundedSet &other) {
+  APInt minSigned = APInt::getSignedMinValue(numBits);
+  APInt minusOne = APInt::getAllOnesValue(numBits);
+  auto thisEnd = values.end();
+  auto otherEnd = other.values.end();
+  if (values.find(minSigned) != thisEnd &&
+      other.values.find(minusOne) != otherEnd) {
+    if (values.size() == 1 && other.values.size() == 1) {
+      // In this case a division by zero is certain.
+      // We don't handle this and will exit.
+      errs() << "ERROR: Input program includes signed division overflow.\n";
+      errs() << "Exiting.\n";
+      exit(EXIT_FAILURE);
+    } else {
+      errs() << "WARNING: Input program includes possible signed division "
+                "overflow.\n";
     }
   }
 }
@@ -200,8 +227,15 @@ shared_ptr<AbstractDomain>
 BoundedSet::srem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   BoundedSet *otherB = static_cast<BoundedSet *>(&other);
   otherB->warnIfContainsZero(numBits);
+  this->warnIfDivisionOverflowPossible(numBits, (*otherB));
   auto opSRem = [numBits](APInt lhs, APInt rhs) {
     if (rhs == 0) {
+      return BoundedSet{false};
+    }
+    // check if lhs==MIN_INT and rhs==-1
+    // this would lead to an overflow and undefined behavior
+    // we ignore this case.
+    if (lhs.isMinSignedValue() && rhs.isAllOnesValue()) {
       return BoundedSet{false};
     }
     APInt res{numBits, 0};

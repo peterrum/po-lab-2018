@@ -114,11 +114,40 @@ void testLeastUpperBoundTop() {
 void testUDiv() {
   BoundedSet dividend{32, {1, 2, 4}};
   BoundedSet divisorZero{32, {0, 1}};
+  errs()
+      << "Next Line should contain a warning for possible division by zero.\n";
   auto result = dividend.udiv(32, divisorZero, false, false);
   if (!(*(static_cast<BoundedSet *>(result.get())) == dividend)) {
     errs() << "testUDiv failed\n";
     errs() << (*result.get()) << "\n";
   }
+  errs() << "----\n";
+}
+
+void testSDiv() {
+  BoundedSet minSValue{4, {8}};
+  BoundedSet setWithMinusOne{4, {15, 3}};
+  errs()
+      << "Next Line should contain a warning for possible division overflow.\n";
+  auto result = minSValue.srem(4, setWithMinusOne, false, false);
+  if (!(*(static_cast<BoundedSet *>(result.get())) == BoundedSet{4, {14}})) {
+    errs() << "testSDiv failed\n";
+    errs() << (*result.get()) << "\n";
+  }
+  errs() << "----\n";
+}
+
+void testSRem() {
+  BoundedSet minSValue{4, {8}};
+  BoundedSet setWithMinusOne{4, {15, 3}};
+  errs()
+      << "Next Line should contain a warning for possible division overflow.\n";
+  auto result = minSValue.srem(4, setWithMinusOne, false, false);
+  if (!(*(static_cast<BoundedSet *>(result.get())) == BoundedSet{4, {14}})) {
+    errs() << "testSRem failed\n";
+    errs() << *result.get() << "\n";
+  }
+  errs() << "----\n";
 }
 
 void testIsBottom() {
@@ -159,5 +188,7 @@ void runBoundedSet() {
   testUDiv();
   testICompLess();
   testIsBottom();
+  testSDiv();
+  testSRem();
 }
 } // namespace pcpo

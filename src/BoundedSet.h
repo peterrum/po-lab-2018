@@ -35,6 +35,7 @@ private:
   createBoundedSetPointerPair(bool firstTop, bool secondTop);
   bool containsValue(unsigned numBits, uint64_t element);
   void warnIfContainsZero(unsigned numBits);
+  void warnIfDivisionOverflowPossible(unsigned numBits, BoundedSet &other);
 
 public:
   // Binary Arithmetic Operations
