@@ -221,6 +221,34 @@ bool StridedInterval::lessOrEqual(AbstractDomain &other) { return false; }
 
 unsigned StridedInterval::getBitWidth() const { return begin.getBitWidth(); }
 
+bool StridedInterval::contains(APInt &value) const {
+  assert(value.getBitWidth() == bitWidth);
+  if (value.getBitWidth() != bitWidth) {
+    return false;
+  } else if (isBottom()) {
+    return false;
+  } else {
+    if (begin.ule(end)) {
+      if (value.ult(begin) || value.ugt(end)) {
+        return false;
+      } else {
+        APInt offset{value};
+        offset -= begin;
+        APInt remainder = offset.urem(stride);
+        return remainder.isNullValue();
+      }
+    } else { // begin > end
+      if (value.ugt(end) && value.ult(begin)) {
+        return false;
+      } else {
+        APInt offset{value};
+        offset -= begin;
+        APInt remainder = offset.urem(stride);
+        return remainder.isNullValue();
+      }
+    }
+  }
+}
 bool StridedInterval::isTop() const {
   if (isBot) {
     return false;
