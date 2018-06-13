@@ -110,7 +110,7 @@ shared_ptr<AbstractDomain>
 CompositeDomain::leastUpperBound(AbstractDomain &other) {
   return nullptr;
 }
-bool CompositeDomain::lessOrEqual(AbstractDomain &other) { false; }
+bool CompositeDomain::lessOrEqual(AbstractDomain &other) { return false; }
 
 // |gamma(this)|
 size_t CompositeDomain::size() const { return 0; }

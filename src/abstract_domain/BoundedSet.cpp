@@ -248,7 +248,7 @@ BoundedSet::srem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
 
 shared_ptr<AbstractDomain>
 BoundedSet::shl(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
-  auto opShl = [numBits, nuw, nsw](APInt lhs, APInt shAmt) {
+  auto opShl = [numBits](APInt lhs, APInt shAmt) {
     APInt res{numBits, 0};
     res += lhs;
     res = res.shl(shAmt);
