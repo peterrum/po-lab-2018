@@ -34,6 +34,8 @@ struct VsaTutorialPass : public ModulePass {
     // extract results
     auto &results = pass.result;
 
+    results.print();
+
     // iterate such that we get a block...
     for (auto &f : M.functions()) {
       for (auto &b : f) {
@@ -61,8 +63,17 @@ struct VsaTutorialPass : public ModulePass {
             else
                 STD_OUTPUT(i.getName() << " a >= b" << v1->getName());
 
+
+            if(abstractValue->isTop()) {
+              continue;
+            }
+
             auto size = abstractValue->getNumValues().getZExtValue();
             STD_OUTPUT("AD getNumValues: '" << size << "'");
+
+            if(size == 0)
+              continue;
+
             for(uint64_t i=0; i<size;i++)
                 STD_OUTPUT("AD getValue: '" << abstractValue->getValueAt(i).getZExtValue() << "'");
 

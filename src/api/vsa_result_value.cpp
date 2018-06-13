@@ -12,7 +12,7 @@ LazyValueInfo::Tristate VsaResultValue::testIf(CmpInst::Predicate predicate,
   if (ConstantInt::classof(C)) {
     // create abstract domain for constant
     auto temp = AD_TYPE(reinterpret_cast<ConstantInt *>(C)->getValue());
-    
+
     // perform comparison
     auto result = abstractValue->icmp(predicate,
                                       C->getType()->getIntegerBitWidth(), temp);
@@ -32,6 +32,10 @@ LazyValueInfo::Tristate VsaResultValue::testIf(CmpInst::Predicate predicate,
   }
 }
 
+bool VsaResultValue::isTop() const{
+  return abstractValue->isTop();
+}
+
 bool VsaResultValue::isConstant() const{
   return abstractValue->size()==1;
 }
@@ -42,24 +46,31 @@ APInt VsaResultValue::getConstant() const{
 }
 
 APInt VsaResultValue::getNumValues() const{
+  assert(!abstractValue->isTop() && " called getNumValues() on T");
+
   const auto size = abstractValue->size();
   return APInt(sizeof(size)*8,size);
 }
 
 APInt VsaResultValue::getValueAt(uint64_t i) const{
+  assert(!abstractValue->isTop() && " called getValueAt() on T");
   return abstractValue->getValueAt(i);
 }
 
 APInt VsaResultValue::getUMin() const {
+  assert(!abstractValue->isTop() && " called getUMin() on T");
   return abstractValue->getUMin();
 }
 APSInt VsaResultValue::getSMin() const {
+  assert(!abstractValue->isTop() && " called getSMin() on T");
   return abstractValue->getSMin();
 }
 APInt VsaResultValue::getUMax() const{
+  assert(!abstractValue->isTop() && " called getUMax() on T");
   return abstractValue->getUMax();
 }
 APSInt VsaResultValue::getSMax() const{
+  assert(!abstractValue->isTop() && " called getSMax() on T");
   return abstractValue->getSMax();
 }
 

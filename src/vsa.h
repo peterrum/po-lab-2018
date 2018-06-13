@@ -71,12 +71,12 @@ struct VsaPass : public ModulePass {
 #ifdef DEBUG
         print_local(vis, visits);
 #endif
-
-        globalProgramPoints.insert(vis.getProgramPoints().begin(),
-                                   vis.getProgramPoints().end());
-
         visits++;
       }
+
+
+      globalProgramPoints.insert(vis.getProgramPoints().begin(),
+                                 vis.getProgramPoints().end());
 
 #ifndef DEBUG
       print_local(vis, visits - 1);

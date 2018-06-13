@@ -22,8 +22,10 @@ public:
   /// compare abstract value with a constant int
   /// \param predicate
   /// \param C constant (please be aware that we only support ConstantInt)
-  /// \return 
+  /// \return
   LazyValueInfo::Tristate testIf(CmpInst::Predicate predicate, Constant *C) const;
+
+  bool isTop() const;
 
   bool isConstant() const;
   APInt getConstant() const;
