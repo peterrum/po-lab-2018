@@ -222,7 +222,7 @@ void VsaVisitor::visitAdd(BinaryOperator &I) {
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->add(I.getType()->getIntegerBitWidth(), *ad1,
-                           I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+                           I.hasNoUnsignedWrap(), I.hasNoSignedWrap()));
 }
 
 void VsaVisitor::visitSub(BinaryOperator &I) {
@@ -230,7 +230,7 @@ void VsaVisitor::visitSub(BinaryOperator &I) {
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->sub(I.getType()->getIntegerBitWidth(), *ad1,
-                           I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+                           I.hasNoUnsignedWrap(), I.hasNoSignedWrap()));
 }
 
 void VsaVisitor::visitMul(BinaryOperator &I) {
@@ -238,7 +238,7 @@ void VsaVisitor::visitMul(BinaryOperator &I) {
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->mul(I.getType()->getIntegerBitWidth(), *ad1,
-                           I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+                           I.hasNoUnsignedWrap(), I.hasNoSignedWrap()));
 }
 
 void VsaVisitor::visitURem(BinaryOperator &I) {
@@ -289,7 +289,7 @@ void VsaVisitor::visitShl(Instruction &I) {
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->shl(I.getType()->getIntegerBitWidth(), *ad1,
-                           I.hasNoSignedWrap(), I.hasNoUnsignedWrap()));
+                           I.hasNoUnsignedWrap(), I.hasNoSignedWrap()));
 }
 void VsaVisitor::visitLShr(Instruction &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
@@ -336,4 +336,4 @@ void VsaVisitor::print() {
 std::map<BasicBlock *, State> &VsaVisitor::getProgramPoints() {
   return programPoints;
 }
-}
+} // namespace pcpo
