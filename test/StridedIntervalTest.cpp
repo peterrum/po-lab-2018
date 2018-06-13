@@ -15,6 +15,78 @@ namespace pcpo {
 //   }
 // }
 
+void testStridedIntervalLessOrEqual() {
+  StridedInterval lhs, rhs;
+  lhs = {4, 14, 14, 0}; rhs = {4, 1, 3, 1};
+  if (lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 0 False\n";
+  }
+  lhs = {4, 14, 14, 0}; rhs = {4, 5, 3, 1};
+  if (!lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 0 True\n";
+  }
+
+  lhs = {4, 1, 3, 1}; rhs = {4, 14, 14, 0};
+  if (lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 1 False\n";
+  }
+
+  lhs = {4, 10, 13, 3}; rhs = {4, 1, 3, 1};
+  if (lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 2 False\n";
+  }
+  lhs = {4, 10, 13, 3}; rhs = {4, 5, 3, 1};
+  if (!lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 2 True\n";
+  }
+
+  lhs = {4, 1, 15, 2}; rhs = {4, 0, 14, 2};
+  if (lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 3, 0 False\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 0, 15, 1};
+  if (!lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 3, 0 True\n";
+  }
+
+  lhs = {4, 9, 3, 5}; rhs = {4, 14, 11, 1};
+  if (!lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 3, 1, 0, 0, 0 True\n";
+  }
+
+  lhs = {4, 9, 3, 5}; rhs = {4, 1, 14, 1};
+  if (!lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 3, 1, 0, 0, 0 False\n";
+  }
+
+  lhs = {4, 1, 3, 1}; rhs = {4, 9, 11, 1};
+  if (lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 3, 1, 1 False\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 3, 1, 1};
+  if (!lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 3, 1, 1 True\n";
+  }
+
+  lhs = {4, 1, 3, 1}; rhs = {4, 9, 1, 1};
+  if (lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 3, 1, 2 False\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 5, 3, 1};
+  if (!lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 3, 1, 2 True\n";
+  }
+
+  lhs = {4, 1, 3, 1}; rhs = {4, 9, 3, 5};
+  if (!lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 4 False\n";
+  }
+  lhs = {4, 14, 14, 0}; rhs = {4, 1, 3, 1};
+  if (!lhs.lessOrEqual(rhs)) {
+    errs() << "[testLessOrEqual] failed: case 1\n";
+  }
+}
+
 void testStridedIntervalAdd() {
   StridedInterval si1{4, 2, 8, 3};
   StridedInterval si2{4, 1, 3, 2};
@@ -40,6 +112,7 @@ void testContains() {
 }
 
 void runStridedInterval() {
+  testStridedIntervalLessOrEqual();
   testStridedIntervalAdd();
   testContains();
 }
