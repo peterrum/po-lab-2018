@@ -8,21 +8,26 @@ namespace pcpo {
 LazyValueInfo::Tristate VsaResultValue::testIf(CmpInst::Predicate predicate,
                                                Constant *C) {
 
+  // only comparison with ConstantInt is implemented
   if (ConstantInt::classof(C)) {
+    // create abstract domain for constant
     auto temp = AD_TYPE(reinterpret_cast<ConstantInt *>(C)->getValue());
+    
+    // perform comparison
     auto result = abstractValue->icmp(predicate,
                                       C->getType()->getIntegerBitWidth(), temp);
 
-    bool b_t = !result.first->isBottom();
-    bool b_f = !result.second->isBottom();
+    // temp. bools
+    bool b_t = !result.first->isBottom(); // predicate might be true
+    bool b_f = !result.second->isBottom(); // predicate might not be true
 
-    if (b_t && b_f)
+    if (b_t && b_f) // predicate might be true or not
       return LazyValueInfo::Unknown;
-    if (b_f)
+    if (b_f) // predicate is not true
       return LazyValueInfo::False;
-    else
+    else // predicate is true
       return LazyValueInfo::True;
-  } else {
+  } else { // not implemented: top
     return LazyValueInfo::Unknown;
   }
 }

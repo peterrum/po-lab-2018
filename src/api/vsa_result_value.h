@@ -18,6 +18,10 @@ public:
   VsaResultValue(std::shared_ptr<AbstractDomain> abstractValue)
       : abstractValue(abstractValue) {}
 
+  /// compare abstract value with a constant int
+  /// \param predicate
+  /// \param C constant (please be aware that we only support ConstantInt)
+  /// \return 
   LazyValueInfo::Tristate testIf(CmpInst::Predicate predicate, Constant *C);
 
 private:

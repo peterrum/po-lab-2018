@@ -1,17 +1,17 @@
 #include "llvm/ADT/Statistic.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Dominators.h"
 #include "llvm/IR/Function.h"
+#include <llvm/IR/InstrTypes.h>
+#include "llvm/IR/LLVMContext.h"
+#include <llvm/IR/Module.h>
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
-#include <llvm/IR/InstrTypes.h>
-#include <llvm/IR/Module.h>
-#include <queue>
 
-#include "llvm/IR/Dominators.h"
+#include <queue>
 
 #include "../../src/util/util.h"
 #include "../../src/vsa.cpp"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/LLVMContext.h"
 
 using namespace llvm;
 
@@ -27,43 +27,48 @@ struct VsaTutorialPass : public ModulePass {
 
   bool runOnModule(Module &M) override {
 
+    // run vsa-pass
     VsaPass pass;
-
     pass.runOnModule(M);
-
+    
+    // extract results
     auto &results = pass.result;
+
+    // iterate such that we get a block...
     for (auto &f : M.functions())
       for (auto &b : f) {
-
+          
+        // is block reachable
+        if(!results.isReachable(&b))
+            continue; // no
+        
+        // create a constant with value 12
         ConstantInt *v1 = ConstantInt::get(M.getContext(), APInt(64, 12));
+        // ... with value
+        ConstantInt *v2 = ConstantInt::get(M.getContext(), APInt(64, 18));
+          
+        // are results regarding the variable v1 available
+        if(!results.isResultAvailable(&b, v1))
+            continue; // no
 
+        // extract results of variable v1
         auto temp = results.getAbstractValue(&b, v1);
 
-        {
-          ConstantInt *v2 = ConstantInt::get(M.getContext(), APInt(64, 12));
-          auto res = temp->testIf(CmpInst::Predicate::ICMP_ULT, v2);
-          STD_OUTPUT(b.getName() << " " << res);
-        }
+        // perform trivial comparison (unsigned less than) between v1 and v2
+        // possible ICMP_EQ, _NE, _UGT, _UGE, _ULT, _ULE, _SGT, _SGE, _SLT, _SLE
+        // more info in: llvm/IR/InstrTypes.h
+        auto res = temp->testIf(CmpInst::Predicate::ICMP_ULT, v2);
+        STD_OUTPUT(b.getName() << " " << res);
 
-        {
-          ConstantInt *v2 = ConstantInt::get(M.getContext(), APInt(64, 18));
-          auto res = temp->testIf(CmpInst::Predicate::ICMP_ULT, v2);
-          STD_OUTPUT(b.getName() << " " << res);
-        }
-
-        {
-          ConstantInt *v2 = ConstantInt::get(M.getContext(), APInt(64, 6));
-          auto res = temp->testIf(CmpInst::Predicate::ICMP_ULT, v2);
-          STD_OUTPUT(b.getName() << " " << res);
-        }
-
+        // this is only a test: so we can stop now!
         break;
       }
 
+    // analysis has made no modifications
     return false;
   }
 
-  // We don't modify the program, so we preserve all analyses.
+  // We don't modify the program, so we preserve all analysis.
   void getAnalysisUsage(AnalysisUsage &AU) const override {
     AU.setPreservesAll();
   }
