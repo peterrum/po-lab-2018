@@ -1,12 +1,16 @@
 #ifndef PROJECT_STATE_H
 #define PROJECT_STATE_H
 
+#include <llvm/Analysis/AliasAnalysis.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/Value.h>
+#include <llvm/Support/raw_ostream.h>
+
 #include "../abstract_domain/AbstractDomain.h"
-#include "llvm/IR/Value.h"
-#include "llvm/Support/raw_ostream.h"
+#include "../util/util.h"
+
 #include <map>
 #include <memory>
-#include <utility>
 
 using namespace llvm;
 namespace pcpo {
@@ -21,10 +25,10 @@ public:
   bool put(Value &v, std::shared_ptr<AbstractDomain> ad);
 
   /// get abstract domain of variable
-  shared_ptr<AbstractDomain> getAbstractValue(Value *v);
+  shared_ptr<AbstractDomain> getAbstractValue(Value *v) const;
 
   /// return if a global sate for this variable is available
-  bool isAvailable(Value *v);
+  bool isAvailable(Value *v) const;
 
   /// create least upper bound (lub) in place
   /// true -> change, false -> no change (see State::put)
@@ -38,13 +42,13 @@ public:
   void prune(State &other);
 
   /// is state bottom, i.e.: is never reached
-  bool isBottom();
+  bool isBottom() const;
 
   /// mark state has been visited, i.e.: set bottom to false
   void markVisited();
 
   /// print abstract domain of each variable
-  void print();
+  void print() const;
 
   std::map<Value *, std::shared_ptr<AbstractDomain>> vars;
 
@@ -52,6 +56,6 @@ private:
   bool bottom;
 };
 
-} /// namespace
+} // namespace pcpo
 
 #endif // PROJECT_STATE_H
