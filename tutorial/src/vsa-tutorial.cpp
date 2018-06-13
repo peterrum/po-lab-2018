@@ -71,6 +71,11 @@ struct VsaTutorialPass : public ModulePass {
 
         if(temp->isConstant())
             STD_OUTPUT("AD getConstant if constant: '" << temp->getConstant() << "'");
+
+          STD_OUTPUT("AD UMin: '" << temp->getUMin() << "'");
+          STD_OUTPUT("AD SMin: '" << temp->getSMin() << "'");
+          STD_OUTPUT("AD UMax: '" << temp->getUMax() << "'");
+          STD_OUTPUT("AD SMax: '" << temp->getSMax() << "'");
         break;
       }
 

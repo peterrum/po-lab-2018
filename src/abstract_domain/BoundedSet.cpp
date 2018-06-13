@@ -484,20 +484,27 @@ APInt BoundedSet::getValueAt(uint64_t i) const{
 }
 
 APInt BoundedSet::getUMin() const {
-    
-  return APInt();
+  return *values.begin();
 }
 
 APSInt BoundedSet::getSMin() const {
-    return APSInt();
+  for(const auto& v:values){
+    if(v.isNegative())
+      return APSInt(v,false);
+  }
+  return APSInt(*values.begin(),false);
 }
 
 APInt BoundedSet::getUMax() const {
-    return APInt();
+  return *values.rbegin();
 }
 
 APSInt BoundedSet::getSMax() const {
-    return APSInt();
+  for(auto it = values.rbegin(); it!=values.rend(); it++){
+    if(!it->isNegative())
+      return APSInt(*it,false);
+  }
+  return APSInt(*values.rbegin(),false);
 }
 
 void BoundedSet::printOut() const {

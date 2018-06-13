@@ -51,16 +51,16 @@ APInt VsaResultValue::getValueAt(uint64_t i) {
 }
 
 APInt VsaResultValue::getUMin() {
-  return APInt();
+  return abstractValue->getUMin();
 }
 APSInt VsaResultValue::getSMin() {
-  return APSInt(getUMin(),false);
+  return abstractValue->getSMin();
 }
 APInt VsaResultValue::getUMax() {
-  return APInt();
+  return abstractValue->getUMax();
 }
 APSInt VsaResultValue::getSMax() {
-  return APSInt(getUMax(),false);
+  return abstractValue->getSMax();
 }
 
 }
