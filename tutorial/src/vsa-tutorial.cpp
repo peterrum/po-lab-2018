@@ -77,6 +77,18 @@ struct VsaTutorialPass : public ModulePass {
             STD_OUTPUT(v1->getName() << "a >= b" << v2->getName());
 
         // this is only a test: so we can stop now!
+          auto size = temp->getNumValues().getZExtValue();
+        STD_OUTPUT("AD getNumValues: '" << size << "'");
+        for(uint64_t i=0; i<size;i++)
+            STD_OUTPUT("AD getValue: '" << temp->getValueAt(i).getZExtValue() << "'");
+
+        if(temp->isConstant())
+            STD_OUTPUT("AD getConstant if constant: '" << temp->getConstant() << "'");
+
+          STD_OUTPUT("AD UMin: '" << temp->getUMin() << "'");
+          STD_OUTPUT("AD SMin: '" << temp->getSMin() << "'");
+          STD_OUTPUT("AD UMax: '" << temp->getUMax() << "'");
+          STD_OUTPUT("AD SMax: '" << temp->getSMax() << "'");
         break;
       }
     }

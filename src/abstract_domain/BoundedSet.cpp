@@ -472,6 +472,41 @@ bool BoundedSet::lessOrEqual(AbstractDomain &other) {
   return false;
 }
 
+APInt BoundedSet::getValueAt(uint64_t i) const{
+  uint64_t j=0;
+  for(const auto& v: values){
+    if(j==i){
+      return v;
+    }
+    j++;
+  }
+  return APInt();
+}
+
+APInt BoundedSet::getUMin() const {
+  return *values.begin();
+}
+
+APSInt BoundedSet::getSMin() const {
+  for(const auto& v:values){
+    if(v.isNegative())
+      return APSInt(v,false);
+  }
+  return APSInt(*values.begin(),false);
+}
+
+APInt BoundedSet::getUMax() const {
+  return *values.rbegin();
+}
+
+APSInt BoundedSet::getSMax() const {
+  for(auto it = values.rbegin(); it!=values.rend(); it++){
+    if(!it->isNegative())
+      return APSInt(*it,false);
+  }
+  return APSInt(*values.rbegin(),false);
+}
+
 void BoundedSet::printOut() const {
   //   errs() << "BoundedSet@" << this << std::endl;
   errs() << "BoundedSet@" << this << "\n";

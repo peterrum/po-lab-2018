@@ -89,6 +89,22 @@ public:
     return std::shared_ptr<AbstractDomain>(new StridedInterval(true));
   }
 
+    APInt getValueAt(uint64_t i) const {
+      return APInt();
+  }
+    APInt getUMin() const {
+      return APInt();
+  }
+    APSInt getSMin() const {
+      return APSInt();
+  }
+    APInt getUMax() const {
+      return APInt();
+  }
+    APSInt getSMax() const {
+      return APSInt();
+  }
+
   // static shared_ptr<AbstractDomain> create_bottom() {
   //   return std::shared_ptr<AbstractDomain>(new StridedInterval());
   // }

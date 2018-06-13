@@ -1,7 +1,6 @@
 #ifndef BOUNDED_SET_H_
 #define BOUNDED_SET_H_
 #include "AbstractDomain.h"
-#include "llvm/ADT/APInt.h"
 #include <functional>
 #include <iostream>
 #include <set>
@@ -87,6 +86,13 @@ public:
   BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
   bool isTop() const;
   bool isBottom() const;
+
+  APInt getValueAt(uint64_t i) const;
+  APInt getUMin() const;
+  APSInt getSMin() const;
+  APInt getUMax() const;
+  APSInt getSMax() const;
+
   void printOut() const;
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);
