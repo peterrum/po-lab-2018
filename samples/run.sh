@@ -4,6 +4,23 @@
 # Please specify the path to llvm and clang in the environment variables
 # VSA_CLANG_PATH and VSA_LLVM_PATH.
 
+while :; do
+    case $1 in
+        -t) flag1="TEST"            
+        ;;
+        *) break
+    esac
+    shift
+done
+
+if [ "$flag1" = "TEST" ]; then
+    EXE=llvm-vsa-tutorial.so
+    PASS=vsatutorialpass
+else
+    EXE=llvm-vsa.so
+    PASS=vsapass
+fi
+
 # if one argument passed: only analyze the passed program
 if [ $# == 1 ] ; then
     ARRAY=($1) 
@@ -36,7 +53,7 @@ do
     # ... disassemble optimized file
     $VSA_LLVM_PATH/bin/llvm-dis build/$f-opt.bc
     # ... run VSA
-    $VSA_LLVM_PATH/bin/opt -load $VSA_LLVM_PATH/lib/llvm-vsa.so -vsapass < build/$f-opt.bc > /dev/null 2> >(tee build/$f.out >&2)
+    $VSA_LLVM_PATH/bin/opt -load $VSA_LLVM_PATH/lib/$EXE -$PASS < build/$f-opt.bc > /dev/null 2> >(tee build/$f.out >&2)
     cp -n build/$f.out build/$f.ref
 done
 
