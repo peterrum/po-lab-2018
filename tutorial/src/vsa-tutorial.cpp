@@ -46,7 +46,7 @@ struct VsaTutorialPass : public ModulePass {
         ConstantInt *v1 = ConstantInt::get(M.getContext(), APInt(64, 12));
         // ... with value
         ConstantInt *v2 = ConstantInt::get(M.getContext(), APInt(64, 18));
-
+        
         // are results regarding the variable v1 available
         if (!results.isResultAvailable(&b, v1))
           continue; // no
@@ -58,7 +58,10 @@ struct VsaTutorialPass : public ModulePass {
         // possible ICMP_EQ, _NE, _UGT, _UGE, _ULT, _ULE, _SGT, _SGE, _SLT, _SLE
         // more info in: llvm/IR/InstrTypes.h
         auto res = temp->testIf(CmpInst::Predicate::ICMP_ULT, v2);
-        STD_OUTPUT(b.getName() << " " << res);
+        if(res)
+            STD_OUTPUT(v1->getName() << "a <  b" << v2->getName());
+        else
+            STD_OUTPUT(v1->getName() << "a >= b" << v2->getName());
 
         // this is only a test: so we can stop now!
         break;
