@@ -12,12 +12,13 @@ BranchConditions::BranchConditions(std::map<BasicBlock *, State> &programPoints)
     : programPoints(programPoints), conditionCacheUsed(false) {}
 
 bool BranchConditions::isBasicBlockReachable(BasicBlock *pred, BasicBlock *bb) {
-  auto bc = branchConditions.find(pred);
-  if (bc != branchConditions.end())
-    if (bc->second.find(bb) != bc->second.end()) {
-      auto &branchConditions_map = bc->second[bb];
 
-      for (auto &branchCondition : branchConditions_map)
+  const auto bc = branchConditions.find(pred);
+  if (bc != branchConditions.end())
+
+    if (bc->second.find(bb) != bc->second.end()) {
+
+      for (const auto &branchCondition : bc->second[bb])
         if (branchCondition.second->isBottom())
           return false;
     }
@@ -29,17 +30,16 @@ void BranchConditions::applyCondition(BasicBlock *pred, BasicBlock *bb) {
   assert(!conditionCacheUsed &&
          "ConditionCache has not been correctly unapplied last time!");
 
-  auto bc = branchConditions.find(pred);
+  const auto bc = branchConditions.find(pred);
   if (bc != branchConditions.end())
     if (bc->second.find(bb) != bc->second.end()) {
       conditionCacheUsed = true;
-      auto &branchConditions_map = bc->second[bb];
 
-      for (auto &branchCondition : branchConditions_map) {
-        auto value = branchCondition.first;
-        // buffer old value
+      for (const auto &branchCondition : bc->second[bb]) {
+        const auto value = branchCondition.first;
+        /// buffer old value
         conditionCache[value] = programPoints[pred].getAbstractValue(value);
-        // overwrite value with condition
+        /// overwrite value with condition
         programPoints[pred].vars[value] = branchCondition.second;
       }
     }
@@ -50,7 +50,7 @@ void BranchConditions::unApplyCondition(BasicBlock *pred) {
   if (!conditionCacheUsed)
     return;
 
-  for (auto &condition : conditionCache)
+  for (const auto &condition : conditionCache)
     programPoints[pred].vars[condition.first] = condition.second;
 
   conditionCache.clear();
