@@ -91,6 +91,14 @@ void testAdd() {
   }
 }
 
+void testAdd2() {
+  BoundedSet a{32, {5}};
+  BoundedSet b{32, {4294967294}};
+  auto result = a.add(32, b, true, false);
+  BoundedSet res = *(static_cast<BoundedSet *>(result.get()));
+  errs() << res << "\n";
+}
+
 void testLeastUpperBoundTop() {
   APInt first{32, 13, false};
   APInt second{32, 42, false};
@@ -190,5 +198,6 @@ void runBoundedSet() {
   testIsBottom();
   testSDiv();
   testSRem();
+  testAdd2();
 }
 } // namespace pcpo
