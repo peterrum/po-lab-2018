@@ -114,6 +114,9 @@ private:
   /// push directly reachable basic blocks onto worklist
   void pushSuccessors(TerminatorInst &I);
 
+  void putBothBranchConditions(BranchInst& I, Value* op,
+    std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>> &valuePair);
+
   WorkList &worklist;
   mutable DominatorTree *DT = nullptr;
   DominatorTreeWrapperPass dt;

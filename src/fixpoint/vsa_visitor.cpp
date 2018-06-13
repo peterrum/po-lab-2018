@@ -111,16 +111,8 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
       /// perform comparison
       auto temp = ad0->icmp(cmpInst->getPredicate(),
                             cmpInst->getType()->getIntegerBitWidth(), *ad1);
-
-      DEBUG_OUTPUT("T-l: " << *temp.first);
-      DEBUG_OUTPUT("F-l: " << *temp.second);
-
-      /// true
-      bcs.putBranchConditions(I.getParent(), I.getSuccessor(0), op0,
-                              temp.first);
-      /// false
-      bcs.putBranchConditions(I.getParent(), I.getSuccessor(1), op0,
-                              temp.second);
+                            
+      putBothBranchConditions(I, op0, temp);
     }
 
     /// right argument (r)
@@ -129,15 +121,7 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
       auto temp = ad1->icmp(cmpInst->getInversePredicate(),
                             cmpInst->getType()->getIntegerBitWidth(), *ad0);
 
-      DEBUG_OUTPUT("T-r: " << *temp.first);
-      DEBUG_OUTPUT("F-r: " << *temp.second);
-
-      /// true
-      bcs.putBranchConditions(I.getParent(), I.getSuccessor(0), op1,
-                              temp.first);
-      /// false
-      bcs.putBranchConditions(I.getParent(), I.getSuccessor(1), op1,
-                              temp.second);
+      putBothBranchConditions(I, op1, temp);
     }
   }
 
