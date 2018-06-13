@@ -15,7 +15,6 @@ const int OUTPUT_SIGNED = false;
 class AbstractDomain {
 public:
   virtual ~AbstractDomain() = default;
-
   // Binary Arithmetic Operations
   virtual shared_ptr<AbstractDomain>
   add(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
@@ -83,6 +82,8 @@ public:
 
   // |gamma(this)|
   virtual size_t size() const = 0;
+
+  virtual bool contains(APInt &value) const = 0;
 
   virtual bool isTop() const = 0;
   virtual bool isBottom() const = 0;
