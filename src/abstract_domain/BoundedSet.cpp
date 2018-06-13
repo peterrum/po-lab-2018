@@ -473,6 +473,7 @@ bool BoundedSet::lessOrEqual(AbstractDomain &other) {
 }
 
 APInt BoundedSet::getValueAt(uint64_t i) const{
+  assert(!isTop() && " called getValueAt() on T");
   uint64_t j=0;
   for(const auto& v: values){
     if(j==i){
@@ -484,10 +485,12 @@ APInt BoundedSet::getValueAt(uint64_t i) const{
 }
 
 APInt BoundedSet::getUMin() const {
+  assert(!isTop() && " called getUMin() on T");
   return *values.begin();
 }
 
 APSInt BoundedSet::getSMin() const {
+  assert(!isTop() && " called getSMin() on T");
   for(const auto& v:values){
     if(v.isNegative())
       return APSInt(v,false);
@@ -496,10 +499,12 @@ APSInt BoundedSet::getSMin() const {
 }
 
 APInt BoundedSet::getUMax() const {
+  assert(!isTop() && " called getUMax() on T");
   return *values.rbegin();
 }
 
 APSInt BoundedSet::getSMax() const {
+  assert(!isTop() && " called getSMax() on T");
   for(auto it = values.rbegin(); it!=values.rend(); it++){
     if(!it->isNegative())
       return APSInt(*it,false);
@@ -549,6 +554,8 @@ bool BoundedSet::isBottom() const {
   }
 }
 
-size_t BoundedSet::size() const { return values.size(); }
+size_t BoundedSet::size() const {
+    assert(!isTop() && " called size() on T");
+    return values.size(); }
 
 } // namespace pcpo
