@@ -31,4 +31,36 @@ LazyValueInfo::Tristate VsaResultValue::testIf(CmpInst::Predicate predicate,
     return LazyValueInfo::Unknown;
   }
 }
+
+bool VsaResultValue::isConstant() {
+  return abstractValue->size()==1;
+}
+
+APInt VsaResultValue::getConstant() {
+  assert(isConstant() && "getConstant failed: non Constant Value");
+  return getValueAt(0);
+}
+
+APInt VsaResultValue::getNumValues() {
+  const auto size = abstractValue->size();
+  return APInt(sizeof(size)*8,size);
+}
+
+APInt VsaResultValue::getValueAt(uint64_t i) {
+  return abstractValue->getValueAt(i);
+}
+
+APInt VsaResultValue::getUMin() {
+  return APInt();
+}
+APSInt VsaResultValue::getSMin() {
+  return APSInt(getUMin(),false);
+}
+APInt VsaResultValue::getUMax() {
+  return APInt();
+}
+APSInt VsaResultValue::getSMax() {
+  return APSInt(getUMax(),false);
+}
+
 }

@@ -2,6 +2,8 @@
 #define ABSTRACTDOMAIN_H_
 
 #include "llvm/IR/InstrTypes.h"
+#include "llvm/ADT/APInt.h"
+#include "llvm/ADT/APSInt.h"
 #include <memory>
 
 namespace pcpo {
@@ -86,6 +88,12 @@ public:
 
   virtual bool isTop() const = 0;
   virtual bool isBottom() const = 0;
+
+  virtual APInt getValueAt(uint64_t i) const = 0;
+  virtual APInt getUMin() const = 0;
+  virtual APSInt getSMin() const = 0;
+  virtual APInt getUMax() const = 0;
+  virtual APSInt getSMax() const = 0;
 
   // Debugging methodes
   virtual void printOut() const = 0;
