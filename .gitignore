@@ -19,7 +19,7 @@ build/
 /cmake-build-debug
 
 # Visual Studio Code
-/.vscode
+.vscode
 
 # Compiled Object files
 *.slo

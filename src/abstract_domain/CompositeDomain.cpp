@@ -7,90 +7,165 @@ using std::function;
 using std::shared_ptr;
 // Binary Arithmetic Operations
 
+shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
+    AbstractDomain &other,
+    function<shared_ptr<AbstractDomain>(AbstractDomain &, AbstractDomain &)>
+        op) {
+
+  CompositeDomain &otherD = *static_cast<CompositeDomain *>(&other);
+
+  if (otherD.getDelegateType() == boundedSet) {
+    if (getDelegateType() == boundedSet) {
+      // both are bounded sets
+      auto result = op(*delegate.get(), *otherD.delegate.get());
+
+      // If the operation results in a top, this might be due
+      // to the size limitation of the bounded set.
+      // Thus, we transform them into strided intervals
+      if (result->isTop()) {
+        StridedInterval otherDelegate{otherD.delegate.get()};
+        StridedInterval thisDelegate{this->delegate.get()};
+        return op(thisDelegate, otherDelegate);
+      }
+    } else {
+      // other has a bounded set, we have a strided interval
+      // change other to strided interval
+      StridedInterval otherDelegate{otherD.delegate.get()};
+      return op(*delegate.get(), otherDelegate);
+    }
+  } else {
+    // other is a strided interval
+    if (getDelegateType() == boundedSet) {
+      // this is a bounded set
+      // change to strided interval
+      StridedInterval thisDelegate{this->delegate.get()};
+      return op(thisDelegate, *otherD.delegate.get());
+    } else {
+      // both are strided intervals already
+      return op(*delegate.get(), *otherD.delegate.get());
+    }
+  }
+}
+
 shared_ptr<AbstractDomain> CompositeDomain::add(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
                                                 bool nsw) {
-  CompositeDomain &otherD = *static_cast<CompositeDomain *>(&other);
-  if (otherD.getDelegateType() == boundedSet &&
-      getDelegateType() == boundedSet) {
-
-    BoundedSet &otherDelegate =
-        *static_cast<BoundedSet *>(otherD.delegate.get());
-    return this->delegate->add(numBits, otherDelegate, nuw, nsw);
-  } else if (this->delegateType == boundedSet) {
-    StridedInterval lhsDelegate{this->delegate.get()};
-    return lhsDelegate.add(numBits, *otherD.delegate.get(), nuw, nsw);
-  } else if (otherD.delegateType == boundedSet) {
-    StridedInterval lhsDelegate{this->delegate.get()};
-    StridedInterval &rhsDelegate =
-        *static_cast<StridedInterval *>(otherD.delegate.get());
-    return lhsDelegate.add(numBits, rhsDelegate, nuw, nsw);
-  } else {
-    // both are strided intervals
-    return delegate->add(numBits, *otherD.delegate.get(), nuw, nsw);
-  }
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.add(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
+
 shared_ptr<AbstractDomain> CompositeDomain::sub(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
                                                 bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.sub(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::mul(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
                                                 bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.mul(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::udiv(unsigned numBits,
                                                  AbstractDomain &other,
                                                  bool nuw, bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.udiv(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::sdiv(unsigned numBits,
                                                  AbstractDomain &other,
                                                  bool nuw, bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.sdiv(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::urem(unsigned numBits,
                                                  AbstractDomain &other,
                                                  bool nuw, bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.urem(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::srem(unsigned numBits,
                                                  AbstractDomain &other,
                                                  bool nuw, bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.srem(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 
 // Binary Bitwise Operations
 shared_ptr<AbstractDomain> CompositeDomain::shl(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
                                                 bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.shl(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::lshr(unsigned numBits,
                                                  AbstractDomain &other,
                                                  bool nuw, bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.lshr(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::ashr(unsigned numBits,
                                                  AbstractDomain &other,
                                                  bool nuw, bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.ashr(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::and_(unsigned numBits,
                                                  AbstractDomain &other,
                                                  bool nuw, bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.and_(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::or_(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
                                                 bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.or_(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::xor_(unsigned numBits,
                                                  AbstractDomain &other,
                                                  bool nuw, bool nsw) {
-  return nullptr;
+  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                       AbstractDomain &rhs) {
+    return lhs.xor_(numBits, rhs, nuw, nsw);
+  };
+  return computeOperation(other, operation);
 }
 
 // Conversion Operations (TODO?)
@@ -103,23 +178,34 @@ CompositeDomain::icmp(CmpInst::Predicate pred, unsigned numBits,
       nullptr, nullptr};
 }
 
-llvm::raw_ostream &CompositeDomain::print(llvm::raw_ostream &os) { return os; }
+llvm::raw_ostream &CompositeDomain::print(llvm::raw_ostream &os) {
+  return delegate->print(os);
+}
 
 // Lattice interface
 shared_ptr<AbstractDomain>
 CompositeDomain::leastUpperBound(AbstractDomain &other) {
-  return nullptr;
+  auto operation = [](AbstractDomain &lhs, AbstractDomain &rhs) {
+    return lhs.leastUpperBound(rhs);
+  };
+  return computeOperation(other, operation);
 }
-bool CompositeDomain::lessOrEqual(AbstractDomain &other) { return false; }
+
+bool CompositeDomain::lessOrEqual(AbstractDomain &other) {
+  CompositeDomain &otherD = *static_cast<CompositeDomain *>(&other);
+  // TODO: Implement lessOrEqual for both BoundedSet and StridedInterval in
+  // these classes
+  return delegate->lessOrEqual(*otherD.delegate.get());
+}
 
 // |gamma(this)|
-size_t CompositeDomain::size() const { return 0; }
+size_t CompositeDomain::size() const { return delegate->size(); }
 
-bool CompositeDomain::isTop() const { return false; }
-bool CompositeDomain::isBottom() const { return false; }
+bool CompositeDomain::isTop() const { return delegate->isTop(); }
+bool CompositeDomain::isBottom() const { return delegate->isBottom(); }
 
 // Debugging methodes
-void CompositeDomain::printOut() const {}
+void CompositeDomain::printOut() const { delegate->printOut(); }
 
 DelegateType CompositeDomain::getDelegateType() { return delegateType; }
 } // namespace pcpo

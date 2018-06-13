@@ -9,6 +9,7 @@
 #include <set>
 namespace pcpo {
 using llvm::APInt;
+using std::function;
 using std::shared_ptr;
 
 enum DelegateType { stridedInterval, boundedSet };
@@ -18,6 +19,10 @@ private:
   DelegateType delegateType;
   shared_ptr<AbstractDomain> delegate;
   DelegateType getDelegateType();
+  shared_ptr<AbstractDomain> computeOperation(
+      AbstractDomain &other,
+      function<shared_ptr<AbstractDomain>(AbstractDomain &, AbstractDomain &)>
+          op);
 
 public:
   // Binary Arithmetic Operations
