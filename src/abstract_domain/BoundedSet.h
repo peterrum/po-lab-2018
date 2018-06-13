@@ -82,6 +82,7 @@ public:
   explicit BoundedSet(APInt value);
   friend std::ostream &operator<<(std::ostream &os, const BoundedSet &bs);
 
+  BoundedSet(const BoundedSet & b);
   explicit BoundedSet(bool isTop);
   BoundedSet(std::initializer_list<APInt> vals);
   BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);

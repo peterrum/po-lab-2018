@@ -155,9 +155,6 @@ void VsaVisitor::visitSwitchInst(SwitchInst &I) {
                           kase.getCaseValue()->getType()->getIntegerBitWidth(),
                           kaseConst);
 
-    kaseVals.first->printOut();
-    kaseVals.second->printOut();
-
     bcs.putBranchConditions(I.getParent(), kase.getCaseSuccessor(), cond,
                             kaseVals.first);
 

@@ -16,6 +16,7 @@ namespace pcpo {
 using namespace llvm;
 using std::shared_ptr;
 
+BoundedSet::BoundedSet(const BoundedSet & b) : values(b.values), top(b.top) {}
 BoundedSet::BoundedSet(std::set<APInt, Comparator> vals) { values = vals; }
 BoundedSet::BoundedSet(APInt val) { values.insert(val); }
 BoundedSet::BoundedSet(bool isTop) : top(isTop) {}
@@ -348,13 +349,13 @@ BoundedSet::subsetsForPredicate(
 
     if (isTop()) {
       if (pred == CmpInst::Predicate::ICMP_EQ) {
-        shared_ptr<AbstractDomain> trueSet{new BoundedSet{otherB}};
+        shared_ptr<AbstractDomain> trueSet(new BoundedSet(*otherB));
         shared_ptr<AbstractDomain> falseSet{new BoundedSet{true}};
         return std::pair<shared_ptr<AbstractDomain>,
                          shared_ptr<AbstractDomain>>{trueSet, falseSet};
       } else if (pred == CmpInst::Predicate::ICMP_NE) {
         shared_ptr<AbstractDomain> trueSet{new BoundedSet{true}};
-        shared_ptr<AbstractDomain> falseSet{new BoundedSet{otherB}};
+        shared_ptr<AbstractDomain> falseSet(new BoundedSet(*otherB));
         return std::pair<shared_ptr<AbstractDomain>,
                          shared_ptr<AbstractDomain>>{trueSet, falseSet};
       }
