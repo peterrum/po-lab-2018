@@ -97,5 +97,6 @@ public:
   //   return std::shared_ptr<AbstractDomain>(new StridedInterval());
   // }
 };
+
 } // namespace pcpo
 #endif

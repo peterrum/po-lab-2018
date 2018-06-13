@@ -46,21 +46,24 @@ bool StridedInterval::operator!=(const StridedInterval &other) {
 }
 
 APInt add_(const APInt &a, const APInt &b) {
-  APInt c = a;
+  APInt c = APInt(a.getBitWidth(), 0);
+  c += a;
   c += b;
-  return b;
+  return c;
 }
 
 APInt sub_(const APInt &a, const APInt &b) {
-  APInt c = a;
+  APInt c = APInt(a.getBitWidth(), 0);
+  c += a;
   c -= b;
-  return b;
+  return c;
 }
 
 APInt mul_(const APInt &a, const APInt &b) {
-  APInt c = a;
+  APInt c = APInt(a.getBitWidth(), 0);
+  c += a;
   c *= b;
-  return b;
+  return c;
 }
 
 APInt mod(const APInt &a, const APInt &b) { return a.urem(b); }
