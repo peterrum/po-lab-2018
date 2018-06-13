@@ -2,16 +2,16 @@
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/Function.h"
-#include <llvm/IR/InstrTypes.h>
 #include "llvm/IR/LLVMContext.h"
-#include <llvm/IR/Module.h>
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
+#include <llvm/IR/InstrTypes.h>
+#include <llvm/IR/Module.h>
 
 #include <queue>
 
 #include "../../src/util/util.h"
-#include "../../src/vsa.cpp"
+#include "../../src/vsa.h"
 
 using namespace llvm;
 
@@ -28,28 +28,28 @@ struct VsaTutorialPass : public ModulePass {
   bool runOnModule(Module &M) override {
 
     // run vsa-pass
-    VsaPass pass;
+    ::VsaPass pass;
     pass.runOnModule(M);
-    
+
     // extract results
     auto &results = pass.result;
 
     // iterate such that we get a block...
     for (auto &f : M.functions())
       for (auto &b : f) {
-          
+
         // is block reachable
-        if(!results.isReachable(&b))
-            continue; // no
-        
+        if (!results.isReachable(&b))
+          continue; // no
+
         // create a constant with value 12
         ConstantInt *v1 = ConstantInt::get(M.getContext(), APInt(64, 12));
         // ... with value
         ConstantInt *v2 = ConstantInt::get(M.getContext(), APInt(64, 18));
-          
+
         // are results regarding the variable v1 available
-        if(!results.isResultAvailable(&b, v1))
-            continue; // no
+        if (!results.isResultAvailable(&b, v1))
+          continue; // no
 
         // extract results of variable v1
         auto temp = results.getAbstractValue(&b, v1);
