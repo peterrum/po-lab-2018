@@ -1,5 +1,4 @@
 #include "vsa_visitor.h"
-#include "llvm/Support/raw_os_ostream.h"
 
 using namespace llvm;
 
@@ -12,13 +11,13 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
 
   /// bb has no predecessors: return empty state which is not bottom!
   /// and insert values s.t. arg -> T
-  int numPreds = std::distance(pred_begin(&BB), pred_end(&BB));
+  const int numPreds = std::distance(pred_begin(&BB), pred_end(&BB));
   if (numPreds == 0) {
-    // mark state such that it is not bottom any more
+    /// mark state such that it is not bottom any more
     newState.markVisited();
 
     for (auto &arg : BB.getParent()->args()) {
-      // put top for all arguments
+      /// put top for all arguments
       if (arg.getType()->isIntegerTy())
         newState.put(arg,
                      AD_TYPE::create_top(arg.getType()->getIntegerBitWidth()));
@@ -28,13 +27,13 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
   }
 
   /// least upper bound with all predecessors
-  for (auto pred : predecessors(&BB)) {
+  for (const auto pred : predecessors(&BB)) {
     DEBUG_OUTPUT("visitBasicBlock: pred " << pred->getName() << " found");
-    auto incoming = programPoints.find(pred);
+    const auto incoming = programPoints.find(pred);
     if (incoming != programPoints.end()) {
-      if (incoming->second.isBottom()) // case 1: lub(x, bottom) = x
+      if (incoming->second.isBottom()) /// case 1: lub(x, bottom) = x
         continue;
-      // else state is not bottom
+      /// else state is not bottom
       DEBUG_OUTPUT("visitBasicBlock: state for " << pred->getName()
                                                  << " found");
 
@@ -45,8 +44,7 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
   }
 
   /// prune state with predominator
-  auto predomState = programPoints[DT->getNode(&BB)->getIDom()->getBlock()];
-  newState.prune(predomState);
+  newState.prune(programPoints[DT->getNode(&BB)->getIDom()->getBlock()]);
 
   /// visited and still bottom: something is wrong...
   /// none of the preceeding basic blocks has been visited!?
@@ -56,17 +54,17 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
 
 void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
   DEBUG_OUTPUT("visitTerminationInst: entered");
-  auto currentBB = I.getParent();
-  auto oldState = programPoints.find(currentBB);
+  const auto currentBB = I.getParent();
+  const auto oldState = programPoints.find(currentBB);
   if (oldState != programPoints.end()) {
     DEBUG_OUTPUT("visitTerminationInst: old state found");
 
     assert(!oldState->second.isBottom() && "Pruning with bottom!");
 
-    // From the merge of states, there are values in the map that are in
-    // reality only defined for certain paths.
-    // All values actually defined are also defined after the first pass.
-    // Therefore remove all values that were not defined in the previous state
+    /// From the merge of states, there are values in the map that are in
+    /// reality only defined for certain paths.
+    /// All values actually defined are also defined after the first pass.
+    /// Therefore remove all values that were not defined in the previous state
     newState.prune(oldState->second);
 
     /// compute lub in place after this old state is updated
@@ -76,7 +74,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
       DEBUG_OUTPUT("visitTerminationInst: new state equals old state in "
                    << currentBB->getName());
       return;
-    } // else: state has changed
+    } /// else: state has changed
   } else {
     DEBUG_OUTPUT("visitTerminationInst: old state not found");
     programPoints[currentBB] = newState;
@@ -92,15 +90,17 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
 }
 
 void VsaVisitor::visitBranchInst(BranchInst &I) {
-  auto cond = I.getOperand(0);
+  const auto cond = I.getOperand(0);
 
   DEBUG_OUTPUT("CONDITIONAL BRANCHES: TEST");
   if (ICmpInst::classof(cond)) {
-    auto cmpInst = reinterpret_cast<ICmpInst *>(cond);
-    auto op0 = cmpInst->getOperand(0);
-    auto op1 = cmpInst->getOperand(1);
-    auto ad0 = newState.getAbstractValue(op0);
-    auto ad1 = newState.getAbstractValue(op1);
+    const auto cmpInst = reinterpret_cast<ICmpInst *>(cond);
+
+    const auto op0 = cmpInst->getOperand(0);
+    const auto ad0 = newState.getAbstractValue(op0);
+
+    const auto op1 = cmpInst->getOperand(1);
+    const auto ad1 = newState.getAbstractValue(op1);
 
     DEBUG_OUTPUT("CONDITIONAL BRANCHES: ");
     DEBUG_OUTPUT("     " << *ad0);
@@ -126,7 +126,7 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
   }
 
   /// continue as it were a simple terminator
-  this->visitTerminatorInst(I);
+  visitTerminatorInst(I);
 }
 
 void VsaVisitor::putBothBranchConditions(BranchInst& I, Value* op,
@@ -143,15 +143,15 @@ void VsaVisitor::putBothBranchConditions(BranchInst& I, Value* op,
 }
 
 void VsaVisitor::visitSwitchInst(SwitchInst &I) {
-  auto cond = I.getCondition();
+  const auto cond = I.getCondition();
   auto values = newState.getAbstractValue(cond);
 
 
-  for (auto &kase : I.cases()) {
+  for (const auto &kase : I.cases()) {
 
     AD_TYPE kaseConst(kase.getCaseValue()->getValue());
 
-    auto kaseVals = values->icmp(CmpInst::Predicate::ICMP_EQ,
+    const auto kaseVals = values->icmp(CmpInst::Predicate::ICMP_EQ,
                           kase.getCaseValue()->getType()->getIntegerBitWidth(),
                           kaseConst);
 
@@ -164,7 +164,7 @@ void VsaVisitor::visitSwitchInst(SwitchInst &I) {
   bcs.putBranchConditions(I.getParent(), I.getDefaultDest(), cond, values);
 
   /// continue as it were a simple terminator
-  this->visitTerminatorInst(I);
+  visitTerminatorInst(I);
 }
 
 void VsaVisitor::visitLoadInst(LoadInst &I) {
@@ -195,7 +195,7 @@ void VsaVisitor::visitPHINode(PHINode &I) {
     /// Check if basic block containing use is bottom
     if (Instruction::classof(val)) {
       /// get incoming block
-      auto incomingBlock = *blocks_iterator;
+      const auto incomingBlock = *blocks_iterator;
 
       /// block has not been visited yet -> implicit bottom=
       if (programPoints.find(incomingBlock) == programPoints.end())
@@ -332,8 +332,8 @@ void VsaVisitor::pushSuccessors(TerminatorInst &I) {
   }
 }
 
-void VsaVisitor::print() {
-  for (auto &pp : programPoints) {
+void VsaVisitor::print() const {
+  for (const auto &pp : programPoints) {
     STD_OUTPUT("VsaVisitor::print():" << pp.first->getName());
     pp.second.print();
   }

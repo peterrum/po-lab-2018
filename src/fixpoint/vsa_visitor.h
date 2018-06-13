@@ -1,18 +1,17 @@
 #ifndef PROJECT_VISITOR_H
 #define PROJECT_VISITOR_H
 
+#include <llvm/IR/CFG.h>
+#include <llvm/IR/Dominators.h>
+#include <llvm/IR/InstVisitor.h>
+#include <llvm/IR/InstrTypes.h>
+#include <llvm/IR/Operator.h>
 #include "../abstract_domain/AbstractDomain.h"
 #include "../util/util.h"
 #include "branch_conditions.h"
 #include "state.h"
 #include "worklist.h"
-#include "llvm/IR/CFG.h"
-#include "llvm/IR/Dominators.h"
-#include "llvm/IR/InstVisitor.h"
-#include "llvm/IR/InstrTypes.h"
-#include "llvm/IR/Operator.h"
-#include <queue>
-#include <unordered_map>
+#include <map>
 
 using namespace llvm;
 
@@ -105,7 +104,7 @@ public:
   void visitInstruction(Instruction &I);
 
   /// print state of all basic blocks
-  void print();
+  void print() const;
 
   /// return the program points
   std::map<BasicBlock *, State> &getProgramPoints();
@@ -119,7 +118,7 @@ private:
 
   WorkList &worklist;
   mutable DominatorTree *DT = nullptr;
-  DominatorTreeWrapperPass dt;
+  DominatorTreeWrapperPass dt; //?
   State newState;
   std::map<BasicBlock *, State> programPoints;
   BranchConditions bcs;
