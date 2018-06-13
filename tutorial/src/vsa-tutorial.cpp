@@ -28,7 +28,7 @@ struct VsaTutorialPass : public ModulePass {
   bool runOnModule(Module &M) override {
 
     // run vsa-pass
-    ::VsaPass pass;
+    ::VsaPass pass(false);
     pass.runOnModule(M);
 
     // extract results

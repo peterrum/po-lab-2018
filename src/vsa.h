@@ -21,6 +21,8 @@ struct VsaPass : public ModulePass {
   // Pass identification, replacement for typeid
   static char ID;
 
+  bool do_print;
+
   // worklist: instructions are handled in a FIFO manner
   WorkList worklist;
 
@@ -29,7 +31,9 @@ struct VsaPass : public ModulePass {
 
   VsaResult result;
 
-  VsaPass() : ModulePass(ID), worklist(), result(globalProgramPoints) {}
+  VsaPass(bool do_print = true)
+      : ModulePass(ID), do_print(do_print), worklist(),
+        result(globalProgramPoints) {}
 
   bool doInitialization(Module &m) override {
     return ModulePass::doInitialization(m);
@@ -79,23 +83,24 @@ struct VsaPass : public ModulePass {
 #endif
 
       /// print trance
-      errs() << "\nTRACE OF FUNCTION " << function.getName() << ":\n";
-      for (auto t : trance) {
-        errs() << t.first << "#" << t.second.size() << ": ";
-        for (auto s : t.second)
-          errs() << s << " ";
-        errs() << "\n";
+      if (do_print) {
+        errs() << "\nTRACE OF FUNCTION " << function.getName() << ":\n";
+        for (auto t : trance) {
+          errs() << t.first << "#" << t.second.size() << ": ";
+          for (auto s : t.second)
+            errs() << s << " ";
+          errs() << "\n";
+        }
       }
     } // go to next function
-
-    result.print();
 
     // Our analysis does not change the IR
     return false;
   }
 
   void print_local(VsaVisitor &vis, int visits) {
-
+    if (!do_print)
+      return;
     STD_OUTPUT("");
     STD_OUTPUT("Global state after " << visits << " visits");
     vis.print();
