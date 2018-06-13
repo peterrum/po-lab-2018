@@ -44,52 +44,40 @@ struct VsaTutorialPass : public ModulePass {
 
         for(auto &i: b) {
             // are results regarding the variable v1 available
-            if (!results.isResultAvailable(&b, i))
+            if (!results.isResultAvailable(&b, &i))
               continue; // no
 
             // extract results of variable i
-            auto abstractValue = results.getAbstractValue(&b, i);
+            auto abstractValue = results.getAbstractValue(&b, &i);
 
             // create a constant with value 12
             ConstantInt *v1 = ConstantInt::get(M.getContext(), APInt(i.getType()->getIntegerBitWidth(), 12));
 
-            // perform trivial comparison (unsigned less than) between v1 and v2
-            // possible ICMP_EQ, _NE, _UGT, _UGE, _ULT, _ULE, _SGT, _SGE, _SLT, _SLE
+            // perform trivial comparison (unsigned less than) between value and v1
             // more info in: llvm/IR/InstrTypes.h
-            auto res = abstractValue->testIf(CmpInst::Predicate::ICMP_ULT, v2);
+            auto res = abstractValue->testIf(CmpInst::Predicate::ICMP_ULT, v1);
             if(res)
-                STD_OUTPUT(v1->getName() << "a <  b" << v2->getName());
+                STD_OUTPUT(i.getName() << " a <  b" << v1->getName());
             else
-                STD_OUTPUT(v1->getName() << "a >= b" << v2->getName());
+                STD_OUTPUT(i.getName() << " a >= b" << v1->getName());
 
+            auto size = abstractValue->getNumValues().getZExtValue();
+            STD_OUTPUT("AD getNumValues: '" << size << "'");
+            for(uint64_t i=0; i<size;i++)
+                STD_OUTPUT("AD getValue: '" << abstractValue->getValueAt(i).getZExtValue() << "'");
+
+            if(abstractValue->isConstant())
+                STD_OUTPUT("AD getConstant if constant: '" << abstractValue->getConstant() << "'");
+
+              STD_OUTPUT("AD UMin: '" << abstractValue->getUMin() << "'");
+              STD_OUTPUT("AD SMin: '" << abstractValue->getSMin() << "'");
+              STD_OUTPUT("AD UMax: '" << abstractValue->getUMax() << "'");
+              STD_OUTPUT("AD SMax: '" << abstractValue->getSMax() << "'");
+
+
+              STD_OUTPUT("----------------------------------");
         }
-
-        // ... with value
-        ConstantInt *v2 = ConstantInt::get(M.getContext(), APInt(64, 18));
-
-        // perform trivial comparison (unsigned less than) between v1 and v2
-        // possible ICMP_EQ, _NE, _UGT, _UGE, _ULT, _ULE, _SGT, _SGE, _SLT, _SLE
-        // more info in: llvm/IR/InstrTypes.h
-        auto res = temp->testIf(CmpInst::Predicate::ICMP_ULT, v2);
-        if(res)
-            STD_OUTPUT(v1->getName() << "a <  b" << v2->getName());
-        else
-            STD_OUTPUT(v1->getName() << "a >= b" << v2->getName());
-
-        // this is only a test: so we can stop now!
-          auto size = temp->getNumValues().getZExtValue();
-        STD_OUTPUT("AD getNumValues: '" << size << "'");
-        for(uint64_t i=0; i<size;i++)
-            STD_OUTPUT("AD getValue: '" << temp->getValueAt(i).getZExtValue() << "'");
-
-        if(temp->isConstant())
-            STD_OUTPUT("AD getConstant if constant: '" << temp->getConstant() << "'");
-
-          STD_OUTPUT("AD UMin: '" << temp->getUMin() << "'");
-          STD_OUTPUT("AD SMin: '" << temp->getSMin() << "'");
-          STD_OUTPUT("AD UMax: '" << temp->getUMax() << "'");
-          STD_OUTPUT("AD SMax: '" << temp->getSMax() << "'");
-        break;
+        STD_OUTPUT("----------------------------------");
       }
     }
 

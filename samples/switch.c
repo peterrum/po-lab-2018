@@ -16,5 +16,6 @@ int main(int argc, char const *argv[]) {
       y = x<<1;
   }
 
-  printf("%d\n", y);
+  int z = y+7;
+  printf("%d\n", z);
 }
