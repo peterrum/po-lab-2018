@@ -26,6 +26,8 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
         StridedInterval otherDelegate{otherD.delegate.get()};
         StridedInterval thisDelegate{this->delegate.get()};
         return op(thisDelegate, otherDelegate);
+      } else {
+        return result;
       }
     } else {
       // other has a bounded set, we have a strided interval
