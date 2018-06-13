@@ -129,14 +129,39 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
   this->visitTerminatorInst(I);
 }
 
+void VsaVisitor::putBothBranchConditions(BranchInst& I, Value* op,
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>> &valuePair) {
+    DEBUG_OUTPUT("T-r: " << *valuePair.first);
+    DEBUG_OUTPUT("F-r: " << *valuePair.second);
+
+    /// true
+    bcs.putBranchConditions(I.getParent(), I.getSuccessor(0), op,
+                            valuePair.first);
+    /// false
+    bcs.putBranchConditions(I.getParent(), I.getSuccessor(1), op,
+                            valuePair.second);
+}
+
 void VsaVisitor::visitSwitchInst(SwitchInst &I) {
   auto cond = I.getCondition();
   auto values = newState.getAbstractValue(cond);
 
+
   for (auto &kase : I.cases()) {
+
+    AD_TYPE kaseConst(kase.getCaseValue()->getValue());
+
+    auto kaseVals = values->icmp(CmpInst::Predicate::ICMP_EQ,
+                          kase.getCaseValue()->getType()->getIntegerBitWidth(),
+                          kaseConst);
+
+    kaseVals.first->printOut();
+    kaseVals.second->printOut();
+
     bcs.putBranchConditions(I.getParent(), kase.getCaseSuccessor(), cond,
-                            shared_ptr<AbstractDomain>(
-                                new AD_TYPE(kase.getCaseValue()->getValue())));
+                            kaseVals.first);
+
+    values = kaseVals.second;
   }
 
   bcs.putBranchConditions(I.getParent(), I.getDefaultDest(), cond, values);
