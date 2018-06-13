@@ -342,10 +342,23 @@ BoundedSet::createBoundedSetPointerPair(bool firstTop, bool secondTop) {
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
 BoundedSet::subsetsForPredicate(
     AbstractDomain &other,
-    std::function<bool(const APInt &, const APInt &)> comparision) {
+    std::function<bool(const APInt &, const APInt &)> comparision,
+    CmpInst::Predicate pred) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
 
     if (isTop()) {
+      if (pred == CmpInst::Predicate::ICMP_EQ) {
+        shared_ptr<AbstractDomain> trueSet{new BoundedSet{otherB}};
+        shared_ptr<AbstractDomain> falseSet{new BoundedSet{true}};
+        return std::pair<shared_ptr<AbstractDomain>,
+                         shared_ptr<AbstractDomain>>{trueSet, falseSet};
+      } else if (pred == CmpInst::Predicate::ICMP_NE) {
+        shared_ptr<AbstractDomain> trueSet{new BoundedSet{true}};
+        shared_ptr<AbstractDomain> falseSet{new BoundedSet{otherB}};
+        return std::pair<shared_ptr<AbstractDomain>,
+                         shared_ptr<AbstractDomain>>{trueSet, falseSet};
+      }
+
       // if this set is top, it will be top in both branches afterwards
       return createBoundedSetPointerPair(true, true);
     }
@@ -415,7 +428,7 @@ BoundedSet::icmp(CmpInst::Predicate pred, unsigned numBits,
   if (pred >= CmpInst::Predicate::ICMP_EQ &&
       pred <= CmpInst::Predicate::ICMP_SLE) {
     auto comparisionFunction = getComparisionFunction(pred);
-    return subsetsForPredicate(other, comparisionFunction);
+    return subsetsForPredicate(other, comparisionFunction, pred);
   }
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       shared_ptr<AbstractDomain>(new BoundedSet(true)),

@@ -25,7 +25,8 @@ private:
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   subsetsForPredicate(
       AbstractDomain &other,
-      std::function<bool(const APInt &, const APInt &)> comparision);
+      std::function<bool(const APInt &, const APInt &)> comparision,
+      CmpInst::Predicate pred);
 
   shared_ptr<AbstractDomain> createBoundedSetPointer(bool top);
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
