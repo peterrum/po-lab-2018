@@ -6,7 +6,11 @@ according to [Reps et al.](http://research.cs.wisc.edu/wpis/papers/pepm06.invite
 
 ## Authors (in alphabetic order)
 
-* TODO
+* Julian Erhard
+* Jakob Gottfriedsen
+* Peter Munch
+* Alexander Roschlaub
+* Michael Schwarz
 
 ## Installation
 
