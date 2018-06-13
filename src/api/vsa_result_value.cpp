@@ -6,7 +6,7 @@ using namespace llvm;
 namespace pcpo {
 
 LazyValueInfo::Tristate VsaResultValue::testIf(CmpInst::Predicate predicate,
-                                               Constant *C) {
+                                               Constant *C) const{
 
   // only comparison with ConstantInt is implemented
   if (ConstantInt::classof(C)) {
@@ -32,34 +32,34 @@ LazyValueInfo::Tristate VsaResultValue::testIf(CmpInst::Predicate predicate,
   }
 }
 
-bool VsaResultValue::isConstant() {
+bool VsaResultValue::isConstant() const{
   return abstractValue->size()==1;
 }
 
-APInt VsaResultValue::getConstant() {
+APInt VsaResultValue::getConstant() const{
   assert(isConstant() && "getConstant failed: non Constant Value");
   return getValueAt(0);
 }
 
-APInt VsaResultValue::getNumValues() {
+APInt VsaResultValue::getNumValues() const{
   const auto size = abstractValue->size();
   return APInt(sizeof(size)*8,size);
 }
 
-APInt VsaResultValue::getValueAt(uint64_t i) {
+APInt VsaResultValue::getValueAt(uint64_t i) const{
   return abstractValue->getValueAt(i);
 }
 
-APInt VsaResultValue::getUMin() {
+APInt VsaResultValue::getUMin() const {
   return abstractValue->getUMin();
 }
-APSInt VsaResultValue::getSMin() {
+APSInt VsaResultValue::getSMin() const {
   return abstractValue->getSMin();
 }
-APInt VsaResultValue::getUMax() {
+APInt VsaResultValue::getUMax() const{
   return abstractValue->getUMax();
 }
-APSInt VsaResultValue::getSMax() {
+APSInt VsaResultValue::getSMax() const{
   return abstractValue->getSMax();
 }
 

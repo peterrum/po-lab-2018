@@ -16,13 +16,13 @@ public:
   VsaResult(std::map<BasicBlock *, State> &globalProgramPoints)
       : globalProgramPoints(globalProgramPoints) {}
 
-  void print();
+  void print() const;
 
-  bool isReachable(BasicBlock *BB);
+  bool isReachable(BasicBlock *BB) const;
 
-  bool isResultAvailable(BasicBlock *BB, Value *val);
+  bool isResultAvailable(BasicBlock *BB, Value *val) const;
 
-  std::unique_ptr<VsaResultValue> getAbstractValue(BasicBlock *BB, Value *val);
+  std::unique_ptr<VsaResultValue> getAbstractValue(BasicBlock *BB, Value *val) const;
 
 private:
   std::map<BasicBlock *, State> &globalProgramPoints;

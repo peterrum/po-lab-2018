@@ -23,18 +23,18 @@ public:
   /// \param predicate
   /// \param C constant (please be aware that we only support ConstantInt)
   /// \return 
-  LazyValueInfo::Tristate testIf(CmpInst::Predicate predicate, Constant *C);
+  LazyValueInfo::Tristate testIf(CmpInst::Predicate predicate, Constant *C) const;
 
-  bool isConstant();
-  APInt getConstant();
-  APInt getNumValues();
+  bool isConstant() const;
+  APInt getConstant() const;
+  APInt getNumValues() const;
 
   /// Values > uint64_t not working
-  APInt getValueAt(uint64_t i);
-  APInt getUMin();
-  APSInt getSMin();
-  APInt getUMax();
-  APSInt getSMax();
+  APInt getValueAt(uint64_t i) const;
+  APInt getUMin() const;
+  APSInt getSMin() const;
+  APInt getUMax() const;
+  APSInt getSMax() const;
 
 private:
   std::shared_ptr<AbstractDomain> abstractValue;
