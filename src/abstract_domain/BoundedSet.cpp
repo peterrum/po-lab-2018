@@ -48,7 +48,7 @@ shared_ptr<AbstractDomain> BoundedSet::compute(
       for (auto &rightVal : otherB->values) {
         BoundedSet res = op(leftVal, rightVal);
         newValues = newValues->leastUpperBound(res);
-        if (newValues->size() > SET_LIMIT) {
+        if (newValues->isTop() || newValues->size() > SET_LIMIT) {
           shared_ptr<BoundedSet> topSet{new BoundedSet(true)};
           return topSet;
         }
