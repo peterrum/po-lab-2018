@@ -68,6 +68,7 @@ public:
   unsigned getBitWidth() const;
   bool isTop() const;
   bool isBottom() const;
+  bool contains(APInt &value) const;
   void printOut() const;
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);
@@ -104,5 +105,6 @@ public:
   //   return std::shared_ptr<AbstractDomain>(new StridedInterval());
   // }
 };
+
 } // namespace pcpo
 #endif

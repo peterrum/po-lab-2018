@@ -31,7 +31,7 @@ private:
   shared_ptr<AbstractDomain> createBoundedSetPointer(bool top);
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   createBoundedSetPointerPair(bool firstTop, bool secondTop);
-  bool containsValue(unsigned numBits, uint64_t element);
+  bool containsValue(unsigned numBits, uint64_t n) const;
   void warnIfContainsZero(unsigned numBits);
   void warnIfDivisionOverflowPossible(unsigned numBits, BoundedSet &other);
 
@@ -63,6 +63,8 @@ public:
 
   // |gamma(this)|
   size_t size() const;
+
+  bool contains(APInt &value) const;
 
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
   bool lessOrEqual(AbstractDomain &other);

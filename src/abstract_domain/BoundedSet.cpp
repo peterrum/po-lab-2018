@@ -196,15 +196,21 @@ void BoundedSet::warnIfDivisionOverflowPossible(unsigned numBits,
   }
 }
 
-bool BoundedSet::containsValue(unsigned numBits, uint64_t n) {
+// private convenience method
+// right now only used to test whether this BoundedSet contains numBits
+bool BoundedSet::containsValue(unsigned numBits, uint64_t n) const {
+  APInt elem{numBits, n};
+  return contains(elem);
+}
+
+bool BoundedSet::contains(APInt &value) const {
   if (isTop()) {
     return true;
   } else if (values.size() == 0) {
     return false;
   } else {
     auto end = values.end();
-    APInt elem{numBits, n};
-    return values.find(elem) != end;
+    return values.find(value) != end;
   }
 }
 
