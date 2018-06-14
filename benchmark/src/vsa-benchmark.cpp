@@ -27,14 +27,11 @@ struct VsaBenchmarkPass : public ModulePass {
       uint64_t vsa_count = 0;
       uint64_t lvi_count = 0;
       uint64_t eq_count = 0;
-      uint64_t uncomp_count = 0;
 
       /// extract results from VsaPass
       const auto& vsa = getAnalysis<VsaPass>().getResult();
 
-      /// iterate such that we get a block...
       for (auto &f : M.functions()) {
-
           /// check if function is empty
           if(f.begin()==f.end())
               continue;
@@ -43,51 +40,48 @@ struct VsaBenchmarkPass : public ModulePass {
           LazyValueInfo& lvi = getAnalysis<LazyValueInfoWrapperPass>(f).getLVI();
 
           for (auto& bb : f) {
+            /// block not reachable in vsa -> vsa.value = bottom
+            if (!vsa.isReachable(&bb)){
+              for (auto &instr: bb) {
+                  if(!instr.getType()->isIntegerTy()) continue;
+                  const llvm::ConstantRange lvi_const_range = lvi.getConstantRange(&instr, &bb);
+                  /// extract results of variable i
+                  if(lvi_const_range.isEmptySet()) eq_count++; /// both know it is bottom
+                  else vsa_count++; /// lvi thinks it's not bottom
+              }
+              continue;
+            }
 
-              /// is block reachable
-              if (vsa.isReachable(&bb)){
-                  for (auto &instr: bb) {
-                      if(!instr.getType()->isIntegerTy()) continue;
-                      const llvm::ConstantRange lvi_const_range = lvi.getConstantRange(&instr, &bb);
-                      /// no results in vsa -> vsa.value = top
-                      if (vsa.isResultAvailable(&bb, &instr)){
-                          const auto abstractValue = vsa.getAbstractValue(&bb, &instr);
-                          if(abstractValue->isTop()){
-                              if(lvi_const_range.isFullSet()) eq_count++;
-                              else lvi_count++;
-                              continue;
-                          }
+            for (auto &instr: bb) {
+              if(!instr.getType()->isIntegerTy()) continue;
+              const llvm::ConstantRange lvi_const_range = lvi.getConstantRange(&instr, &bb);
 
-                          const auto vsa_size = abstractValue->getNumValues().getZExtValue();
-                          const auto lvi_size = lvi_const_range.getSetSize().getZExtValue();
-
-                          if(vsa_size == lvi_size) eq_count++;
-                          else if(vsa_size <lvi_size) vsa_count++;
-                          else lvi_count++;
-                      }
-
-                      else {
-                          if(lvi_const_range.isFullSet()) eq_count++;
-                          else lvi_count++;
-                          continue;
-                      }
-                  }
+              /// no results in vsa -> vsa.value = top
+              if(!vsa.isResultAvailable(&bb, &instr)) {
+                if (lvi_const_range.isFullSet()) eq_count++; /// both T
+                else lvi_count++; /// lvi has something better
+                continue;
               }
 
-              /// block not reachable in vsa -> vsa.value = bottom
-              else {
-                  for (auto &instr: bb) {
-                      if(!instr.getType()->isIntegerTy()) continue;
-                      const llvm::ConstantRange lvi_const_range = lvi.getConstantRange(&instr, &bb);
-                      /// extract results of variable i
-                      if(lvi_const_range.isEmptySet()) eq_count++;
-                      else vsa_count++;
-                  }
+              const auto abstractValue = vsa.getAbstractValue(&bb, &instr);
+              if(abstractValue->isTop()){
+                  if(lvi_const_range.isFullSet()) eq_count++; /// both T
+                  else lvi_count++;  /// lvi has something better
+                  continue;
               }
+
+              /// Comparing set sizes
+              const auto vsa_size = abstractValue->getNumValues().getZExtValue();
+              const auto lvi_size = lvi_const_range.getSetSize().getZExtValue();
+
+              if(vsa_size == lvi_size) eq_count++; // both same size
+              else if(vsa_size < lvi_size) vsa_count++; // vsa smaller -> better
+              else lvi_count++; // lvi smaller -> better
           }
+        }
       }
 
-      STD_OUTPUT(vsa_count << "," << lvi_count << "," << eq_count << "," << uncomp_count);
+    errs() << vsa_count << "," << lvi_count << "," << eq_count << '\n';
 
     /// analysis has made no modifications
     return false;

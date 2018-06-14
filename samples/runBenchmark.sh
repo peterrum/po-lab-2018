@@ -14,7 +14,7 @@ fi
 
 # if no folder is existent
 mkdir -p build
-printf "Program, VSAbetter, LVIbetter, Equal, Uncomparable\n"
+printf "Program, VSAbetter, LVIbetter, Equal\n"
 
 # for all c-files...
 for f in ${ARRAY[*]};
@@ -33,5 +33,5 @@ do
     # ... disassemble optimized file
     $VSA_LLVM_PATH/bin/llvm-dis build/$f-opt.bc
     # ... run VSA #MAC ONLY .dylib ->.so
-    $VSA_LLVM_PATH/bin/opt -load $VSA_LLVM_PATH/lib/llvm-vsa-benchmark.so -vsabenchmarkpass < build/$f-opt.bc > /dev/null 2> >(tee build/$f.out >&2)
+    $VSA_LLVM_PATH/bin/opt -load $VSA_LLVM_PATH/lib/llvm-vsa-benchmark.so -vsabenchmarkpass < build/$f-opt.bc > /dev/null
 done
