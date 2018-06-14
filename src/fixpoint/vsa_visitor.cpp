@@ -165,7 +165,7 @@ void VsaVisitor::visitSwitchInst(SwitchInst &I) {
 
   bcs.putBranchConditions(I.getParent(), I.getDefaultDest(), cond, values);
 
-  /// continue as it were a simple terminator
+  /// continue as if it were a simple terminator
   visitTerminatorInst(I);
 }
 
@@ -179,46 +179,55 @@ void VsaVisitor::visitPHINode(PHINode &I) {
   auto bs = AD_TYPE::create_bottom(I.getType()->getIntegerBitWidth());
 
   /// iterator for incoming blocks and values:
-  /// we have to handle it seperatly since LLVM seems to save them not togehter
+  /// we have to handle it seperatly since LLVM seems to not save them together
   auto blocks_iterator = I.block_begin();
   auto val_iterator = I.incoming_values().begin();
 
   // iterate together over incoming blocks and values
   for (; blocks_iterator != I.block_end(); blocks_iterator++, val_iterator++) {
-
-    /// if the basic block where a value comes from is bottom,
-    /// the corresponding alternative in the phi node is never taken
-    /// the next 20 lines handle all the cases for that
     Value *val = val_iterator->get();
 
     /// create initial condition for lubs
     auto newValue = AD_TYPE::create_bottom(I.getType()->getIntegerBitWidth());
 
-    /// Check if basic block containing use is bottom
+    /// Check if this is an instruction
     if (Instruction::classof(val)) {
+      /// if the basic block where a value comes from is bottom,
+      /// the corresponding alternative in the phi node is never taken
+      /// we handle this here
+
       /// get incoming block
       const auto incomingBlock = *blocks_iterator;
 
-      /// block has not been visited yet -> implicit bottom=
+      /// block has not been visited yet -> implicit bottom -> continue
       if (programPoints.find(incomingBlock) == programPoints.end())
         continue;
 
-      /// explicit bottom
+      /// explicit bottom -> continue
       if (programPoints[incomingBlock].isBottom())
         continue;
 
+      /// apply the conditions that we have for reaching this basic block
+      /// from the basic block containing the instruction
       bcs.applyCondition(incomingBlock, I.getParent());
+
       newValue = programPoints[incomingBlock].getAbstractValue(val);
+
+      /// reset the condition cache
       bcs.unApplyCondition(incomingBlock);
     } else {
+      /// val is not an instruction but a constant etc., so we do not need to
+      /// go to its basic block but can gte it directly
       newValue = newState.getAbstractValue(val);
     }
 
     /// if state of basic block was not bottom, include abstract value
-    /// in appropriate block in lub for phi
+    /// in appropriate block in LUB for phi
     bs = bs->leastUpperBound(*newValue);
   }
 
+  /// this should not happen as we only put basicBlocks on the worklist if they
+  /// are reachable
   assert(!bs->isBottom() && "VsaVisitor::visitPHINode: new value is bottom!");
 
   /// save new value into state
@@ -255,36 +264,42 @@ void VsaVisitor::visitURem(BinaryOperator &I) {
 
   newState.put(I, ad0->urem(I.getType()->getIntegerBitWidth(), *ad1));
 }
+
 void VsaVisitor::visitSRem(BinaryOperator &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->srem(I.getType()->getIntegerBitWidth(), *ad1));
 }
+
 void VsaVisitor::visitUDiv(BinaryOperator &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->udiv(I.getType()->getIntegerBitWidth(), *ad1));
 }
+
 void VsaVisitor::visitSDiv(BinaryOperator &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->sdiv(I.getType()->getIntegerBitWidth(), *ad1));
 }
+
 void VsaVisitor::visitAnd(BinaryOperator &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->and_(I.getType()->getIntegerBitWidth(), *ad1));
 }
+
 void VsaVisitor::visitOr(BinaryOperator &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->or_(I.getType()->getIntegerBitWidth(), *ad1));
 }
+
 void VsaVisitor::visitXor(BinaryOperator &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
@@ -299,12 +314,14 @@ void VsaVisitor::visitShl(Instruction &I) {
   newState.put(I, ad0->shl(I.getType()->getIntegerBitWidth(), *ad1,
                            I.hasNoUnsignedWrap(), I.hasNoSignedWrap()));
 }
+
 void VsaVisitor::visitLShr(Instruction &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
 
   newState.put(I, ad0->lshr(I.getType()->getIntegerBitWidth(), *ad1));
 }
+
 void VsaVisitor::visitAShr(Instruction &I) {
   auto ad0 = newState.getAbstractValue(I.getOperand(0));
   auto ad1 = newState.getAbstractValue(I.getOperand(1));
