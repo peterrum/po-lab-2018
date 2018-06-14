@@ -35,20 +35,20 @@ struct VsaTutorialPass : public ModulePass {
 
     // iterate such that we get a block...
     for (auto &f : M.functions()) {
-        
+
       // check if function is empty
       if(f.begin()==f.end())
         continue;
-        
+
       STD_OUTPUT("\n----------------------------------");
       STD_OUTPUT("Function: " << f.getName() << ":");
       STD_OUTPUT("----------------------------------");
 
-      // get LazyValueInfo for function 
+      // get LazyValueInfo for function
       LazyValueInfo& lvi = getAnalysis<LazyValueInfoWrapperPass>(f).getLVI();
-      
+
       for (auto &b : f) {
-        
+
         // is block reachable
         if (!results.isReachable(&b))
           continue; // no
@@ -68,24 +68,24 @@ struct VsaTutorialPass : public ModulePass {
             // more info in: llvm/IR/InstrTypes.h
             auto res = abstractValue->testIf(CmpInst::Predicate::ICMP_ULT, v1);
             if(res == 1)
-                STD_OUTPUT("VSA: " << i.getName() << " 1");
+                STD_OUTPUT("VSA (is " << i.getName() << " < 12 ?)" << " yes");
             else if (res == 0)
-                STD_OUTPUT("VSA: " << i.getName() << " 0");
+                STD_OUTPUT("VSA (is " << i.getName() << " < 12 ?)" << " no");
             else
-                STD_OUTPUT("VSA: " << i.getName() << " T");
+                STD_OUTPUT("VSA (is " << i.getName() << " < 12 ?)" << " maybe");
 
             // compare with LVI:
             auto res2 = lvi.getPredicateAt(CmpInst::Predicate::ICMP_ULT, &i, v1, &i);
             if(res2 == 1)
-                STD_OUTPUT("LVI: " << i.getName() << " 1");
+                STD_OUTPUT("LVI (is " << i.getName() << " < 12 ?)" << " yes");
             else if (res2 == 0)
-                STD_OUTPUT("LVI: " << i.getName() << " 0");
+                STD_OUTPUT("LVI (is " << i.getName() << " < 12 ?)" << " no");
             else
-                STD_OUTPUT("LVI: " << i.getName() << " T");
-            
+                STD_OUTPUT("LVI (is " << i.getName() << " < 12 ?)" << " maybe");
+
             // new line
             STD_OUTPUT("");
-            
+
             if(abstractValue->isTop()) {
               STD_OUTPUT("----------------------------------");
               continue;
