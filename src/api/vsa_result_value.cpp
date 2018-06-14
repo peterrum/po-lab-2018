@@ -74,5 +74,4 @@ APSInt VsaResultValue::getSMax() const{
   assert(!abstractValue->isTop() && " called getSMax() on T");
   return abstractValue->getSMax();
 }
-
 }

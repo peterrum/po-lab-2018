@@ -7,7 +7,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Module.h>
-
+#include <llvm/IR/ConstantRange.h>
 #include <queue>
 
 #include "../../src/util/util.h"
@@ -92,31 +92,37 @@ struct VsaTutorialPass : public ModulePass {
             }
 
             auto size = abstractValue->getNumValues().getZExtValue();
-            STD_OUTPUT("AD getNumValues: '" << size << "'");
+            //STD_OUTPUT("AD getNumValues: '" << size << "'");
 
             if(size == 0){
               STD_OUTPUT("----------------------------------");
               continue;
             }
 
-            for(uint64_t i=0; i<size;i++)
-                STD_OUTPUT("AD getValue: '" << abstractValue->getValueAt(i).getZExtValue() << "'");
+            STD_OUTPUT("VSA " << *abstractValue);
 
-            if(abstractValue->isConstant())
-                STD_OUTPUT("AD getConstant if constant: '" << abstractValue->getConstant() << "'");
+            //for(uint64_t i=0; i<size;i++)
+            //    STD_OUTPUT("AD getValue: '" << abstractValue->getValueAt(i).getZExtValue() << "'");
+
+            //if(abstractValue->isConstant())
+            //    STD_OUTPUT("AD getConstant if constant: '" << abstractValue->getConstant() << "'");
 
             // do the same for LazyValueInfo
-            auto lvi_const = lvi.getConstant(&i, &b);
-            if(!(lvi_const==nullptr))
-                STD_OUTPUT("LazyValueInfo getConstant: '" << abstractValue->getConstant() << "'");
+            //auto lvi_const = lvi.getConstant(&i, &b);
+            //if(!(lvi_const==nullptr))
+            //    STD_OUTPUT("LazyValueInfo getConstant: '" << lvi_const->getUniqueInteger() << "'");
 
-              STD_OUTPUT("AD UMin: '" << abstractValue->getUMin() << "'");
-              STD_OUTPUT("AD SMin: '" << abstractValue->getSMin() << "'");
-              STD_OUTPUT("AD UMax: '" << abstractValue->getUMax() << "'");
-              STD_OUTPUT("AD SMax: '" << abstractValue->getSMax() << "'");
+            auto lvi_const_range = lvi.getConstantRange(&i, &b);
+            STD_OUTPUT("LVI " << lvi_const_range);
+/*
 
+            STD_OUTPUT("AD UMin: '" << abstractValue->getUMin() << "'");
+            STD_OUTPUT("AD SMin: '" << abstractValue->getSMin() << "'");
+            STD_OUTPUT("AD UMax: '" << abstractValue->getUMax() << "'");
+            STD_OUTPUT("AD SMax: '" << abstractValue->getSMax() << "'");
+*/
 
-              STD_OUTPUT("----------------------------------");
+            STD_OUTPUT("----------------------------------");
         }
       }
     }
@@ -129,6 +135,7 @@ struct VsaTutorialPass : public ModulePass {
   void getAnalysisUsage(AnalysisUsage &AU) const override {
     AU.setPreservesAll();
     AU.addRequired<LazyValueInfoWrapperPass>();
+    AU.addRequired<DominatorTreeWrapperPass>();
     AU.addRequired<VsaPass>();
   }
 };

@@ -38,6 +38,10 @@ public:
   APInt getUMax() const;
   APSInt getSMax() const;
 
+  friend llvm::raw_ostream &operator<<(llvm::raw_ostream &os, VsaResultValue &vsrRv) {
+      return os << *vsrRv.abstractValue;
+  }
+
 private:
   std::shared_ptr<AbstractDomain> abstractValue;
 };
