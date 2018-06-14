@@ -185,13 +185,6 @@ void testStridedIntervalAdd() {
 }
 
 void testContains() {
-  APInt val;
-  StridedInterval msi;
-  val = {1}; msi = {1, 0, 1, 1};
-  if (!msi.contains(val)) {
-    errs() << "[testContains] failed with operands: 1, 1[0, 1]_{1}\n";
-  }
-
   APInt begin{5, 15};
   APInt end{5, 5};
   APInt stride{5, 2};
