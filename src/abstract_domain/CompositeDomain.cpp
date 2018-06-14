@@ -5,8 +5,13 @@
 namespace pcpo {
 using std::function;
 using std::shared_ptr;
-// Binary Arithmetic Operations
 
+// computeOperation expects a CompositeDomain (CD) and a binary function to be evaluated on these.
+// In case both (this and the argument) CompositeDomains contain a BoundedSet (BS), the function is executed on these.
+// If this results in a top, both BoundedSets are converted to StridedIntervals (SI)
+// and the operation is executed again.
+// In case one of the CD contains a BS and the other a SI, the BS is converted to a SI.
+// In case both CD contain a SI, the function is executed on the SIs.
 shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
     AbstractDomain &other,
     function<shared_ptr<AbstractDomain>(AbstractDomain &, AbstractDomain &)>
@@ -49,6 +54,7 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
   }
 }
 
+// Binary Arithmetic Operations
 shared_ptr<AbstractDomain> CompositeDomain::add(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
                                                 bool nsw) {
