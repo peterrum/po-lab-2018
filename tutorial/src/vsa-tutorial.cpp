@@ -32,7 +32,7 @@ struct VsaTutorialPass : public ModulePass {
     pass.runOnModule(M);
 
     // extract results
-    auto &results = pass.result;
+    auto &results = pass.getResult();
 
     results.print();
 

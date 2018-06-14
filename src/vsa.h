@@ -29,8 +29,10 @@ struct VsaPass : public ModulePass {
   // global map of programPoints
   std::map<BasicBlock *, State> globalProgramPoints;
 
+private:
   VsaResult result;
-
+public:
+    
   VsaPass(bool do_print = true)
       : ModulePass(ID), do_print(do_print), worklist(),
         result(globalProgramPoints) {}
@@ -113,6 +115,10 @@ struct VsaPass : public ModulePass {
   // We don't modify the program, so we preserve all analyses.
   void getAnalysisUsage(AnalysisUsage &AU) const override {
     AU.setPreservesAll();
+  }
+  
+  VsaResult& getResult(){
+      return result;
   }
 };
 
