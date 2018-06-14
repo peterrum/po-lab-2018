@@ -107,7 +107,7 @@ void testLeastUpperBoundTop() {
   BoundedSet right{second};
   auto result = left.leastUpperBound(right);
   APInt tmpInt;
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < SET_LIMIT; i++) {
     tmpInt = APInt(32, i, false);
     BoundedSet tmp(tmpInt);
     result = result->leastUpperBound(tmp);
