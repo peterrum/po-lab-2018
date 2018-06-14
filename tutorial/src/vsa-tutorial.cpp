@@ -70,21 +70,37 @@ struct VsaTutorialPass : public ModulePass {
             // perform trivial comparison (unsigned less than) between value and v1
             // more info in: llvm/IR/InstrTypes.h
             auto res = abstractValue->testIf(CmpInst::Predicate::ICMP_ULT, v1);
-            if(res)
-                STD_OUTPUT(i.getName() << " a <  b" << v1->getName());
+            if(res == 1)
+                STD_OUTPUT("VSA: " << i.getName() << " 1");
+            else if (res == 0)
+                STD_OUTPUT("VSA: " << i.getName() << " 0");
             else
-                STD_OUTPUT(i.getName() << " a >= b" << v1->getName());
+                STD_OUTPUT("VSA: " << i.getName() << " T");
 
-
+            // compare with LVI:
+            auto res2 = lvi.getPredicateAt(CmpInst::Predicate::ICMP_ULT, &i, v1, &i);
+            if(res2 == 1)
+                STD_OUTPUT("LVI: " << i.getName() << " 1");
+            else if (res2 == 0)
+                STD_OUTPUT("LVI: " << i.getName() << " 0");
+            else
+                STD_OUTPUT("LVI: " << i.getName() << " T");
+            
+            // new line
+            STD_OUTPUT("");
+            
             if(abstractValue->isTop()) {
+              STD_OUTPUT("----------------------------------");
               continue;
             }
 
             auto size = abstractValue->getNumValues().getZExtValue();
             STD_OUTPUT("AD getNumValues: '" << size << "'");
 
-            if(size == 0)
+            if(size == 0){
+              STD_OUTPUT("----------------------------------");
               continue;
+            }
 
             for(uint64_t i=0; i<size;i++)
                 STD_OUTPUT("AD getValue: '" << abstractValue->getValueAt(i).getZExtValue() << "'");
