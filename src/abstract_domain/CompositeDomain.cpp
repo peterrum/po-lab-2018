@@ -6,6 +6,27 @@ namespace pcpo {
 using std::function;
 using std::shared_ptr;
 
+CompositeDomain::CompositeDomain(APInt value) {
+  delegate = shared_ptr<AbstractDomain>{new BoundedSet{value}};
+}
+
+// if isTop==true then we create a top delegate
+// if isTop==false then we create a bottom delegate
+CompositeDomain::CompositeDomain(bool isTop) {
+  delegate = shared_ptr<AbstractDomain>{new BoundedSet{isTop}};
+}
+
+CompositeDomain::CompositeDomain(const CompositeDomain &old)
+    : delegateType{old.delegateType} {
+  if (old.getDelegateType == boundedSet) {
+    BoundedSet *oldBs = static_cast<BoundedSet *>(old.delegate.get());
+    delegate = shared_ptr<AbstractDomain>{new BoundedSet{*oldBs}};
+  } else {
+    StridedInterval *oldSi = static_cast<StridedInterval *>(old.delegate.get());
+    delegate = shared_ptr<AbstractDomain>{new StridedInterval{*oldSi}};
+  }
+}
+
 // computeOperation expects a CompositeDomain (CD) and a binary function to be evaluated on these.
 // In case both (this and the argument) CompositeDomains contain a BoundedSet (BS), the function is executed on these.
 // If this results in a top, both BoundedSets are converted to StridedIntervals (SI)

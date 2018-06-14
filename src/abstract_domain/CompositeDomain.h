@@ -25,6 +25,11 @@ private:
           op);
 
 public:
+  // Constructors
+  CompositeDomain(APInt value);
+  CompositeDomain(bool isTop);
+  CompositeDomain::CompositeDomain(const CompositeDomain &old);
+
   // Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other,
                                  bool nuw, bool nsw);
