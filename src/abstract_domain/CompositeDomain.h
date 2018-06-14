@@ -16,6 +16,7 @@ enum DelegateType { stridedInterval, boundedSet };
 
 class CompositeDomain : public AbstractDomain {
 private:
+  unsigned bitWidth;
   DelegateType delegateType;
   shared_ptr<AbstractDomain> delegate;
   DelegateType getDelegateType();
@@ -28,7 +29,7 @@ private:
 public:
   // Constructors
   CompositeDomain(APInt value);
-  CompositeDomain(bool isTop);
+  CompositeDomain(unsigned bitWidth, bool isTop);
   CompositeDomain(const CompositeDomain &old);
 
   // Binary Arithmetic Operations
@@ -65,6 +66,7 @@ public:
   bool operator==(const BoundedSet &other);
 
   friend std::ostream &operator<<(std::ostream &os, const BoundedSet &bs);
+  bool contains(APInt &value) const;
   bool isTop() const;
   bool isBottom() const;
   void printOut() const;

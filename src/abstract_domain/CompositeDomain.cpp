@@ -7,18 +7,18 @@ namespace pcpo {
 using std::function;
 using std::shared_ptr;
 
-CompositeDomain::CompositeDomain(APInt value) : delegateType{boundedSet} {
+CompositeDomain::CompositeDomain(APInt value) : bitWidth{value.getBitWidth()}, delegateType{boundedSet} {
   delegate = shared_ptr<AbstractDomain>{new BoundedSet{value}};
 }
 
 // if isTop==true then we create a top delegate
 // if isTop==false then we create a bottom delegate
-CompositeDomain::CompositeDomain(bool isTop) : delegateType{boundedSet} {
-  delegate = shared_ptr<AbstractDomain>{new BoundedSet{isTop}};
+CompositeDomain::CompositeDomain(unsigned bitWidth, bool isTop) : bitWidth{bitWidth}, delegateType{boundedSet} {
+  delegate = shared_ptr<AbstractDomain>{new BoundedSet{bitWidth, isTop}};
 }
 
 CompositeDomain::CompositeDomain(const CompositeDomain &old)
-    : delegateType{old.delegateType} {
+    : bitWidth{bitWidth}, delegateType{old.delegateType} {
   if (old.delegateType == boundedSet) {
     BoundedSet *oldBs = static_cast<BoundedSet *>(old.delegate.get());
     delegate = shared_ptr<AbstractDomain>{new BoundedSet{*oldBs}};
@@ -49,18 +49,14 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
     if (getDelegateType() == boundedSet) {
       // both are bounded sets
       auto resultOp = op(*delegate.get(), *otherD.delegate.get());
-      errs() << "result is top:" << resultOp->isTop() << "\n";
       // If the operation results in a top, this might be due
       // to the size limitation of the bounded set.
       // Thus, we transform them into strided intervals
       if (resultOp->isTop()) {
-        errs() << "switching to strided intervals\n";
         BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
         BoundedSet thisBs = *static_cast<BoundedSet *>(this->delegate.get());
         StridedInterval otherDelegate{otherBs};
-        errs() << "constructed SI\n";
         StridedInterval thisDelegate{thisBs};
-        errs() << "constructed SI2\n";
         resultOp = op(thisDelegate, otherDelegate);
         return shared_ptr<AbstractDomain>{
             new CompositeDomain{resultOp, stridedInterval}};
@@ -69,7 +65,6 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
             new CompositeDomain{resultOp, boundedSet}};
       }
     } else {
-      errs() << "this stridedInterval\n";
 
       // other has a bounded set, we have a strided interval
       // change other to strided interval
@@ -80,8 +75,6 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
   } else {
     // other is a strided interval
     if (getDelegateType() == boundedSet) {
-      errs() << "other stridedInterval\n";
-
       // this is a bounded set
       // change to strided interval
       StridedInterval thisDelegate{this->delegate.get()};
@@ -89,7 +82,6 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
           op(thisDelegate, *otherD.delegate.get()), stridedInterval}};
     } else {
       // both are strided intervals already
-      errs() << "stridedIntervals\n";
       return shared_ptr<AbstractDomain>{new CompositeDomain{
           op(*delegate.get(), *otherD.delegate.get()), stridedInterval}};
     }
@@ -245,6 +237,10 @@ size_t CompositeDomain::size() const { return delegate->size(); }
 
 bool CompositeDomain::isTop() const { return delegate->isTop(); }
 bool CompositeDomain::isBottom() const { return delegate->isBottom(); }
+
+bool CompositeDomain::contains(APInt& value) const{
+  return false;
+}
 
 APInt CompositeDomain::getValueAt(uint64_t i) const {
   return delegate->getValueAt(i);
