@@ -15,7 +15,7 @@ add_llvm_loadable_module( llvm-vsa-tutorial
 
   ../src/abstract_domain/BoundedSet.cpp
   ../src/abstract_domain/StridedInterval.cpp
-  ../src/abstract_domain/CompositeDomain.cpp
+  # ../src/abstract_domain/CompositeDomain.cpp
   ../src/fixpoint/state.cpp
   ../src/fixpoint/vsa_visitor.cpp
   ../src/fixpoint/worklist.cpp

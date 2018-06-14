@@ -24,6 +24,15 @@ StridedInterval::StridedInterval(APInt value)
 
 StridedInterval::StridedInterval() : isBot(true) {}
 
+StridedInterval::StridedInterval(bool isTop, unsigned bitWidth): bitWidth(bitWidth)
+  ,begin(APInt(bitWidth, 0)),
+  end(APInt::getMaxValue(bitWidth)),
+  stride(APInt(bitWidth, 1)),
+  isBot(!isTop) {
+}
+
+
+
 StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
                                  uint64_t end, uint64_t stride)
     : bitWidth(bitWidth), begin(APInt(bitWidth, begin)),
