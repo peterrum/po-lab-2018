@@ -11,8 +11,6 @@
 #include "../../src/util/util.h"
 #include "../../src/vsa.h"
 
-#define DEBUG_TYPE "hello"
-
 namespace {
 
 struct VsaBenchmarkPass : public ModulePass {
@@ -22,6 +20,9 @@ struct VsaBenchmarkPass : public ModulePass {
   VsaBenchmarkPass() : ModulePass(ID) {}
 
   bool runOnModule(Module &M) override {
+
+      /// extract results from VsaPass
+      const auto &results = getAnalysis<VsaPass>().getResult();
 
     /// analysis has made no modifications
     return false;

@@ -33,7 +33,7 @@ private:
   VsaResult result;
 public:
     
-  VsaPass(bool do_print = true)
+  VsaPass(bool do_print = false)
       : ModulePass(ID), do_print(do_print), worklist(),
         result(globalProgramPoints) {}
 
