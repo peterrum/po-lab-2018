@@ -43,7 +43,8 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
     }
   }
 
-  /// prune state with predominator
+  /// prune state with predominator (to get rid of mappings that are NOT
+  /// guaranteed to be in the state)
   if(numPreds>1)
     newState.prune(programPoints[DT.getNode(&BB)->getIDom()->getBlock()]);
 
@@ -112,7 +113,7 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
       /// perform comparison
       auto temp = ad0->icmp(cmpInst->getPredicate(),
                             cmpInst->getType()->getIntegerBitWidth(), *ad1);
-                            
+
       putBothBranchConditions(I, op0, temp);
     }
 
