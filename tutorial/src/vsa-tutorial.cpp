@@ -39,9 +39,16 @@ struct VsaTutorialPass : public ModulePass {
     // iterate such that we get a block...
     for (auto &f : M.functions()) {
         
-      LazyValueInfoWrapperPass lviwp;
-      lviwp.runOnFunction(f);
-      LazyValueInfo& lvi = lviwp.getLVI();
+      // check if function is empty
+      if(f.begin()==f.end())
+        continue;
+        
+      STD_OUTPUT("\n----------------------------------");
+      STD_OUTPUT("Function: " << f.getName() << ":");
+      STD_OUTPUT("----------------------------------");
+
+      // get LazyValueInfo for function 
+      LazyValueInfo& lvi = getAnalysis<LazyValueInfoWrapperPass>(f).getLVI();
       
       for (auto &b : f) {
         
@@ -85,6 +92,7 @@ struct VsaTutorialPass : public ModulePass {
             if(abstractValue->isConstant())
                 STD_OUTPUT("AD getConstant if constant: '" << abstractValue->getConstant() << "'");
 
+            // do the same for LazyValueInfo
             auto lvi_const = lvi.getConstant(&i, &b);
             if(!(lvi_const==nullptr))
                 STD_OUTPUT("LazyValueInfo getConstant: '" << abstractValue->getConstant() << "'");
@@ -97,7 +105,6 @@ struct VsaTutorialPass : public ModulePass {
 
               STD_OUTPUT("----------------------------------");
         }
-        STD_OUTPUT("----------------------------------");
       }
     }
 
@@ -108,6 +115,7 @@ struct VsaTutorialPass : public ModulePass {
   // We don't modify the program, so we preserve all analysis.
   void getAnalysisUsage(AnalysisUsage &AU) const override {
     AU.setPreservesAll();
+    AU.addRequired<LazyValueInfoWrapperPass>();
   }
 };
 }
