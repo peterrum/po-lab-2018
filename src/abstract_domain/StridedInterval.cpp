@@ -219,44 +219,50 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
 
 bool StridedInterval::lessOrEqual(AbstractDomain &other) {
   StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
+  if (isBot) {
+    return true;
+  } else if (otherMSI->isBot) {
+    return false;
+  }
+  if (otherMSI->bitWidth != bitWidth) {
+  }
   assert(otherMSI->bitWidth == bitWidth);
-  // APInt N{pow2(bitWidth + 1, bitWidth)};
   APInt a{begin};
   APInt b{end};
   APInt s{stride};
   APInt c{otherMSI->begin};
   APInt d{otherMSI->end};
   APInt t{otherMSI->stride};
-  if (s == 0) {
+  if (s.isNullValue()) {
     return otherMSI->contains(a);
   } else if (t == 0) {
     return false;
   } else if (b == add_(a, s)) /* mod N */ {
     return otherMSI->contains(a) && otherMSI->contains(b);
-  } else if (mod(s, t) == 0) {
-    if (mod(pow2(bitWidth, bitWidth-1), t) == 0 && sub_(c, d) /* mod N */ == t) { // t | 2^n <=> 2**(n-1) = 0 mod t
-      return mod(sub_(a.zext(bitWidth+1), c.zext(bitWidth+1)).trunc(bitWidth), t) == 0 && mod(s, t) == 0;
+  } else if (mod(s, t).isNullValue()) {
+    if (mod(pow2(bitWidth, bitWidth-1), t).isNullValue() && sub_(c, d) /* mod N */ == t) { // t | 2^n <=> 2**(n-1) = 0 mod t
+      return mod(sub_(a.zext(bitWidth+1), c.zext(bitWidth+1)).trunc(bitWidth), t).isNullValue() && mod(s, t).isNullValue();
     } else {
       APInt b_ {sub_(b, a) /* mod N */};
       APInt c_ {sub_(c, a) /* mod N */};
       APInt d_ {sub_(d, a) /* mod N */};
-      if ((sub_(c, d) /* mod N */).ule(s) && d_.ult(c_) && d_.ule(b_) && c_.ule(b_)) {
+      if (d_.ult(c_) && c_.ule(b_)) {
         APInt e_ = mul_(s, div(d_, s));
         APInt f_ = sub_(b_, mul_(s, div(sub_(b_, c_), s))) /* mod N */; // save since c_ < b_
-        if (sub_(f_, e_) == s && mod(s, t) == 0) { // e_ <= f_?
+        if (sub_(f_, e_) == s) { // e_ <= f_?
           if (e_.ult(s)) {
-            if (otherMSI->contains(a) && mod(c_, t) == 0) {
+            if (otherMSI->contains(a) && mod(c_, t).isNullValue()) {
               return true;
             }
-          } else if (otherMSI->contains(b) && mod(d_, t) == 0) {
+          } else if (otherMSI->contains(b) && mod(d_, t).isNullValue()) {
             return true;
           }
         }
       }
       if (c_.ule(d_)) {
-        return c_ == 0 && b_.ule(d_);
+        return c_.isNullValue() && b_.ule(d_);
       } else {
-        return b_.ule(d_) && mod(sub_(d_, b_), t) == 0;
+        return b_.ule(d_) && mod(sub_(d_, b_), t).isNullValue();
       }
     }
   } else {
