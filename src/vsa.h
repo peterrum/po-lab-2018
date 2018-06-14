@@ -52,7 +52,8 @@ public:
       if (function.empty())
         continue;
 
-      VsaVisitor vis(worklist, function);
+      VsaVisitor vis(worklist,
+              getAnalysis<DominatorTreeWrapperPass>(function).getDomTree());
 
       /// get the first basic block and push it into the worklist
       worklist.push(&function.front());
@@ -115,6 +116,7 @@ public:
   // We don't modify the program, so we preserve all analyses.
   void getAnalysisUsage(AnalysisUsage &AU) const override {
     AU.setPreservesAll();
+    AU.addRequired<DominatorTreeWrapperPass>();
   }
   
   VsaResult& getResult(){

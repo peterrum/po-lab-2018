@@ -45,7 +45,7 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
 
   /// prune state with predominator
   if(numPreds>1)
-    newState.prune(programPoints[DT->getNode(&BB)->getIDom()->getBlock()]);
+    newState.prune(programPoints[DT.getNode(&BB)->getIDom()->getBlock()]);
 
   /// visited and still bottom: something is wrong...
   /// none of the preceeding basic blocks has been visited!?

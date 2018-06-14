@@ -20,19 +20,8 @@ namespace pcpo {
 class VsaVisitor : public InstVisitor<VsaVisitor, void> {
 
 public:
-  VsaVisitor(WorkList &q, Function &function)
-      : worklist(q), newState(), bcs(programPoints) {
-    dt.runOnFunction(function);
-    DT = &dt.getDomTree();
-
-    for (auto &bb : function)
-      if (DT->getNode(&bb)->getLevel() > 0) {
-        DEBUG_OUTPUT(bb.getName()
-                     << "  "
-                     << DT->getNode(&bb)->getIDom()->getBlock()->getName()
-                     << "\n");
-      }
-  };
+  VsaVisitor(WorkList &q, DominatorTree& DT)
+      : worklist(q), DT(DT), newState(), bcs(programPoints){};
 
   /// create lub of states of preceeding basic blocks and use it as newState;
   /// the visitor automatically visits all instructions of this basic block
@@ -117,8 +106,7 @@ private:
     std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>> &valuePair);
 
   WorkList &worklist;
-  mutable DominatorTree *DT = nullptr;
-  DominatorTreeWrapperPass dt; //?
+  DominatorTree& DT;
   State newState;
   std::map<BasicBlock *, State> programPoints;
   BranchConditions bcs;
