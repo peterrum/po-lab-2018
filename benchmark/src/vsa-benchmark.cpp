@@ -39,10 +39,6 @@ struct VsaBenchmarkPass : public ModulePass {
           if(f.begin()==f.end())
               continue;
 
-          STD_OUTPUT("\n----------------------------------");
-          STD_OUTPUT("Function: " << f.getName() << ":");
-          STD_OUTPUT("----------------------------------");
-
           /// get LazyValueInfo for function
           LazyValueInfo& lvi = getAnalysis<LazyValueInfoWrapperPass>(f).getLVI();
 
@@ -91,10 +87,7 @@ struct VsaBenchmarkPass : public ModulePass {
           }
       }
 
-      STD_OUTPUT("VSA more precise " << vsa_count);
-      STD_OUTPUT("LVI more precise " << lvi_count);
-      STD_OUTPUT("VSA == LVI " << eq_count);
-      STD_OUTPUT("uncomparable " << uncomp_count);
+      STD_OUTPUT(vsa_count << "," << lvi_count << "," << eq_count << "," << uncomp_count);
 
     /// analysis has made no modifications
     return false;
