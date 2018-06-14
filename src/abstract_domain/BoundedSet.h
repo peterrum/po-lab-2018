@@ -17,6 +17,7 @@ struct Comparator {
 
 class BoundedSet : public AbstractDomain {
 private:
+  unsigned bitWidth;
   std::set<APInt, Comparator> values;
   bool top{false};
   shared_ptr<AbstractDomain>
@@ -28,9 +29,9 @@ private:
       std::function<bool(const APInt &, const APInt &)> comparision,
       CmpInst::Predicate pred);
 
-  shared_ptr<AbstractDomain> createBoundedSetPointer(bool top);
+  shared_ptr<AbstractDomain> createBoundedSetPointer(unsigned bitWidth, bool top);
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-  createBoundedSetPointerPair(bool firstTop, bool secondTop);
+  createBoundedSetPointerPair(unsigned bitWidth, bool firstTop, bool secondTop);
   bool containsValue(unsigned numBits, uint64_t n) const;
   void warnIfContainsZero(unsigned numBits);
   void warnIfDivisionOverflowPossible(unsigned numBits, BoundedSet &other);
@@ -75,9 +76,11 @@ public:
   explicit BoundedSet(APInt value);
 
   BoundedSet(const BoundedSet & b);
-  explicit BoundedSet(bool isTop);
-  BoundedSet(std::initializer_list<APInt> vals);
+  explicit BoundedSet(unsigned numBits, bool isTop);
+  BoundedSet(unsigned numBits, std::initializer_list<APInt> vals);
   BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
+  unsigned getBitWidth() const;
+  std::set<APInt, Comparator> getValues() const;
   bool isTop() const;
   bool isBottom() const;
 
@@ -91,12 +94,12 @@ public:
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);
 
-  static shared_ptr<AbstractDomain> create_bottom(unsigned /*numBits*/) {
-    return std::shared_ptr<AbstractDomain>(new BoundedSet(false));
+  static shared_ptr<AbstractDomain> create_bottom(unsigned bitWidth) {
+    return std::shared_ptr<AbstractDomain>(new BoundedSet(bitWidth, false));
   }
 
-  static shared_ptr<AbstractDomain> create_top(unsigned /*numBits*/) {
-    return std::shared_ptr<AbstractDomain>(new BoundedSet(true));
+  static shared_ptr<AbstractDomain> create_top(unsigned bitWidth) {
+    return std::shared_ptr<AbstractDomain>(new BoundedSet(bitWidth, true));
   }
 };
 } // namespace pcpo

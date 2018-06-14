@@ -6,10 +6,13 @@
 #include <initializer_list>
 #include <iostream>
 #include <iterator>
+#include <limits>
+#include <vector>
 
 namespace pcpo {
 using llvm::APInt;
 using llvm::APIntOps::GreatestCommonDivisor;
+using std::vector;
 
 StridedInterval::StridedInterval(APInt begin, APInt end, APInt stride)
     : bitWidth(begin.getBitWidth()), begin(begin), end(end), stride(stride),
@@ -30,7 +33,62 @@ StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
       end(APInt(bitWidth, end)), stride(APInt(bitWidth, stride)), isBot(false) {
 }
 
-StridedInterval::StridedInterval(BoundedSet &set) : isBot(true) {}
+StridedInterval::StridedInterval(BoundedSet &set)
+    : bitWidth(set.getBitWidth()) {
+  if (set.isBottom()) {
+    isBot = true;
+    return;
+  } else if (set.isTop()) {
+    begin = APInt{bitWidth, 0};
+    end = APInt::getMaxValue(bitWidth);
+    stride = APInt{bitWidth, 1};
+  } else {
+    const auto vals = set.getValues();
+    assert(vals.size() > 0);
+    if (vals.size() == 1) {
+      auto value = vals.begin();
+      begin = *value;
+      end = *value;
+      stride = *value;
+    } else {
+      vector<APInt> values{};
+      for (auto &val : vals) {
+        values.push_back(val);
+      }
+      APInt b;
+      APInt e;
+      APInt s;
+      APInt second;
+      const auto size = values.size();
+      const auto offset = size - 1;
+      size_t min = std::numeric_limits<size_t>::max();
+      StridedInterval minInterval;
+      for (size_t i = 0; i < size; i++) {
+        auto lastIndex = (i + offset) % size;
+        b = values.at(i % size);
+        second = values.at((i + 1) % size);
+        e = values.at(lastIndex);
+
+        APInt diff{second};
+        diff -= b;
+        APInt gcd{diff};
+        for (size_t j = (i + 1) % size; j != lastIndex; j = (j + 1) % size) {
+          diff = values.at((j+1)%size);
+          diff -= values.at(j);
+          gcd = GreatestCommonDivisor(gcd, diff);
+        }
+        StridedInterval tmp{b, e, s};
+        if(tmp.size()<=min){
+          min = tmp.size();
+          minInterval = StridedInterval(b, e, s);
+        }
+      }
+      begin = minInterval.begin;
+      end = minInterval.end;
+      stride = minInterval.stride;
+    }
+  }
+}
 
 bool StridedInterval::operator==(const StridedInterval &other) {
   if (this->isBot) {

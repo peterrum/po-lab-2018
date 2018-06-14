@@ -9,8 +9,8 @@ APInt apint1{32, 1, false};
 APInt apint2{32, 2, false};
 APInt apint3{32, 3, false};
 APInt apint5{32, 5, false};
-BoundedSet top{true};
-BoundedSet bot{false};
+BoundedSet top{32, true};
+BoundedSet bot{32, false};
 BoundedSet set0{apint1};
 BoundedSet set1_3{std::set<APInt, Comparator>{apint1, apint3}};
 BoundedSet set2_5{std::set<APInt, Comparator>{apint2, apint5}};
@@ -159,7 +159,7 @@ void testSRem() {
 }
 
 void testIsBottom() {
-  if (!BoundedSet{false}.isBottom()) {
+  if (!BoundedSet{32, false}.isBottom()) {
     errs() << "testIsBottom failed\n";
   }
   if (top.isBottom()) {
@@ -174,9 +174,9 @@ void testLeastUpperBoundWithAdd() {
   errs() << "[testLeastUpperBoundWithAdd]\n";
   BoundedSet a{32, {3}};
   shared_ptr<AbstractDomain> result{new BoundedSet{32, {1, 2}}};
-  shared_ptr<AbstractDomain> tmp{new BoundedSet{false}};
+  shared_ptr<AbstractDomain> tmp{new BoundedSet{32, false}};
 
-  BoundedSet res{false};
+  BoundedSet res{32, false};
   for (int i = 0; i < 4; i++) {
     tmp = result->add(32, a, false, false);
     res = *(static_cast<BoundedSet *>(tmp.get()));
