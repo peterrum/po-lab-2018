@@ -23,12 +23,13 @@ private:
       AbstractDomain &other,
       function<shared_ptr<AbstractDomain>(AbstractDomain &, AbstractDomain &)>
           op);
+  CompositeDomain(shared_ptr<AbstractDomain> del, DelegateType delType);
 
 public:
   // Constructors
   CompositeDomain(APInt value);
   CompositeDomain(bool isTop);
-  CompositeDomain::CompositeDomain(const CompositeDomain &old);
+  CompositeDomain(const CompositeDomain &old);
 
   // Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other,
@@ -68,7 +69,13 @@ public:
   bool isBottom() const;
   void printOut() const;
 
-  virtual llvm::raw_ostream &print(llvm::raw_ostream &os);
+  APInt getValueAt(uint64_t i) const;
+  APInt getUMin() const;
+  APSInt getSMin() const;
+  APInt getUMax() const;
+  APSInt getSMax() const;
+
+  llvm::raw_ostream &print(llvm::raw_ostream &os);
 };
 } // namespace pcpo
 #endif

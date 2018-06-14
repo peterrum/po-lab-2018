@@ -23,6 +23,7 @@ add_llvm_loadable_module( llvm-vsa
   src/api/vsa_result_value.cpp
   test/BoundedSetTest.cpp
   test/StridedIntervalTest.cpp
+  test/CompositeDomainTest.cpp
   test/TestRunner.cpp
   DEPENDS
   intrinsics_gen

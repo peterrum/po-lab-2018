@@ -14,6 +14,7 @@
 
 #include "BoundedSetTest.h"
 #include "StridedIntervalTest.h"
+#include "CompositeDomainTest.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Pass.h"
@@ -28,8 +29,9 @@ struct Hello : public FunctionPass {
   Hello() : FunctionPass(ID) {}
 
   bool runOnFunction(Function &F) override {
-    pcpo::runBoundedSet();
+ //   pcpo::runBoundedSet();
     pcpo::runStridedInterval();
+    pcpo::runCompositeDomain();
     return false;
   }
 };

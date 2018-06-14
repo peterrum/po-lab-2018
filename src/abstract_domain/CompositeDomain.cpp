@@ -1,4 +1,5 @@
 #include "CompositeDomain.h"
+#include "llvm/Support/raw_os_ostream.h"
 #include <functional>
 #include <memory>
 
@@ -6,19 +7,19 @@ namespace pcpo {
 using std::function;
 using std::shared_ptr;
 
-CompositeDomain::CompositeDomain(APInt value) {
+CompositeDomain::CompositeDomain(APInt value) : delegateType{boundedSet} {
   delegate = shared_ptr<AbstractDomain>{new BoundedSet{value}};
 }
 
 // if isTop==true then we create a top delegate
 // if isTop==false then we create a bottom delegate
-CompositeDomain::CompositeDomain(bool isTop) {
+CompositeDomain::CompositeDomain(bool isTop) : delegateType{boundedSet} {
   delegate = shared_ptr<AbstractDomain>{new BoundedSet{isTop}};
 }
 
 CompositeDomain::CompositeDomain(const CompositeDomain &old)
     : delegateType{old.delegateType} {
-  if (old.getDelegateType == boundedSet) {
+  if (old.delegateType == boundedSet) {
     BoundedSet *oldBs = static_cast<BoundedSet *>(old.delegate.get());
     delegate = shared_ptr<AbstractDomain>{new BoundedSet{*oldBs}};
   } else {
@@ -27,50 +28,70 @@ CompositeDomain::CompositeDomain(const CompositeDomain &old)
   }
 }
 
-// computeOperation expects a CompositeDomain (CD) and a binary function to be evaluated on these.
-// In case both (this and the argument) CompositeDomains contain a BoundedSet (BS), the function is executed on these.
-// If this results in a top, both BoundedSets are converted to StridedIntervals (SI)
-// and the operation is executed again.
-// In case one of the CD contains a BS and the other a SI, the BS is converted to a SI.
-// In case both CD contain a SI, the function is executed on the SIs.
+CompositeDomain::CompositeDomain(shared_ptr<AbstractDomain> del,
+                                 DelegateType delType)
+    : delegateType{delType}, delegate{del} {}
+
+// computeOperation expects a CompositeDomain (CD) and a binary function to be
+// evaluated on these. In case both (this and the argument) CompositeDomains
+// contain a BoundedSet (BS), the function is executed on these. If this results
+// in a top, both BoundedSets are converted to StridedIntervals (SI) and the
+// operation is executed again. In case one of the CD contains a BS and the
+// other a SI, the BS is converted to a SI. In case both CD contain a SI, the
+// function is executed on the SIs.
 shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
     AbstractDomain &other,
     function<shared_ptr<AbstractDomain>(AbstractDomain &, AbstractDomain &)>
         op) {
-
   CompositeDomain &otherD = *static_cast<CompositeDomain *>(&other);
 
   if (otherD.getDelegateType() == boundedSet) {
     if (getDelegateType() == boundedSet) {
       // both are bounded sets
-      auto result = op(*delegate.get(), *otherD.delegate.get());
-
+      auto resultOp = op(*delegate.get(), *otherD.delegate.get());
+      errs() << "result is top:" << resultOp->isTop() << "\n";
       // If the operation results in a top, this might be due
       // to the size limitation of the bounded set.
       // Thus, we transform them into strided intervals
-      if (result->isTop()) {
-        StridedInterval otherDelegate{otherD.delegate.get()};
-        StridedInterval thisDelegate{this->delegate.get()};
-        return op(thisDelegate, otherDelegate);
+      if (resultOp->isTop()) {
+        errs() << "switching to strided intervals\n";
+        BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
+        BoundedSet thisBs = *static_cast<BoundedSet *>(this->delegate.get());
+        StridedInterval otherDelegate{otherBs};
+        errs() << "constructed SI\n";
+        StridedInterval thisDelegate{thisBs};
+        errs() << "constructed SI2\n";
+        resultOp = op(thisDelegate, otherDelegate);
+        return shared_ptr<AbstractDomain>{
+            new CompositeDomain{resultOp, stridedInterval}};
       } else {
-        return result;
+        return shared_ptr<AbstractDomain>{
+            new CompositeDomain{resultOp, boundedSet}};
       }
     } else {
+      errs() << "this stridedInterval\n";
+
       // other has a bounded set, we have a strided interval
       // change other to strided interval
       StridedInterval otherDelegate{otherD.delegate.get()};
-      return op(*delegate.get(), otherDelegate);
+      return shared_ptr<AbstractDomain>{new CompositeDomain{
+          op(*delegate.get(), otherDelegate), stridedInterval}};
     }
   } else {
     // other is a strided interval
     if (getDelegateType() == boundedSet) {
+      errs() << "other stridedInterval\n";
+
       // this is a bounded set
       // change to strided interval
       StridedInterval thisDelegate{this->delegate.get()};
-      return op(thisDelegate, *otherD.delegate.get());
+      return shared_ptr<AbstractDomain>{new CompositeDomain{
+          op(thisDelegate, *otherD.delegate.get()), stridedInterval}};
     } else {
       // both are strided intervals already
-      return op(*delegate.get(), *otherD.delegate.get());
+      errs() << "stridedIntervals\n";
+      return shared_ptr<AbstractDomain>{new CompositeDomain{
+          op(*delegate.get(), *otherD.delegate.get()), stridedInterval}};
     }
   }
 }
@@ -205,6 +226,7 @@ llvm::raw_ostream &CompositeDomain::print(llvm::raw_ostream &os) {
 // Lattice interface
 shared_ptr<AbstractDomain>
 CompositeDomain::leastUpperBound(AbstractDomain &other) {
+  errs() << "in lub cd\n";
   auto operation = [](AbstractDomain &lhs, AbstractDomain &rhs) {
     return lhs.leastUpperBound(rhs);
   };
@@ -223,6 +245,26 @@ size_t CompositeDomain::size() const { return delegate->size(); }
 
 bool CompositeDomain::isTop() const { return delegate->isTop(); }
 bool CompositeDomain::isBottom() const { return delegate->isBottom(); }
+
+APInt CompositeDomain::getValueAt(uint64_t i) const {
+  return delegate->getValueAt(i);
+}
+
+APInt CompositeDomain::getUMin() const {
+   return delegate->getUMin();
+}
+
+APSInt CompositeDomain::getSMin() const { 
+  return delegate->getSMin();
+}
+
+APInt CompositeDomain::getUMax() const { 
+  return delegate->getUMax();
+}
+
+APSInt CompositeDomain::getSMax() const { 
+  return delegate->getSMax();
+}
 
 // Debugging methodes
 void CompositeDomain::printOut() const { delegate->printOut(); }
