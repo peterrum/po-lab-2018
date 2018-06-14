@@ -71,7 +71,6 @@ public:
 
   BoundedSet(std::set<APInt, Comparator> values);
   explicit BoundedSet(APInt value);
-  friend std::ostream &operator<<(std::ostream &os, const BoundedSet &bs);
 
   BoundedSet(const BoundedSet & b);
   explicit BoundedSet(bool isTop);
