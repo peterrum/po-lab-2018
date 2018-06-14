@@ -334,7 +334,8 @@ void VsaVisitor::visitBinaryOperator(BinaryOperator &I) {
 }
 
 void VsaVisitor::visitUnaryInstruction(UnaryInstruction &I) {
-  // todo
+  /// interesting ones here would be the ext/trunc instructions, i.e.
+  /// sext, zext, trunc
 }
 
 void VsaVisitor::visitInstruction(Instruction &I) {
