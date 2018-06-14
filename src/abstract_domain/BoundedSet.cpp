@@ -122,7 +122,7 @@ BoundedSet::mul(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
 }
 
 shared_ptr<AbstractDomain>
-BoundedSet::udiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+BoundedSet::udiv(unsigned numBits, AbstractDomain &other) {
   BoundedSet *otherB = static_cast<BoundedSet *>(&other);
   otherB->warnIfContainsZero(numBits);
 
@@ -139,7 +139,7 @@ BoundedSet::udiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
 }
 
 shared_ptr<AbstractDomain>
-BoundedSet::sdiv(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+BoundedSet::sdiv(unsigned numBits, AbstractDomain &other) {
   BoundedSet *otherB = static_cast<BoundedSet *>(&other);
   otherB->warnIfContainsZero(numBits);
   this->warnIfDivisionOverflowPossible(numBits, (*otherB));
@@ -209,7 +209,7 @@ bool BoundedSet::containsValue(unsigned numBits, uint64_t n) {
 }
 
 shared_ptr<AbstractDomain>
-BoundedSet::urem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+BoundedSet::urem(unsigned numBits, AbstractDomain &other) {
   BoundedSet *otherB = static_cast<BoundedSet *>(&other);
   otherB->warnIfContainsZero(numBits);
   auto opURem = [numBits](APInt lhs, APInt rhs) {
@@ -225,7 +225,7 @@ BoundedSet::urem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
 }
 
 shared_ptr<AbstractDomain>
-BoundedSet::srem(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+BoundedSet::srem(unsigned numBits, AbstractDomain &other) {
   BoundedSet *otherB = static_cast<BoundedSet *>(&other);
   otherB->warnIfContainsZero(numBits);
   this->warnIfDivisionOverflowPossible(numBits, (*otherB));
@@ -270,7 +270,7 @@ BoundedSet::shl(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
 
 // lshr shifts the this object to the right, using a zero fill on the right
 shared_ptr<AbstractDomain>
-BoundedSet::lshr(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+BoundedSet::lshr(unsigned numBits, AbstractDomain &other) {
   auto opLShr = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
@@ -281,7 +281,7 @@ BoundedSet::lshr(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
 }
 
 shared_ptr<AbstractDomain>
-BoundedSet::ashr(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+BoundedSet::ashr(unsigned numBits, AbstractDomain &other) {
   auto opAShr = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
@@ -291,7 +291,7 @@ BoundedSet::ashr(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   return compute(other, opAShr);
 }
 shared_ptr<AbstractDomain>
-BoundedSet::and_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+BoundedSet::and_(unsigned numBits, AbstractDomain &other) {
   auto opAnd = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
@@ -301,7 +301,7 @@ BoundedSet::and_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   return compute(other, opAnd);
 }
 shared_ptr<AbstractDomain>
-BoundedSet::or_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+BoundedSet::or_(unsigned numBits, AbstractDomain &other) {
   auto opOr = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;
@@ -311,7 +311,7 @@ BoundedSet::or_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
   return compute(other, opOr);
 }
 shared_ptr<AbstractDomain>
-BoundedSet::xor_(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
+BoundedSet::xor_(unsigned numBits, AbstractDomain &other) {
   auto opNot = [numBits](APInt lhs, APInt rhs) {
     APInt res{numBits, 0};
     res += lhs;

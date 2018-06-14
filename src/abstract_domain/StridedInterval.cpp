@@ -151,25 +151,20 @@ shared_ptr<AbstractDomain> StridedInterval::mul(unsigned numBits,
 }
 
 shared_ptr<AbstractDomain> StridedInterval::udiv(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
+                                                 AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 shared_ptr<AbstractDomain> StridedInterval::sdiv(unsigned numBits,
-                                                 AbstractDomain &other,
-
-                                                 bool nuw, bool nsw) {
+                                                 AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 shared_ptr<AbstractDomain> StridedInterval::urem(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
+                                                 AbstractDomain &other) {
 
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 shared_ptr<AbstractDomain> StridedInterval::srem(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
+                                                 AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 
@@ -180,32 +175,27 @@ shared_ptr<AbstractDomain> StridedInterval::shl(unsigned numBits,
 }
 
 shared_ptr<AbstractDomain> StridedInterval::lshr(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
+                                                 AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::ashr(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
+                                                 AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::and_(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
+                                                 AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::or_(unsigned numBits,
-                                                AbstractDomain &other, bool nuw,
-                                                bool nsw) {
+                                                AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::xor_(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
+                                                 AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 

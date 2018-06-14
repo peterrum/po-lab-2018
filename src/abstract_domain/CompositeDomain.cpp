@@ -78,38 +78,34 @@ shared_ptr<AbstractDomain> CompositeDomain::mul(unsigned numBits,
   return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::udiv(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
-  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                                 AbstractDomain &other) {
+  auto operation = [numBits](AbstractDomain &lhs,
                                        AbstractDomain &rhs) {
-    return lhs.udiv(numBits, rhs, nuw, nsw);
+    return lhs.udiv(numBits, rhs);
   };
   return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::sdiv(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
-  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                                 AbstractDomain &other) {
+  auto operation = [numBits](AbstractDomain &lhs,
                                        AbstractDomain &rhs) {
-    return lhs.sdiv(numBits, rhs, nuw, nsw);
+    return lhs.sdiv(numBits, rhs);
   };
   return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::urem(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
-  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                                 AbstractDomain &other) {
+  auto operation = [numBits](AbstractDomain &lhs,
                                        AbstractDomain &rhs) {
-    return lhs.urem(numBits, rhs, nuw, nsw);
+    return lhs.urem(numBits, rhs);
   };
   return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::srem(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
-  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                                 AbstractDomain &other) {
+  auto operation = [numBits](AbstractDomain &lhs,
                                        AbstractDomain &rhs) {
-    return lhs.srem(numBits, rhs, nuw, nsw);
+    return lhs.srem(numBits, rhs);
   };
   return computeOperation(other, operation);
 }
@@ -125,47 +121,42 @@ shared_ptr<AbstractDomain> CompositeDomain::shl(unsigned numBits,
   return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::lshr(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
-  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                                 AbstractDomain &other) {
+  auto operation = [numBits](AbstractDomain &lhs,
                                        AbstractDomain &rhs) {
-    return lhs.lshr(numBits, rhs, nuw, nsw);
+    return lhs.lshr(numBits, rhs);
   };
   return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::ashr(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
-  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                                 AbstractDomain &other) {
+  auto operation = [numBits](AbstractDomain &lhs,
                                        AbstractDomain &rhs) {
-    return lhs.ashr(numBits, rhs, nuw, nsw);
+    return lhs.ashr(numBits, rhs);
   };
   return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::and_(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
-  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                                 AbstractDomain &other) {
+  auto operation = [numBits](AbstractDomain &lhs,
                                        AbstractDomain &rhs) {
-    return lhs.and_(numBits, rhs, nuw, nsw);
+    return lhs.and_(numBits, rhs);
   };
   return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::or_(unsigned numBits,
-                                                AbstractDomain &other, bool nuw,
-                                                bool nsw) {
-  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                                AbstractDomain &other) {
+  auto operation = [numBits](AbstractDomain &lhs,
                                        AbstractDomain &rhs) {
-    return lhs.or_(numBits, rhs, nuw, nsw);
+    return lhs.or_(numBits, rhs);
   };
   return computeOperation(other, operation);
 }
 shared_ptr<AbstractDomain> CompositeDomain::xor_(unsigned numBits,
-                                                 AbstractDomain &other,
-                                                 bool nuw, bool nsw) {
-  auto operation = [numBits, nuw, nsw](AbstractDomain &lhs,
+                                                 AbstractDomain &other) {
+  auto operation = [numBits](AbstractDomain &lhs,
                                        AbstractDomain &rhs) {
-    return lhs.xor_(numBits, rhs, nuw, nsw);
+    return lhs.xor_(numBits, rhs);
   };
   return computeOperation(other, operation);
 }

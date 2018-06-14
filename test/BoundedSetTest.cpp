@@ -124,7 +124,7 @@ void testUDiv() {
   BoundedSet divisorZero{32, {0, 1}};
   errs()
       << "Next Line should contain a warning for possible division by zero.\n";
-  auto result = dividend.udiv(32, divisorZero, false, false);
+  auto result = dividend.udiv(32, divisorZero);
   if (!(*(static_cast<BoundedSet *>(result.get())) == dividend)) {
     errs() << "testUDiv failed\n";
     errs() << (*result.get()) << "\n";
@@ -137,7 +137,7 @@ void testSDiv() {
   BoundedSet setWithMinusOne{4, {15, 3}};
   errs()
       << "Next Line should contain a warning for possible division overflow.\n";
-  auto result = minSValue.srem(4, setWithMinusOne, false, false);
+  auto result = minSValue.srem(4, setWithMinusOne);
   if (!(*(static_cast<BoundedSet *>(result.get())) == BoundedSet{4, {14}})) {
     errs() << "testSDiv failed\n";
     errs() << (*result.get()) << "\n";
@@ -150,7 +150,7 @@ void testSRem() {
   BoundedSet setWithMinusOne{4, {15, 3}};
   errs()
       << "Next Line should contain a warning for possible division overflow.\n";
-  auto result = minSValue.srem(4, setWithMinusOne, false, false);
+  auto result = minSValue.srem(4, setWithMinusOne);
   if (!(*(static_cast<BoundedSet *>(result.get())) == BoundedSet{4, {14}})) {
     errs() << "testSRem failed\n";
     errs() << *result.get() << "\n";
