@@ -6,10 +6,13 @@
 #include <initializer_list>
 #include <iostream>
 #include <iterator>
+#include <limits>
+#include <vector>
 
 namespace pcpo {
 using llvm::APInt;
 using llvm::APIntOps::GreatestCommonDivisor;
+using std::vector;
 
 StridedInterval::StridedInterval(APInt begin, APInt end, APInt stride)
     : bitWidth(begin.getBitWidth()), begin(begin), end(end), stride(stride),
@@ -30,7 +33,62 @@ StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
       end(APInt(bitWidth, end)), stride(APInt(bitWidth, stride)), isBot(false) {
 }
 
-StridedInterval::StridedInterval(BoundedSet &set) : isBot(true) {}
+StridedInterval::StridedInterval(BoundedSet &set)
+    : bitWidth(set.getBitWidth()) {
+  if (set.isBottom()) {
+    isBot = true;
+    return;
+  } else if (set.isTop()) {
+    begin = APInt{bitWidth, 0};
+    end = APInt::getMaxValue(bitWidth);
+    stride = APInt{bitWidth, 1};
+  } else {
+    const auto vals = set.getValues();
+    assert(vals.size() > 0);
+    if (vals.size() == 1) {
+      auto value = vals.begin();
+      begin = *value;
+      end = *value;
+      stride = *value;
+    } else {
+      vector<APInt> values{};
+      for (auto &val : vals) {
+        values.push_back(val);
+      }
+      APInt b;
+      APInt e;
+      APInt s;
+      APInt second;
+      const auto size = values.size();
+      const auto offset = size - 1;
+      size_t min = std::numeric_limits<size_t>::max();
+      StridedInterval minInterval;
+      for (size_t i = 0; i < size; i++) {
+        auto lastIndex = (i + offset) % size;
+        b = values.at(i % size);
+        second = values.at((i + 1) % size);
+        e = values.at(lastIndex);
+
+        APInt diff{second};
+        diff -= b;
+        APInt gcd{diff};
+        for (size_t j = (i + 1) % size; j != lastIndex; j = (j + 1) % size) {
+          diff = values.at((j+1)%size);
+          diff -= values.at(j);
+          gcd = GreatestCommonDivisor(gcd, diff);
+        }
+        StridedInterval tmp{b, e, s};
+        if(tmp.size()<=min){
+          min = tmp.size();
+          minInterval = StridedInterval(b, e, s);
+        }
+      }
+      begin = minInterval.begin;
+      end = minInterval.end;
+      stride = minInterval.stride;
+    }
+  }
+}
 
 bool StridedInterval::operator==(const StridedInterval &other) {
   if (this->isBot) {
@@ -46,21 +104,24 @@ bool StridedInterval::operator!=(const StridedInterval &other) {
 }
 
 APInt add_(const APInt &a, const APInt &b) {
-  APInt c = a;
+  APInt c = APInt(a.getBitWidth(), 0);
+  c += a;
   c += b;
-  return b;
+  return c;
 }
 
 APInt sub_(const APInt &a, const APInt &b) {
-  APInt c = a;
+  APInt c = APInt(a.getBitWidth(), 0);
+  c += a;
   c -= b;
-  return b;
+  return c;
 }
 
 APInt mul_(const APInt &a, const APInt &b) {
-  APInt c = a;
+  APInt c = APInt(a.getBitWidth(), 0);
+  c += a;
   c *= b;
-  return b;
+  return c;
 }
 
 APInt mod(const APInt &a, const APInt &b) { return a.urem(b); }
@@ -214,10 +275,89 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 
-bool StridedInterval::lessOrEqual(AbstractDomain &other) { return false; }
+bool StridedInterval::lessOrEqual(AbstractDomain &other) {
+  StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
+  if (isBot) {
+    return true;
+  } else if (otherMSI->isBot) {
+    return false;
+  }
+  if (otherMSI->bitWidth != bitWidth) {
+  }
+  assert(otherMSI->bitWidth == bitWidth);
+  APInt a{begin};
+  APInt b{end};
+  APInt s{stride};
+  APInt c{otherMSI->begin};
+  APInt d{otherMSI->end};
+  APInt t{otherMSI->stride};
+  if (s.isNullValue()) {
+    return otherMSI->contains(a);
+  } else if (t == 0) {
+    return false;
+  } else if (b == add_(a, s)) /* mod N */ {
+    return otherMSI->contains(a) && otherMSI->contains(b);
+  } else if (mod(s, t).isNullValue()) {
+    if (mod(pow2(bitWidth, bitWidth-1), t).isNullValue() && sub_(c, d) /* mod N */ == t) { // t | 2^n <=> 2**(n-1) = 0 mod t
+      return mod(sub_(a.zext(bitWidth+1), c.zext(bitWidth+1)).trunc(bitWidth), t).isNullValue() && mod(s, t).isNullValue();
+    } else {
+      APInt b_ {sub_(b, a) /* mod N */};
+      APInt c_ {sub_(c, a) /* mod N */};
+      APInt d_ {sub_(d, a) /* mod N */};
+      if (d_.ult(c_) && c_.ule(b_)) {
+        APInt e_ = mul_(s, div(d_, s));
+        APInt f_ = sub_(b_, mul_(s, div(sub_(b_, c_), s))) /* mod N */; // save since c_ < b_
+        if (sub_(f_, e_) == s) { // e_ <= f_?
+          if (e_.ult(s)) {
+            if (otherMSI->contains(a) && mod(c_, t).isNullValue()) {
+              return true;
+            }
+          } else if (otherMSI->contains(b) && mod(d_, t).isNullValue()) {
+            return true;
+          }
+        }
+      }
+      if (c_.ule(d_)) {
+        return c_.isNullValue() && b_.ule(d_);
+      } else {
+        return b_.ule(d_) && mod(sub_(d_, b_), t).isNullValue();
+      }
+    }
+  } else {
+    return false;
+  }
+}
 
 unsigned StridedInterval::getBitWidth() const { return begin.getBitWidth(); }
 
+bool StridedInterval::contains(APInt &value) const {
+  assert(value.getBitWidth() == bitWidth);
+  if (value.getBitWidth() != bitWidth) {
+    return false;
+  } else if (isBottom()) {
+    return false;
+  } else {
+    if (begin.ule(end)) {
+      if (value.ult(begin) || value.ugt(end)) {
+        return false;
+      } else {
+        APInt offset{value};
+        offset -= begin;
+        APInt remainder = offset.urem(stride);
+        return remainder.isNullValue();
+      }
+    } else { // begin > end
+      if (value.ugt(end) && value.ult(begin)) {
+        return false;
+      } else {
+        APInt offset{value};
+        offset -= begin;
+        APInt remainder = offset.urem(stride);
+        return remainder.isNullValue();
+      }
+    }
+  }
+}
 bool StridedInterval::isTop() const {
   if (isBot) {
     return false;

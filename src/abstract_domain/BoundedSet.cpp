@@ -16,12 +16,15 @@ namespace pcpo {
 using namespace llvm;
 using std::shared_ptr;
 
-BoundedSet::BoundedSet(const BoundedSet & b) : values(b.values), top(b.top) {}
-BoundedSet::BoundedSet(std::set<APInt, Comparator> vals) { values = vals; }
-BoundedSet::BoundedSet(APInt val) { values.insert(val); }
-BoundedSet::BoundedSet(bool isTop) : top(isTop) {}
-BoundedSet::BoundedSet(std::initializer_list<APInt> vals) { values = vals; }
-BoundedSet::BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals) {
+BoundedSet::BoundedSet(const BoundedSet & b) : bitWidth(b.bitWidth), values(b.values), top(b.top) {}
+BoundedSet::BoundedSet(std::set<APInt, Comparator> vals) { 
+
+  values = vals;
+}
+BoundedSet::BoundedSet(APInt val) : bitWidth(val.getBitWidth()) { values.insert(val); }
+BoundedSet::BoundedSet(unsigned numBits, bool isTop) : bitWidth(numBits), top(isTop) {}
+BoundedSet::BoundedSet(unsigned numBits, std::initializer_list<APInt> vals) : bitWidth(numBits) { values = vals; }
+BoundedSet::BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals) : bitWidth(numBits) {
   for (auto val : vals) {
     values.insert(APInt{numBits, val});
   }
@@ -39,9 +42,9 @@ shared_ptr<AbstractDomain> BoundedSet::compute(
     AbstractDomain &other,
     std::function<BoundedSet(const APInt &, const APInt &)> op) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
-    shared_ptr<AbstractDomain> newValues{new BoundedSet(false)};
+    shared_ptr<AbstractDomain> newValues{new BoundedSet(bitWidth, false)};
     if (top || otherB->top) {
-      BoundedSet *res = new BoundedSet(true);
+      BoundedSet *res = new BoundedSet(bitWidth, true);
       return shared_ptr<BoundedSet>{res};
     }
     for (auto &leftVal : values) {
@@ -49,7 +52,7 @@ shared_ptr<AbstractDomain> BoundedSet::compute(
         BoundedSet res = op(leftVal, rightVal);
         newValues = newValues->leastUpperBound(res);
         if (newValues->isTop() || newValues->size() > SET_LIMIT) {
-          shared_ptr<BoundedSet> topSet{new BoundedSet(true)};
+          shared_ptr<BoundedSet> topSet{new BoundedSet(bitWidth, true)};
           return topSet;
         }
       }
@@ -70,7 +73,7 @@ BoundedSet::add(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
                  left.isNonNegative() != newValue.isNonNegative());
     overflow |= (nuw && newValue.ult(right));
     if (overflow) {
-      return BoundedSet{true};
+      return BoundedSet{numBits, true};
     } else {
       return BoundedSet{newValue};
     }
@@ -88,7 +91,7 @@ BoundedSet::sub(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
                  left.isNonNegative() != newValue.isNonNegative());
     overflow |= (nuw && newValue.ugt(right));
     if (overflow) {
-      return BoundedSet{true};
+      return BoundedSet{numBits, true};
     } else {
       return BoundedSet{newValue};
     }
@@ -113,7 +116,7 @@ BoundedSet::mul(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
       }
     }
     if (overflow) {
-      return BoundedSet{true};
+      return BoundedSet{numBits, true};
     } else {
       return BoundedSet{res};
     }
@@ -128,7 +131,7 @@ BoundedSet::udiv(unsigned numBits, AbstractDomain &other) {
 
   auto opUDiv = [numBits](APInt lhs, APInt rhs) {
     if (rhs == 0) {
-      return BoundedSet{false};
+      return BoundedSet{numBits, false};
     }
     APInt res{numBits, 0};
     res += lhs;
@@ -145,13 +148,13 @@ BoundedSet::sdiv(unsigned numBits, AbstractDomain &other) {
   this->warnIfDivisionOverflowPossible(numBits, (*otherB));
   auto opSDiv = [numBits](APInt lhs, APInt rhs) {
     if (rhs == 0) {
-      return BoundedSet{false};
+      return BoundedSet{numBits, false};
     }
     // check if lhs==MIN_INT and rhs==-1
     // this would lead to an overflow and undefined behavior
     // we ignore this case.
     if (lhs.isMinSignedValue() && rhs.isAllOnesValue()) {
-      return BoundedSet{false};
+      return BoundedSet{numBits, false};
     }
     APInt res{numBits, 0};
     res += lhs;
@@ -196,15 +199,21 @@ void BoundedSet::warnIfDivisionOverflowPossible(unsigned numBits,
   }
 }
 
-bool BoundedSet::containsValue(unsigned numBits, uint64_t n) {
+// private convenience method
+// right now only used to test whether this BoundedSet contains numBits
+bool BoundedSet::containsValue(unsigned numBits, uint64_t n) const {
+  APInt elem{numBits, n};
+  return contains(elem);
+}
+
+bool BoundedSet::contains(APInt &value) const {
   if (isTop()) {
     return true;
   } else if (values.size() == 0) {
     return false;
   } else {
     auto end = values.end();
-    APInt elem{numBits, n};
-    return values.find(elem) != end;
+    return values.find(value) != end;
   }
 }
 
@@ -214,7 +223,7 @@ BoundedSet::urem(unsigned numBits, AbstractDomain &other) {
   otherB->warnIfContainsZero(numBits);
   auto opURem = [numBits](APInt lhs, APInt rhs) {
     if (rhs == 0) {
-      return BoundedSet{false};
+      return BoundedSet{numBits, false};
     }
     APInt res{numBits, 0};
     res += lhs;
@@ -231,13 +240,13 @@ BoundedSet::srem(unsigned numBits, AbstractDomain &other) {
   this->warnIfDivisionOverflowPossible(numBits, (*otherB));
   auto opSRem = [numBits](APInt lhs, APInt rhs) {
     if (rhs == 0) {
-      return BoundedSet{false};
+      return BoundedSet{numBits, false};
     }
     // check if lhs==MIN_INT and rhs==-1
     // this would lead to an overflow and undefined behavior
     // we ignore this case.
     if (lhs.isMinSignedValue() && rhs.isAllOnesValue()) {
-      return BoundedSet{false};
+      return BoundedSet{numBits, false};
     }
     APInt res{numBits, 0};
     res += lhs;
@@ -260,7 +269,7 @@ BoundedSet::shl(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) {
       overflow |= shAmt.uge(lhs.countLeadingZeros());
     }
     if (overflow) {
-      return BoundedSet{true};
+      return BoundedSet{numBits, true};
     } else {
       return BoundedSet{res};
     }
@@ -326,15 +335,15 @@ BoundedSet::xor_(unsigned numBits, AbstractDomain &other) {
 // bottomstd::make_pair<shared_ptr<AbstractDomain>,
 // shared_ptr<AbstractDomain>>(std::make_shared<AbstractDomain>(new
 // BoundedSet(true)), std::make_shared<AbstractDomain>(new BoundedSet(true)));
-shared_ptr<AbstractDomain> BoundedSet::createBoundedSetPointer(bool top) {
-  std::shared_ptr<AbstractDomain> resultPtr(new BoundedSet(top));
+shared_ptr<AbstractDomain> BoundedSet::createBoundedSetPointer(unsigned numBits, bool top) {
+  std::shared_ptr<AbstractDomain> resultPtr(new BoundedSet(numBits, top));
   return resultPtr;
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-BoundedSet::createBoundedSetPointerPair(bool firstTop, bool secondTop) {
+BoundedSet::createBoundedSetPointerPair(unsigned numBits, bool firstTop, bool secondTop) {
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-      createBoundedSetPointer(firstTop), createBoundedSetPointer(secondTop));
+      createBoundedSetPointer(numBits, firstTop), createBoundedSetPointer(numBits, secondTop));
 }
 
 // Returns two subsets of the values of this BoundedSet that that can lead to
@@ -350,18 +359,18 @@ BoundedSet::subsetsForPredicate(
     if (isTop()) {
       if (pred == CmpInst::Predicate::ICMP_EQ) {
         shared_ptr<AbstractDomain> trueSet(new BoundedSet(*otherB));
-        shared_ptr<AbstractDomain> falseSet{new BoundedSet{true}};
+        shared_ptr<AbstractDomain> falseSet{new BoundedSet{bitWidth, true}};
         return std::pair<shared_ptr<AbstractDomain>,
                          shared_ptr<AbstractDomain>>{trueSet, falseSet};
       } else if (pred == CmpInst::Predicate::ICMP_NE) {
-        shared_ptr<AbstractDomain> trueSet{new BoundedSet{true}};
+        shared_ptr<AbstractDomain> trueSet{new BoundedSet{bitWidth, true}};
         shared_ptr<AbstractDomain> falseSet(new BoundedSet(*otherB));
         return std::pair<shared_ptr<AbstractDomain>,
                          shared_ptr<AbstractDomain>>{trueSet, falseSet};
       }
 
       // if this set is top, it will be top in both branches afterwards
-      return createBoundedSetPointerPair(true, true);
+      return createBoundedSetPointerPair(bitWidth, true, true);
     }
 
     if (otherB->isTop()) {
@@ -391,7 +400,7 @@ BoundedSet::subsetsForPredicate(
         trueSet, falseSet);
   }
 
-  return createBoundedSetPointerPair(true, true);
+  return createBoundedSetPointerPair(bitWidth, true, true);
 }
 
 std::function<bool(const APInt &, const APInt &)>
@@ -432,14 +441,14 @@ BoundedSet::icmp(CmpInst::Predicate pred, unsigned numBits,
     return subsetsForPredicate(other, comparisionFunction, pred);
   }
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-      shared_ptr<AbstractDomain>(new BoundedSet(true)),
-      shared_ptr<AbstractDomain>(new BoundedSet(true)));
+      shared_ptr<AbstractDomain>(new BoundedSet(bitWidth, true)),
+      shared_ptr<AbstractDomain>(new BoundedSet(bitWidth, true)));
 }
 
 shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
     if (isTop() || otherB->isTop()) {
-      return shared_ptr<BoundedSet>{new BoundedSet(true)};
+      return shared_ptr<BoundedSet>{new BoundedSet(bitWidth, true)};
     }
     std::set<APInt, Comparator> result;
     for (auto &val : values) {
@@ -453,7 +462,7 @@ shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
       if (result.find(val) == end) {
         count++;
         if (count > SET_LIMIT) {
-          return shared_ptr<BoundedSet>{new BoundedSet(true)};
+          return shared_ptr<BoundedSet>{new BoundedSet(bitWidth, true)};
         }
         result.insert(val);
       }
@@ -559,6 +568,8 @@ llvm::raw_ostream &BoundedSet::print(llvm::raw_ostream &os) {
   return os;
 }
 
+std::set<APInt, Comparator> BoundedSet::getValues() const { return values; }
+
 bool BoundedSet::isTop() const { return top; }
 bool BoundedSet::isBottom() const {
   if (isTop()) {
@@ -567,6 +578,8 @@ bool BoundedSet::isBottom() const {
     return values.size() == 0;
   }
 }
+
+unsigned BoundedSet::getBitWidth() const { return bitWidth; }
 
 size_t BoundedSet::size() const {
     assert(!isTop() && " called size() on T");
