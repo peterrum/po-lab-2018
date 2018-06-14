@@ -38,8 +38,13 @@ struct VsaTutorialPass : public ModulePass {
 
     // iterate such that we get a block...
     for (auto &f : M.functions()) {
+        
+      LazyValueInfoWrapperPass lviwp;
+      lviwp.runOnFunction(f);
+      LazyValueInfo& lvi = lviwp.getLVI();
+      
       for (auto &b : f) {
-
+        
         // is block reachable
         if (!results.isReachable(&b))
           continue; // no
@@ -79,6 +84,10 @@ struct VsaTutorialPass : public ModulePass {
 
             if(abstractValue->isConstant())
                 STD_OUTPUT("AD getConstant if constant: '" << abstractValue->getConstant() << "'");
+
+            auto lvi_const = lvi.getConstant(&i, &b);
+            if(!(lvi_const==nullptr))
+                STD_OUTPUT("LazyValueInfo getConstant: '" << abstractValue->getConstant() << "'");
 
               STD_OUTPUT("AD UMin: '" << abstractValue->getUMin() << "'");
               STD_OUTPUT("AD SMin: '" << abstractValue->getSMin() << "'");
