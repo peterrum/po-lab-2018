@@ -210,11 +210,61 @@ StridedInterval::icmp(CmpInst::Predicate pred, unsigned numBits,
       shared_ptr<AbstractDomain>(new StridedInterval(this->bitWidth, 0, 0, 0)));
 }
 
-size_t StridedInterval::size() const { return 0; }
+size_t StridedInterval::size() const {
+  APInt d = sub_(this->end, this->begin);
+  return div(d, this->stride).getZExtValue();
+}
 
 shared_ptr<AbstractDomain>
 StridedInterval::leastUpperBound(AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+  StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
+  assert(otherMSI->bitWidth == bitWidth);
+  APInt a{begin};
+  APInt b{end};
+  APInt s{stride};
+  APInt c{otherMSI->begin};
+  APInt d{otherMSI->end};
+  APInt t{otherMSI->stride};
+  if (isBot) {
+    return std::shared_ptr<AbstractDomain>{new StridedInterval(c, d, t)};
+  } else if (otherMSI->isBot) {
+    return std::shared_ptr<AbstractDomain>{new StridedInterval(a, b, s)};
+  } else {
+    APInt b_ {sub_(b, a) /* mod N */};
+    APInt c_ {sub_(c, a) /* mod N */};
+    APInt d_ {sub_(d, a) /* mod N */};
+    APInt e, f, u;
+    if (b_.ult(c_) && c_.ult(d_)) { // no overlapping regions
+      APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));
+      APInt e1 = a, f1 = d;
+      APInt u2 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, d));
+      APInt e2 = c, f2 = b;
+      StridedInterval opt1 {e1, f1, u1};
+      StridedInterval opt2 {e2, f2, u2};
+      if (opt1.size() < opt2.size()) {
+        e = e1; f = f1; u = u1;
+      } else {
+        e = e2; f = f2; u = u2;
+      }
+    } else if (c_.ule(b_) && c_.ule(d_) || d_.ule(b_) && c_.ult(d_)) { // one overlapping region
+      if (c_.ule(b_)) {
+        e = a;
+      } else {
+        e = c;
+      }
+      if (d_.ule(b_)) {
+        f = b;
+      } else {
+        f = d;
+      }
+      u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(d, b));
+    } else { // two overlapping regions
+      u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, c));
+      e = mod(a, u);
+      f = sub_({bitWidth, 0}, u); /* mod 2^n */
+    }
+    return std::shared_ptr<AbstractDomain>{new StridedInterval(e, f, u)};
+  }
 }
 
 bool StridedInterval::lessOrEqual(AbstractDomain &other) {
