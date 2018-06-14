@@ -27,13 +27,10 @@ struct VsaTutorialPass : public ModulePass {
 
   bool runOnModule(Module &M) override {
 
-    // run vsa-pass
-    ::VsaPass pass(false);
-    pass.runOnModule(M);
+    // extract results from VsaPass
+    auto &results = getAnalysis<VsaPass>().getResult();
 
-    // extract results
-    auto &results = pass.getResult();
-
+    // print states of all basic blocks of this module
     results.print();
 
     // iterate such that we get a block...
@@ -132,9 +129,12 @@ struct VsaTutorialPass : public ModulePass {
   void getAnalysisUsage(AnalysisUsage &AU) const override {
     AU.setPreservesAll();
     AU.addRequired<LazyValueInfoWrapperPass>();
+    AU.addRequired<VsaPass>();
   }
 };
 }
+
+static RegisterPass<VsaPass> Y("vsapass", "VSA Pass");
 
 char VsaTutorialPass::ID = 0;
 static RegisterPass<VsaTutorialPass> Z("vsatutorialpass", "VSA Tutorial Pass");
