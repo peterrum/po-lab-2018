@@ -512,9 +512,9 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   }
   
   if (isBot) {
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(c, d, t));
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*otherMSI)); // pm
   } else if (otherMSI->isBot) {
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(a, b, s));
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*this)); // pm
   } else {
     APInt b_ (sub_(b, a) /* mod N */);
     APInt c_ (sub_(c, a) /* mod N */);
