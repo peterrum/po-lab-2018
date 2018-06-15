@@ -76,6 +76,8 @@ public:
   APSInt getSMin() const;
   APInt getUMax() const;
   APSInt getSMax() const;
+  
+  unsigned getBitWidth()const;
 
   llvm::raw_ostream &print(llvm::raw_ostream &os);
 

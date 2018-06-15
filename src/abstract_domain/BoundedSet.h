@@ -72,7 +72,7 @@ public:
 
   bool operator==(const BoundedSet &other);
 
-  BoundedSet(std::set<APInt, Comparator> values);
+  BoundedSet(unsigned ,std::set<APInt, Comparator> values);
   explicit BoundedSet(APInt value);
 
   BoundedSet(const BoundedSet & b);

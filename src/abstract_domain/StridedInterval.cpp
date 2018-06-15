@@ -73,6 +73,7 @@ StridedInterval::StridedInterval(BoundedSet &set)
       begin = *value;
       end = *value;
       stride = *value;
+      isBot = false;
     } else {
       // Create StridedInterval from BoundedSet with multiple values
       // for faster access, we first load the values of the BS into a vector
@@ -520,6 +521,16 @@ size_t StridedInterval::size() const {
 shared_ptr<AbstractDomain>
 StridedInterval::leastUpperBound(AbstractDomain &other) {
   StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
+  // pm: shortcut for both abstract domains are equal
+  if(*this == *otherMSI){
+      return shared_ptr<AbstractDomain>(new StridedInterval(*this));
+  } 
+  if (isBot) {
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*otherMSI)); // pm
+  } else if (otherMSI->isBot) {
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*this)); // pm  
+  }
+  
   assert(otherMSI->bitWidth == bitWidth);
   // pm: range s[a,b] should be left of range t[c,d]
   APInt a(begin.ult(otherMSI->begin) ? begin            : otherMSI->begin);
@@ -529,16 +540,8 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   APInt d(begin.ult(otherMSI->begin) ? otherMSI->end    : end);
   APInt t(begin.ult(otherMSI->begin) ? otherMSI->stride : stride);
   
-  // pm: shortcut for both abstract domains are equal
-  if(*this == *otherMSI){
-      return shared_ptr<AbstractDomain>(new StridedInterval(*this));
-  }
-  
-  if (isBot) {
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(*otherMSI)); // pm
-  } else if (otherMSI->isBot) {
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(*this)); // pm
-  } else {
+
+  {
     APInt b_ (sub_(b, a) /* mod N */);
     APInt c_ (sub_(c, a) /* mod N */);
     APInt d_ (sub_(d, a) /* mod N */);
@@ -642,7 +645,7 @@ bool StridedInterval::lessOrEqual(AbstractDomain &other) {
   }
 }
 
-unsigned StridedInterval::getBitWidth() const { return begin.getBitWidth(); }
+unsigned StridedInterval::getBitWidth() const { return bitWidth; }
 
 bool StridedInterval::contains(APInt &value) const {
   assert(value.getBitWidth() == bitWidth);

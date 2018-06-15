@@ -63,6 +63,8 @@ public:
   // Lattice interface
   virtual shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other) = 0;
   virtual bool lessOrEqual(AbstractDomain &other) = 0;
+  
+  virtual unsigned getBitWidth()const = 0;
 
   // |gamma(this)|
   virtual size_t size() const = 0;

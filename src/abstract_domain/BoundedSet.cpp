@@ -17,8 +17,7 @@ using namespace llvm;
 using std::shared_ptr;
 
 BoundedSet::BoundedSet(const BoundedSet & b) : bitWidth(b.bitWidth), values(b.values), top(b.top) {}
-BoundedSet::BoundedSet(std::set<APInt, Comparator> vals) { 
-
+BoundedSet::BoundedSet(unsigned bitWidth, std::set<APInt, Comparator> vals) : bitWidth(bitWidth) { 
   values = vals;
 }
 BoundedSet::BoundedSet(APInt val) : bitWidth(val.getBitWidth()) { values.insert(val); }
@@ -394,8 +393,8 @@ BoundedSet::subsetsForPredicate(
       }
     }
 
-    shared_ptr<AbstractDomain> trueSet{new BoundedSet(trueValues)};
-    shared_ptr<AbstractDomain> falseSet{new BoundedSet(falseValues)};
+    shared_ptr<AbstractDomain> trueSet{new BoundedSet(bitWidth, trueValues)};
+    shared_ptr<AbstractDomain> falseSet{new BoundedSet(bitWidth, falseValues)};
     return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
         trueSet, falseSet);
   }
@@ -467,7 +466,7 @@ shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
         result.insert(val);
       }
     }
-    shared_ptr<BoundedSet> res{new BoundedSet{result}};
+    shared_ptr<BoundedSet> res{new BoundedSet(bitWidth,result)};
     return res;
   }
   return nullptr;

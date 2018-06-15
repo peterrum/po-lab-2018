@@ -12,8 +12,8 @@ APInt apint5{32, 5, false};
 BoundedSet top{32, true};
 BoundedSet bot{32, false};
 BoundedSet set0{apint1};
-BoundedSet set1_3{std::set<APInt, Comparator>{apint1, apint3}};
-BoundedSet set2_5{std::set<APInt, Comparator>{apint2, apint5}};
+BoundedSet set1_3{32, std::set<APInt, Comparator>{apint1, apint3}};
+BoundedSet set2_5{32, std::set<APInt, Comparator>{apint2, apint5}};
 
 void testConstructor() {
   errs() << "[testConstructor] top: ";
