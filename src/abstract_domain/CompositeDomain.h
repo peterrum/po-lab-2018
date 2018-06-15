@@ -78,6 +78,14 @@ public:
   APSInt getSMax() const;
 
   llvm::raw_ostream &print(llvm::raw_ostream &os);
+
+  static shared_ptr<AbstractDomain> create_bottom(unsigned bitWidth) {
+    return std::shared_ptr<AbstractDomain>(new CompositeDomain(bitWidth, false));
+  }
+
+  static shared_ptr<AbstractDomain> create_top(unsigned bitWidth) {
+    return std::shared_ptr<AbstractDomain>(new CompositeDomain(bitWidth, true));
+  }
 };
 } // namespace pcpo
 #endif
