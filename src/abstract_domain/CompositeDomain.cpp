@@ -263,6 +263,17 @@ bool CompositeDomain::lessOrEqual(AbstractDomain &other) {
   CompositeDomain &otherD = *static_cast<CompositeDomain *>(&other);
   // TODO: Implement lessOrEqual for both BoundedSet and StridedInterval in
   // these classes
+  //return delegate->lessOrEqual(*otherD.delegate.get());
+  if (delegateType == stridedInterval && otherD.getDelegateType() == boundedSet) {
+      BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
+      StridedInterval otherDelegate(otherBs);
+      return delegate->lessOrEqual(otherDelegate);
+  }
+  if (getDelegateType() == boundedSet && otherD.getDelegateType() == stridedInterval) {
+      BoundedSet thisBs = *static_cast<BoundedSet *>(this->delegate.get());
+      StridedInterval thisDelegate{thisBs};
+      return thisDelegate.lessOrEqual(*otherD.delegate.get());
+  }
   return delegate->lessOrEqual(*otherD.delegate.get());
 }
 
