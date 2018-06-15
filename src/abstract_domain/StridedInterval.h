@@ -52,6 +52,9 @@ public:
       CmpInst::Predicate pred);
   
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+    subsetsForPredicateULE(StridedInterval &A, StridedInterval &B);
+  
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
 
   // |gamma(this)|

@@ -367,14 +367,79 @@ StridedInterval::subsetsForPredicate(
               shared_ptr<AbstractDomain>(new StridedInterval(maxBegin, minEnd, 
                         APInt(this->bitWidth, 1))));
         
+    } else if(pred == CmpInst::Predicate::ICMP_ULE ||
+                    pred == CmpInst::Predicate::ICMP_SLE){
+        
+//        errs() << "############################################\n";
+//        
+//        APInt maxBeginFalse = this->begin.uge(otherB->begin+1) ? 
+//            this->begin : (otherB->begin+1);
+//        
+//        APInt minEndTrue = this->end.ule(otherB->end) ? 
+//            this->end : otherB->end;
+//        
+//        shared_ptr<AbstractDomain> a1, a2;
+//                
+//        if(this->begin.ugt(minEndTrue)){
+//            a1 = StridedInterval::create_bottom(this->bitWidth);
+//        }else {
+//            a1 = shared_ptr<AbstractDomain>(new StridedInterval(
+//                    this->begin, minEndTrue, APInt(this->bitWidth, 1)));
+//        }
+//                
+//        if(maxBeginFalse.ugt(this->end)){
+//            a2 = StridedInterval::create_bottom(this->bitWidth);
+//        }else {
+//            a2 = shared_ptr<AbstractDomain>(new StridedInterval(
+//                    maxBeginFalse, this->end, APInt(this->bitWidth, 1)));
+//        }
+//        
+//        return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+//              a1, a2);
+           
+        return subsetsForPredicateULE(*this, *otherB);
+    } else if(pred == CmpInst::Predicate::ICMP_UGE ||
+                    pred == CmpInst::Predicate::ICMP_SGE){
+        auto temp = subsetsForPredicateULE(*this, *otherB);
+        return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(temp.second, temp.first);
     }
 
   }
-
+  
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       StridedInterval::create_top(this->bitWidth),
       StridedInterval::create_top(this->bitWidth));
 }
+
+std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+StridedInterval::subsetsForPredicateULE(
+    StridedInterval &A, StridedInterval &B) {
+        APInt maxBeginFalse = A.begin.uge(B.begin+1) ? 
+            A.begin : (B.begin+1);
+        
+        APInt minEndTrue = A.end.ule(B.end) ? 
+            A.end : B.end;
+        
+        shared_ptr<AbstractDomain> a1, a2;
+                
+        if(A.begin.ugt(minEndTrue)){
+            a1 = StridedInterval::create_bottom(A.bitWidth);
+        }else {
+            a1 = shared_ptr<AbstractDomain>(new StridedInterval(
+                    A.begin, minEndTrue, APInt(A.bitWidth, 1)));
+        }
+                
+        if(maxBeginFalse.ugt(A.end)){
+            a2 = StridedInterval::create_bottom(A.bitWidth);
+        }else {
+            a2 = shared_ptr<AbstractDomain>(new StridedInterval(
+                    maxBeginFalse, A.end, APInt(A.bitWidth, 1)));
+        }
+        
+        return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+              a1, a2);
+}
+        
 
 std::function<bool(const APInt &, const APInt &)>
 getComparisionFunctionTemp(CmpInst::Predicate pred) {
