@@ -119,8 +119,8 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
 
     /// right argument (r)
     if (Instruction::classof(op1)) {
-      /// perform comparison with inverted predicate
-      auto temp = ad1->icmp(cmpInst->getInversePredicate(),
+      /// perform comparison with swapped predicate
+      auto temp = ad1->icmp(cmpInst->getSwappedPredicate(),
                             cmpInst->getType()->getIntegerBitWidth(), *ad0);
 
       putBothBranchConditions(I, op1, temp);
