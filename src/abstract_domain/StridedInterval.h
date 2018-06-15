@@ -43,6 +43,14 @@ public:
   shared_ptr<AbstractDomain> xor_(unsigned numBits, AbstractDomain &other);
 
   // Other operations
+  
+  
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+  subsetsForPredicate(
+      AbstractDomain &other,
+      std::function<bool(const APInt &, const APInt &)> comparision,
+      CmpInst::Predicate pred);
+  
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
 
@@ -58,13 +66,15 @@ public:
   explicit StridedInterval(APInt value);
   friend std::ostream &operator<<(std::ostream &os, const StridedInterval &bs);
 
-  explicit StridedInterval(bool isTop);
+  explicit StridedInterval(bool isTop, unsigned bitWidth);
   StridedInterval();
+  StridedInterval(const StridedInterval& other);
   StridedInterval(APInt begin, APInt end, APInt stride);
   StridedInterval(unsigned numBits, std::initializer_list<uint64_t> vals);
   StridedInterval(unsigned bitWidth, uint64_t begin, uint64_t end,
                   uint64_t stride);
   StridedInterval(BoundedSet &set);
+
   unsigned getBitWidth() const;
   bool isTop() const;
   bool isBottom() const;
@@ -73,12 +83,12 @@ public:
 
   virtual llvm::raw_ostream &print(llvm::raw_ostream &os);
 
-  static shared_ptr<AbstractDomain> create_bottom() {
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(false));
+  static shared_ptr<AbstractDomain> create_bottom(unsigned bitWidth) {
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(false, bitWidth));
   }
 
-  static shared_ptr<AbstractDomain> create_top() {
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(true));
+  static shared_ptr<AbstractDomain> create_top(unsigned bitWidth) {
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(true, bitWidth));
   }
 
     APInt getValueAt(uint64_t i) const {

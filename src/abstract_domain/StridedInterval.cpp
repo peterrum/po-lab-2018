@@ -14,6 +14,14 @@ using llvm::APInt;
 using llvm::APIntOps::GreatestCommonDivisor;
 using std::vector;
 
+
+StridedInterval::StridedInterval(const StridedInterval& other)
+    : bitWidth(other.bitWidth), 
+      begin(other.begin), 
+      end(other.end), 
+      stride(other.stride),
+      isBot(other.isBot) {}
+
 StridedInterval::StridedInterval(APInt begin, APInt end, APInt stride)
     : bitWidth(begin.getBitWidth()), begin(begin), end(end), stride(stride),
       isBot(false) {
@@ -26,6 +34,15 @@ StridedInterval::StridedInterval(APInt value)
       stride({value.getBitWidth(), 0}), isBot{false} {}
 
 StridedInterval::StridedInterval() : isBot(true) {}
+
+StridedInterval::StridedInterval(bool isTop, unsigned bitWidth): bitWidth(bitWidth)
+  ,begin(APInt(bitWidth, 0)),
+  end(APInt::getMaxValue(bitWidth)),
+  stride(APInt(bitWidth, 1)),
+  isBot(!isTop) {
+}
+
+
 
 StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
                                  uint64_t end, uint64_t stride)
@@ -135,11 +152,11 @@ APInt pow2(unsigned n, int a) {
 }
 
 std::shared_ptr<AbstractDomain> StridedInterval::normalize() {
-  unsigned n{bitWidth};
-  APInt N{pow2(n + 1, n)};
-  APInt a{begin.zext(n + 1)};
-  APInt b{end.zext(n + 1)};
-  APInt s{stride.zext(n + 1)};
+  unsigned n = bitWidth;
+  APInt N(pow2(n + 1, n));
+  APInt a(begin.zext(n + 1));
+  APInt b(end.zext(n + 1));
+  APInt s(stride.zext(n + 1));
   if (s == 0) {
     b = a;
   } else {
@@ -158,8 +175,8 @@ std::shared_ptr<AbstractDomain> StridedInterval::normalize() {
       }
     }
   }
-  return std::shared_ptr<AbstractDomain>{new StridedInterval(
-      a.zextOrTrunc(n), b.zextOrTrunc(n), s.zextOrTrunc(n))};
+  return std::shared_ptr<AbstractDomain>(new StridedInterval(
+      a.zextOrTrunc(n), b.zextOrTrunc(n), s.zextOrTrunc(n)));
 }
 
 shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
@@ -168,18 +185,18 @@ shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
   StridedInterval *otherB = static_cast<StridedInterval *>(&other);
   assert(numBits == bitWidth);
   assert(numBits == otherB->bitWidth);
-  APInt N{pow2(numBits + 1, numBits)};
-  APInt a{begin.zext(numBits + 1)};
-  APInt b{end.zext(numBits + 1)};
-  APInt s{stride.zext(numBits + 1)};
-  APInt c{otherB->begin.zext(numBits + 1)};
-  APInt d{otherB->end.zext(numBits + 1)};
-  APInt t{otherB->stride.zext(numBits + 1)};
-  APInt u{GreatestCommonDivisor(s, t)};
-  APInt b_{a.ule(b) ? b : add_(b, N)};
-  APInt d_{c.ule(d) ? d : add_(d, N)};
-  APInt e{add_(a, c)};
-  APInt f{add_(b_, d_)};
+  APInt N(pow2(numBits + 1, numBits));
+  APInt a(begin.zext(numBits + 1));
+  APInt b(end.zext(numBits + 1));
+  APInt s(stride.zext(numBits + 1));
+  APInt c(otherB->begin.zext(numBits + 1));
+  APInt d(otherB->end.zext(numBits + 1));
+  APInt t(otherB->stride.zext(numBits + 1));
+  APInt u(GreatestCommonDivisor(s, t));
+  APInt b_(a.ule(b) ? b : add_(b, N));
+  APInt d_(c.ule(d) ? d : add_(d, N));
+  APInt e(add_(a, c));
+  APInt f(add_(b_, d_));
   APInt u_, e_, f_;
   if (sub_(f, e).ult(N)) {
     u_ = u;
@@ -261,22 +278,185 @@ shared_ptr<AbstractDomain> StridedInterval::xor_(unsigned numBits,
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-StridedInterval::icmp(CmpInst::Predicate pred, unsigned numBits,
-                      AbstractDomain &other) {
+StridedInterval::subsetsForPredicate(
+    AbstractDomain &other,
+    std::function<bool(const APInt &, const APInt &)> comparision,
+    CmpInst::Predicate pred) {
+  if (StridedInterval *otherB = static_cast<StridedInterval *>(&other)) {
+
+    if (isTop()) {
+      if (pred == CmpInst::Predicate::ICMP_EQ) {
+        shared_ptr<AbstractDomain> trueSet(new StridedInterval(*otherB));
+        shared_ptr<AbstractDomain> falseSet(StridedInterval::create_top(this->bitWidth));
+        return std::pair<shared_ptr<AbstractDomain>,
+                         shared_ptr<AbstractDomain>>(trueSet, falseSet);
+      } else if (pred == CmpInst::Predicate::ICMP_NE) {
+        shared_ptr<AbstractDomain> trueSet(StridedInterval::create_top(this->bitWidth));
+        shared_ptr<AbstractDomain> falseSet(new StridedInterval(*otherB));
+        return std::pair<shared_ptr<AbstractDomain>,
+                         shared_ptr<AbstractDomain>>{trueSet, falseSet};
+      }
+      
+      // if this set is top, it will be top in both branches afterwards
+
+      return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+        StridedInterval::create_top(this->bitWidth),
+        StridedInterval::create_top(this->bitWidth));
+    }
+
+    if (otherB->isTop()) {
+      // if the other set is top; we cannot infer more details about our set
+      // in both branches afterwards thus, the set stays the same
+      shared_ptr<AbstractDomain> copy(new StridedInterval(*this));
+      shared_ptr<AbstractDomain> anotherCopy(new StridedInterval(*this));
+      return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+          copy, anotherCopy);
+    }
+//    std::set<APInt, Comparator> trueValues;
+//    std::set<APInt, Comparator> falseValues;
+//
+//    for (auto &leftVal : values) {
+//      for (auto &rightVal : otherB->values) {
+//        if (comparision(leftVal, rightVal)) {
+//          trueValues.insert(leftVal);
+//        } else {
+//          falseValues.insert(leftVal);
+//        }
+//      }
+//    }
+//
+//    shared_ptr<AbstractDomain> trueSet{new BoundedSet(trueValues)};
+//    shared_ptr<AbstractDomain> falseSet{new BoundedSet(falseValues)};
+//    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+//        trueSet, falseSet);
+  }
+
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-      shared_ptr<AbstractDomain>(new StridedInterval(this->bitWidth, 0, 0, 0)),
-      shared_ptr<AbstractDomain>(new StridedInterval(this->bitWidth, 0, 0, 0)));
+      StridedInterval::create_top(this->bitWidth),
+      StridedInterval::create_top(this->bitWidth));
 }
 
-size_t StridedInterval::size() const { return 0; }
+std::function<bool(const APInt &, const APInt &)>
+getComparisionFunctionTemp(CmpInst::Predicate pred) {
+  switch (pred) {
+  case CmpInst::Predicate::ICMP_EQ:
+    return [](APInt lhs, APInt rhs) { return lhs == rhs; };
+  case CmpInst::Predicate::ICMP_NE:
+    return [](APInt lhs, APInt rhs) { return !(lhs == rhs); };
+  case CmpInst::Predicate::ICMP_UGT:
+    return [](APInt lhs, APInt rhs) { return lhs.ugt(rhs); };
+  case CmpInst::Predicate::ICMP_UGE:
+    return [](APInt lhs, APInt rhs) { return lhs.uge(rhs); };
+  case CmpInst::Predicate::ICMP_ULT:
+    return [](APInt lhs, APInt rhs) { return lhs.ult(rhs); };
+  case CmpInst::Predicate::ICMP_ULE:
+    return [](APInt lhs, APInt rhs) { return lhs.ule(rhs); };
+  case CmpInst::Predicate::ICMP_SGT:
+    return [](APInt lhs, APInt rhs) { return lhs.sgt(rhs); };
+  case CmpInst::Predicate::ICMP_SGE:
+    return [](APInt lhs, APInt rhs) { return lhs.sge(rhs); };
+  case CmpInst::Predicate::ICMP_SLT:
+    return [](APInt lhs, APInt rhs) { return lhs.slt(rhs); };
+  case CmpInst::Predicate::ICMP_SLE:
+    return [](APInt lhs, APInt rhs) { return lhs.sle(rhs); };
+  default:
+    // We don't handle this case
+    return nullptr;
+  }
+}
+
+std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+StridedInterval::icmp(CmpInst::Predicate pred, unsigned numBits,
+                      AbstractDomain &other) {
+  if (pred >= CmpInst::Predicate::ICMP_EQ &&
+      pred <= CmpInst::Predicate::ICMP_SLE) {
+    auto comparisionFunction = getComparisionFunctionTemp(pred);
+    return subsetsForPredicate(other, comparisionFunction, pred);
+  }
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+      shared_ptr<AbstractDomain>(StridedInterval::create_top(this->bitWidth)),
+      shared_ptr<AbstractDomain>(StridedInterval::create_top(this->bitWidth)));
+}
+
+size_t StridedInterval::size() const {
+  APInt d = sub_(this->end, this->begin);
+  return div(d, this->stride).getZExtValue();
+}
 
 shared_ptr<AbstractDomain>
 StridedInterval::leastUpperBound(AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+  StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
+  assert(otherMSI->bitWidth == bitWidth);
+  // pm: range s[a,b] should be left of range t[c,d]
+  APInt a(begin.ult(otherMSI->begin) ? begin            : otherMSI->begin);
+  APInt b(begin.ult(otherMSI->begin) ? end              : otherMSI->end);
+  APInt s(begin.ult(otherMSI->begin) ? stride           : otherMSI->stride);
+  APInt c(begin.ult(otherMSI->begin) ? otherMSI->begin  : begin);
+  APInt d(begin.ult(otherMSI->begin) ? otherMSI->end    : end);
+  APInt t(begin.ult(otherMSI->begin) ? otherMSI->stride : stride);
+  
+  // pm: shortcut for both abstract domains are equal
+  if(*this == *otherMSI){
+      return shared_ptr<AbstractDomain>(this);
+  }
+  
+  if (isBot) {
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(c, d, t));
+  } else if (otherMSI->isBot) {
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(a, b, s));
+  } else {
+    APInt b_ (sub_(b, a) /* mod N */);
+    APInt c_ (sub_(c, a) /* mod N */);
+    APInt d_ (sub_(d, a) /* mod N */);
+    APInt e, f, u;
+    if (b_.ult(c_) && c_.ule(d_)) { // no overlapping regions; pm: ule 
+      APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));
+      APInt e1 = a, f1 = d;
+      APInt u2 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, d));
+      APInt e2 = c, f2 = b;
+      StridedInterval opt1 (e1, f1, u1);
+      StridedInterval opt2 (e2, f2, u2);
+      if (opt1.size() <= opt2.size()) { // pm: less or equal!
+        e = e1; f = f1; u = u1;
+      } else {
+        e = e2; f = f2; u = u2;
+      }
+    } else if (c_.ule(b_) && c_.ule(d_) || d_.ule(b_) && c_.ult(d_)) { // one overlapping region
+      if (c_.ule(b_)) {
+        e = a;
+      } else {
+        e = c;
+      }
+      if (d_.ule(b_)) {
+        f = b;
+      } else {
+        f = d;
+      }
+      u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(d, b));
+    } else { // two overlapping regions
+      u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, c));
+      e = mod(a, u);
+      f = sub_(APInt(bitWidth, 0), u); /* mod 2^n */
+    }
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(e, f, u));
+  }
 }
 
 bool StridedInterval::lessOrEqual(AbstractDomain &other) {
   StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
+  
+  // pm: shortcut for both abstract domains are equal
+  if(*this == *otherMSI){
+      return true;
+  }
+  
+  // pm: check for topness
+  if(isTop()){
+      if(other.isTop())
+          return true;
+      return false;
+  }
+
   if (isBot) {
     return true;
   } else if (otherMSI->isBot) {
@@ -285,12 +465,12 @@ bool StridedInterval::lessOrEqual(AbstractDomain &other) {
   if (otherMSI->bitWidth != bitWidth) {
   }
   assert(otherMSI->bitWidth == bitWidth);
-  APInt a{begin};
-  APInt b{end};
-  APInt s{stride};
-  APInt c{otherMSI->begin};
-  APInt d{otherMSI->end};
-  APInt t{otherMSI->stride};
+  APInt a(begin);
+  APInt b(end);
+  APInt s(stride);
+  APInt c(otherMSI->begin);
+  APInt d(otherMSI->end);
+  APInt t(otherMSI->stride);
   if (s.isNullValue()) {
     return otherMSI->contains(a);
   } else if (t == 0) {
@@ -301,9 +481,9 @@ bool StridedInterval::lessOrEqual(AbstractDomain &other) {
     if (mod(pow2(bitWidth, bitWidth-1), t).isNullValue() && sub_(c, d) /* mod N */ == t) { // t | 2^n <=> 2**(n-1) = 0 mod t
       return mod(sub_(a.zext(bitWidth+1), c.zext(bitWidth+1)).trunc(bitWidth), t).isNullValue() && mod(s, t).isNullValue();
     } else {
-      APInt b_ {sub_(b, a) /* mod N */};
-      APInt c_ {sub_(c, a) /* mod N */};
-      APInt d_ {sub_(d, a) /* mod N */};
+      APInt b_ (sub_(b, a) /* mod N */);
+      APInt c_ (sub_(c, a) /* mod N */);
+      APInt d_ (sub_(d, a) /* mod N */);
       if (d_.ult(c_) && c_.ule(b_)) {
         APInt e_ = mul_(s, div(d_, s));
         APInt f_ = sub_(b_, mul_(s, div(sub_(b_, c_), s))) /* mod N */; // save since c_ < b_
@@ -341,7 +521,7 @@ bool StridedInterval::contains(APInt &value) const {
       if (value.ult(begin) || value.ugt(end)) {
         return false;
       } else {
-        APInt offset{value};
+        APInt offset(value);
         offset -= begin;
         APInt remainder = offset.urem(stride);
         return remainder.isNullValue();
@@ -350,7 +530,7 @@ bool StridedInterval::contains(APInt &value) const {
       if (value.ugt(end) && value.ult(begin)) {
         return false;
       } else {
-        APInt offset{value};
+        APInt offset(value);
         offset -= begin;
         APInt remainder = offset.urem(stride);
         return remainder.isNullValue();

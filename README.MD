@@ -24,6 +24,8 @@ mv po-lab-2018 ValueSetAnalysis
 and add the following line to the `CMakeLists.txt`-file:
 ```bash
 add_subdirectory(ValueSetAnalysis)
+add_subdirectory(ValueSetAnalysis/tutorial)
+add_subdirectory(ValueSetAnalysis/benchmark)
 ```
 
 Finally run `make` and/or `make install` again.

@@ -4,14 +4,14 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "../abstract_domain/BoundedSet.h"
-
+#include "../abstract_domain/StridedInterval.h"
 /// settings
 
 /// should debug output enabled?
 //#define DEBUG
 
 /// type of abstract domain
-#define AD_TYPE BoundedSet
+#define AD_TYPE StridedInterval
 
 /// do not to touch anything beneath here (useful functions)
 

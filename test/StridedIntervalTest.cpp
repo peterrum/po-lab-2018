@@ -184,6 +184,22 @@ void testStridedIntervalAdd() {
   }
 }
 
+void testStridedIntervalLeastUpperBound() {
+  StridedInterval lhs, rhs, res;
+  lhs = {6, 0, 12, 6}; rhs = {6, 14, 44, 10};
+  res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
+  errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
+  lhs = {4, 1, 5, 2}; rhs = {4, 7, 13, 3};
+  res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
+  errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
+  lhs = {6, 2, 14, 6}; rhs = {6, 8, 28, 10};
+  res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
+  errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
+  lhs = {4, 0, 8, 2}; rhs = {4, 6, 2, 2};
+  res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
+  errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
+}
+
 void testContains() {
   APInt begin{5, 15};
   APInt end{5, 5};
@@ -199,6 +215,7 @@ void testContains() {
 
 void runStridedInterval() {
   testStridedIntervalLessOrEqual();
+  testStridedIntervalLeastUpperBound();
   testStridedIntervalAdd();
   testContains();
 }
