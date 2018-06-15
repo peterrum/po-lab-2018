@@ -25,11 +25,13 @@ bool BranchConditions::isBasicBlockReachable(BasicBlock *pred, BasicBlock *bb) {
   return true;
 }
 
-void BranchConditions::applyCondition(BasicBlock *pred, BasicBlock *bb) {
+bool BranchConditions::applyCondition(BasicBlock *pred, BasicBlock *bb) {
 
   assert(!conditionCacheUsed &&
          "ConditionCache has not been correctly unapplied last time!");
 
+  bool isNotBottom = true;
+  
   const auto bc = branchConditions.find(pred);
   if (bc != branchConditions.end())
     if (bc->second.find(bb) != bc->second.end()) {
@@ -41,8 +43,12 @@ void BranchConditions::applyCondition(BasicBlock *pred, BasicBlock *bb) {
         conditionCache[value] = programPoints[pred].getAbstractValue(value);
         /// overwrite value with condition
         programPoints[pred].vars[value] = branchCondition.second;
+        if(branchCondition.second->isBottom()){
+            isNotBottom &=false;
+        }
       }
     }
+  return isNotBottom;
 }
 
 void BranchConditions::unApplyCondition(BasicBlock *pred) {

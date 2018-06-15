@@ -19,7 +19,7 @@ public:
 
   bool isBasicBlockReachable(BasicBlock *pred, BasicBlock *bb);
 
-  void applyCondition(BasicBlock *pred, BasicBlock *bb);
+  bool applyCondition(BasicBlock *pred, BasicBlock *bb);
 
   void unApplyCondition(BasicBlock *pred);
 

@@ -37,8 +37,8 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
       DEBUG_OUTPUT("visitBasicBlock: state for " << pred->getName()
                                                  << " found");
 
-      bcs.applyCondition(pred, &BB);
-      newState.leastUpperBound(incoming->second);
+      if(bcs.applyCondition(pred, &BB))
+          newState.leastUpperBound(incoming->second);
       bcs.unApplyCondition(pred);
     }
   }
