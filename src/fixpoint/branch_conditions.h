@@ -19,6 +19,7 @@ public:
 
   bool isBasicBlockReachable(BasicBlock *pred, BasicBlock *bb);
 
+  // apply conditions and return true if non of the variables are bottom
   bool applyCondition(BasicBlock *pred, BasicBlock *bb);
 
   void unApplyCondition(BasicBlock *pred);

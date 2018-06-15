@@ -30,6 +30,7 @@ bool BranchConditions::applyCondition(BasicBlock *pred, BasicBlock *bb) {
   assert(!conditionCacheUsed &&
          "ConditionCache has not been correctly unapplied last time!");
 
+  // initial condition: no variable is bottom
   bool isNotBottom = true;
   
   const auto bc = branchConditions.find(pred);
@@ -43,9 +44,8 @@ bool BranchConditions::applyCondition(BasicBlock *pred, BasicBlock *bb) {
         conditionCache[value] = programPoints[pred].getAbstractValue(value);
         /// overwrite value with condition
         programPoints[pred].vars[value] = branchCondition.second;
-        if(branchCondition.second->isBottom()){
-            isNotBottom &=false;
-        }
+        // is variable bottom?
+        isNotBottom &= !branchCondition.second->isBottom();
       }
     }
   return isNotBottom;
