@@ -326,23 +326,49 @@ StridedInterval::subsetsForPredicate(
       return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
           copy, anotherCopy);
     }
-//    std::set<APInt, Comparator> trueValues;
-//    std::set<APInt, Comparator> falseValues;
-//
-//    for (auto &leftVal : values) {
-//      for (auto &rightVal : otherB->values) {
-//        if (comparision(leftVal, rightVal)) {
-//          trueValues.insert(leftVal);
-//        } else {
-//          falseValues.insert(leftVal);
-//        }
-//      }
-//    }
-//
-//    shared_ptr<AbstractDomain> trueSet{new BoundedSet(trueValues)};
-//    shared_ptr<AbstractDomain> falseSet{new BoundedSet(falseValues)};
-//    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-//        trueSet, falseSet);
+    
+    if(pred == CmpInst::Predicate::ICMP_EQ){
+        
+        APInt maxBegin = this->begin.uge(otherB->begin) ? 
+            this->begin : otherB->begin;
+        
+        APInt minEnd = this->end.ule(otherB->end) ? 
+            this->end : otherB->end;
+        
+        if(maxBegin.ugt(minEnd)){
+            // no intersection
+            return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+                  StridedInterval::create_bottom(this->bitWidth),
+                  shared_ptr<AbstractDomain>(new StridedInterval(*this)));
+        } // else
+        
+        return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+              shared_ptr<AbstractDomain>(new StridedInterval(maxBegin, minEnd, 
+                        APInt(this->bitWidth, 1))),
+              shared_ptr<AbstractDomain>(new StridedInterval(*this)));
+        
+    } else if(pred == CmpInst::Predicate::ICMP_NE){
+        
+        APInt maxBegin = this->begin.uge(otherB->begin) ? 
+            this->begin : otherB->begin;
+        
+        APInt minEnd = this->end.ule(otherB->end) ? 
+            this->end : otherB->end;
+        
+        if(maxBegin.ugt(minEnd)){
+            // no intersection
+            return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+                  shared_ptr<AbstractDomain>(new StridedInterval(*this)),
+                  StridedInterval::create_bottom(this->bitWidth));
+        } // else
+        
+        return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+              shared_ptr<AbstractDomain>(new StridedInterval(*this)),
+              shared_ptr<AbstractDomain>(new StridedInterval(maxBegin, minEnd, 
+                        APInt(this->bitWidth, 1))));
+        
+    }
+
   }
 
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
