@@ -417,7 +417,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   
   // pm: shortcut for both abstract domains are equal
   if(*this == *otherMSI){
-      return shared_ptr<AbstractDomain>(this);
+      return shared_ptr<AbstractDomain>(new StridedInterval(*this));
   }
   
   if (isBot) {
@@ -464,7 +464,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
 
 bool StridedInterval::lessOrEqual(AbstractDomain &other) {
   StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
-  
+
   // pm: shortcut for both abstract domains are equal
   if(*this == *otherMSI){
       return true;
