@@ -37,8 +37,11 @@ void VsaVisitor::visitBasicBlock(BasicBlock &BB) {
       DEBUG_OUTPUT("visitBasicBlock: state for " << pred->getName()
                                                  << " found");
 
+      /// apply condition and check if basic block is reachable from previous
+      /// block under application of the condition
       if(bcs.applyCondition(pred, &BB))
           newState.leastUpperBound(incoming->second);
+      // else : not reachable -> do not take lub
       bcs.unApplyCondition(pred);
     }
   }
