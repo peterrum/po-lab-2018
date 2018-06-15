@@ -53,12 +53,9 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
       // to the size limitation of the bounded set.
       // Thus, we transform them into strided intervals
       if (resultOp->isTop()) {
-        errs() << "switching to si\n";
         BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
         BoundedSet thisBs = *static_cast<BoundedSet *>(this->delegate.get());
-        errs() << "before creating si1\n";
         StridedInterval otherDelegate{otherBs};
-        errs() << "before creating si2\n";
         StridedInterval thisDelegate{thisBs};
         resultOp = op(thisDelegate, otherDelegate);
         return shared_ptr<AbstractDomain>{
@@ -71,7 +68,6 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
 
       // other has a bounded set, we have a strided interval
       // change other to strided interval
-      errs() << "this is si\n";
       BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
       StridedInterval otherDelegate{otherBs};
       return shared_ptr<AbstractDomain>{new CompositeDomain{
@@ -80,7 +76,6 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
   } else {
     // other is a strided interval
     if (getDelegateType() == boundedSet) {
-      errs() << "this is bs\n";
       // this is a bounded set
       // change to strided interval
       BoundedSet thisBs = *static_cast<BoundedSet *>(this->delegate.get());
@@ -88,7 +83,6 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
       return shared_ptr<AbstractDomain>{new CompositeDomain{
           op(thisDelegate, *otherD.delegate.get()), stridedInterval}};
     } else {
-      errs() << "both are si\n";
       // both are strided intervals already
       return shared_ptr<AbstractDomain>{new CompositeDomain{
           op(*delegate.get(), *otherD.delegate.get()), stridedInterval}};

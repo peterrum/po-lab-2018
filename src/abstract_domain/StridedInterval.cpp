@@ -52,68 +52,91 @@ StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
 
 StridedInterval::StridedInterval(BoundedSet &set)
     : bitWidth(set.getBitWidth()) {
-  errs() << "creating si from bs\n";
   if (set.isBottom()) {
+    // create this a bottom
     isBot = true;
     return;
   } else if (set.isTop()) {
+    isBot = false;
     begin = APInt{bitWidth, 0};
     end = APInt::getMaxValue(bitWidth);
     stride = APInt{bitWidth, 1};
   } else {
-    errs() << set.size() << "\n";
+    // create a custom interval
+
+    // we do a case distinction on the size of the BoundedSet
     const auto vals = set.getValues();
     assert(vals.size() > 0);
     if (vals.size() == 1) {
+      // Create singleton
       auto value = vals.begin();
       begin = *value;
       end = *value;
       stride = *value;
     } else {
+      // Create StridedInterval from BoundedSet with multiple values
+      // for faster access, we first load the values of the BS into a vector
       vector<APInt> values{};
       for (auto &val : vals) {
         values.push_back(val);
       }
-
-      errs() << "values\n";
-      for (unsigned i = 0; i < vals.size(); i++){
-        errs() << values.at(i) << "\n";
-      }
+      // variables for begin, end and stride
       APInt b;
       APInt e;
       APInt s;
+      // We consider every point in the BoundedSet as a start point of the Interval
+      // We will pick the interval with the minimum number of elements
       APInt second;
       const auto size = values.size();
       const auto offset = size - 1;
       size_t min = std::numeric_limits<size_t>::max();
       StridedInterval minInterval{};
+
+      // Consider every value as a start point
       for (size_t i = 0; i < size; i++) {
         auto lastIndex = (i + offset) % size;
         b = values.at(i % size);
         second = values.at((i + 1) % size);
         e = values.at(lastIndex);
 
-        APInt diff{second};
-        diff -= b;
-        APInt gcd{diff};
-
-        minInterval.begin = b;
-        minInterval.end = e;
-        minInterval.stride = gcd;
-
-        errs() << "look at " << minInterval << "\n";
-
-        for (size_t j = (i + 1) % size; j != lastIndex; j = (j + 1) % size) {
-          diff = values.at((j + 1) % size);
-          diff -= values.at(j);
-          gcd = GreatestCommonDivisor(gcd, diff);
+        // Stride will be gcd of all differences between points next to each other
+        APInt diff;
+        APInt gcd;
+        if (second.uge(b)) {
+          diff = second;
+          diff -= b;
         }
-        StridedInterval tmp{b, e, s};
+        else {
+          diff = b;
+          diff -= second;
+        }
+        gcd = diff;
+
+        // calculate stride
+        for (size_t j = (i + 1) % size; (j + 1) % size != lastIndex;
+             j = (j + 1) % size) {
+          auto current = values.at(j);
+          auto next = values.at((j + 1) % size);
+
+          if (next.uge(current)) {
+            diff = next;
+            diff -= current;
+            gcd = GreatestCommonDivisor(gcd, diff);
+          } else {
+            diff = current;
+            diff -= next;
+            gcd = GreatestCommonDivisor(gcd, diff);            
+          }
+        }
+
+        // check whether interval starting at gcd has minimum number of elements
+        StridedInterval tmp{b, e, gcd};
         if (tmp.size() <= min) {
           min = tmp.size();
-          minInterval = StridedInterval(b, e, s);
+          minInterval = StridedInterval(tmp);
         }
       }
+      isBot = false;
       begin = minInterval.begin;
       end = minInterval.end;
       stride = minInterval.stride;

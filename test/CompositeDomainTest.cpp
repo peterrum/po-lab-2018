@@ -35,8 +35,16 @@ void testCompositeDomainAdd() {
   errs() << *comp.get() << "\n";
 }
 
+
+void testSIConstructorFromBS(){
+  BoundedSet bs{32, {0,10}};
+  StridedInterval si{bs};
+  errs() << si << "\n";
+}
+
 void runCompositeDomain() {
 //   testCompositeDomainLeastUpperBound();
   testCompositeDomainAdd();
+  testSIConstructorFromBS();
 }
 }
