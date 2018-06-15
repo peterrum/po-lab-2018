@@ -68,7 +68,8 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
 
       // other has a bounded set, we have a strided interval
       // change other to strided interval
-      StridedInterval otherDelegate{otherD.delegate.get()};
+      BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
+      StridedInterval otherDelegate{otherBs};
       return shared_ptr<AbstractDomain>{new CompositeDomain{
           op(*delegate.get(), otherDelegate), stridedInterval}};
     }
@@ -77,7 +78,8 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
     if (getDelegateType() == boundedSet) {
       // this is a bounded set
       // change to strided interval
-      StridedInterval thisDelegate{this->delegate.get()};
+      BoundedSet thisBs = *static_cast<BoundedSet *>(this->delegate.get());
+      StridedInterval thisDelegate{thisBs};
       return shared_ptr<AbstractDomain>{new CompositeDomain{
           op(thisDelegate, *otherD.delegate.get()), stridedInterval}};
     } else {
