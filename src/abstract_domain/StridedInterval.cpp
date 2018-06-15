@@ -558,7 +558,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
       } else {
         e = e2; f = f2; u = u2;
       }
-    } else if (c_.ule(b_) && c_.ule(d_) || d_.ule(b_) && c_.ult(d_)) { // one overlapping region
+    } else if ((c_.ule(b_) && c_.ule(d_)) || (d_.ule(b_) && c_.ult(d_))) { // one overlapping region
       if (c_.ule(b_)) {
         e = a;
       } else {
