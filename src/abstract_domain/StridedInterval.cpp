@@ -52,6 +52,7 @@ StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
 
 StridedInterval::StridedInterval(BoundedSet &set)
     : bitWidth(set.getBitWidth()) {
+  errs() << "creating si from bs\n";
   if (set.isBottom()) {
     isBot = true;
     return;
@@ -60,6 +61,7 @@ StridedInterval::StridedInterval(BoundedSet &set)
     end = APInt::getMaxValue(bitWidth);
     stride = APInt{bitWidth, 1};
   } else {
+    errs() << set.size() << "\n";
     const auto vals = set.getValues();
     assert(vals.size() > 0);
     if (vals.size() == 1) {
@@ -72,6 +74,11 @@ StridedInterval::StridedInterval(BoundedSet &set)
       for (auto &val : vals) {
         values.push_back(val);
       }
+
+      errs() << "values\n";
+      for (unsigned i = 0; i < vals.size(); i++){
+        errs() << values.at(i) << "\n";
+      }
       APInt b;
       APInt e;
       APInt s;
@@ -79,7 +86,7 @@ StridedInterval::StridedInterval(BoundedSet &set)
       const auto size = values.size();
       const auto offset = size - 1;
       size_t min = std::numeric_limits<size_t>::max();
-      StridedInterval minInterval;
+      StridedInterval minInterval{};
       for (size_t i = 0; i < size; i++) {
         auto lastIndex = (i + offset) % size;
         b = values.at(i % size);
@@ -89,13 +96,20 @@ StridedInterval::StridedInterval(BoundedSet &set)
         APInt diff{second};
         diff -= b;
         APInt gcd{diff};
+
+        minInterval.begin = b;
+        minInterval.end = e;
+        minInterval.stride = gcd;
+
+        errs() << "look at " << minInterval << "\n";
+
         for (size_t j = (i + 1) % size; j != lastIndex; j = (j + 1) % size) {
-          diff = values.at((j+1)%size);
+          diff = values.at((j + 1) % size);
           diff -= values.at(j);
           gcd = GreatestCommonDivisor(gcd, diff);
         }
         StridedInterval tmp{b, e, s};
-        if(tmp.size()<=min){
+        if (tmp.size() <= min) {
           min = tmp.size();
           minInterval = StridedInterval(b, e, s);
         }
@@ -379,8 +393,14 @@ StridedInterval::icmp(CmpInst::Predicate pred, unsigned numBits,
 }
 
 size_t StridedInterval::size() const {
-  APInt d = sub_(this->end, this->begin);
-  return div(d, this->stride).getZExtValue();
+  if (isBottom()) {
+    return 0;
+  } else if (stride == 0) {
+    return 1;
+  } else {
+    APInt d = sub_(this->end, this->begin);
+    return div(d, this->stride).getZExtValue();
+  }
 }
 
 shared_ptr<AbstractDomain>
