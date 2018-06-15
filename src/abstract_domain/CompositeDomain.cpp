@@ -90,6 +90,9 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
   }
 }
 
+
+
+
 // Binary Arithmetic Operations
 shared_ptr<AbstractDomain> CompositeDomain::add(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
@@ -209,9 +212,25 @@ shared_ptr<AbstractDomain> CompositeDomain::xor_(unsigned numBits,
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
 CompositeDomain::icmp(CmpInst::Predicate pred, unsigned numBits,
                       AbstractDomain &other) {
-  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>{
-      nullptr, nullptr};
+  CompositeDomain &otherD = *static_cast<CompositeDomain *>(&other);
+
+  if (getDelegateType() == stridedInterval && otherD.getDelegateType() == boundedSet) {
+      // other has a bounded set, we have a strided interval
+      // change other to strided interval
+      BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
+      StridedInterval otherDelegate{otherBs};
+      return delegate->icmp(pred, numBits, otherDelegate);
+  }
+  if (getDelegateType() == boundedSet && otherD.getDelegateType() == stridedInterval) {
+      // this is a bounded set
+      // change to strided interval
+      BoundedSet thisBs = *static_cast<BoundedSet *>(this->delegate.get());
+      StridedInterval thisDelegate{thisBs};
+      return thisDelegate.icmp(pred, numBits, *otherD.delegate.get());
+  }
+  return delegate->icmp(pred, numBits, *otherD.delegate.get());
 }
+
 
 llvm::raw_ostream &CompositeDomain::print(llvm::raw_ostream &os) {
   return delegate->print(os);
