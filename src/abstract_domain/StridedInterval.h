@@ -43,6 +43,14 @@ public:
   shared_ptr<AbstractDomain> xor_(unsigned numBits, AbstractDomain &other);
 
   // Other operations
+  
+  
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+  subsetsForPredicate(
+      AbstractDomain &other,
+      std::function<bool(const APInt &, const APInt &)> comparision,
+      CmpInst::Predicate pred);
+  
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
 
@@ -60,6 +68,7 @@ public:
 
   explicit StridedInterval(bool isTop, unsigned bitWidth);
   StridedInterval();
+  StridedInterval(const StridedInterval& other);
   StridedInterval(APInt begin, APInt end, APInt stride);
   StridedInterval(unsigned numBits, std::initializer_list<uint64_t> vals);
   StridedInterval(unsigned bitWidth, uint64_t begin, uint64_t end,
