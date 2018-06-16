@@ -1,0 +1,233 @@
+\begin{frame}
+
+Part 2:
+\vspace{0.2cm}
+
+{\LARGE \textbf{\textcolor{blue}{Fixpoint Algorithm \& Visitor}}}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Data Structures}}
+
+\underline{\smash{Data structures maintained during the analysis}}:
+\begin{itemize}
+\item {\color{blue}state} of each basic block (goal):\hfill {\color{red}red: abstract domain}
+\begin{align*}
+\mathcal{D}\,:\, BB\rightarrow \underbrace{ \left( Var \rightarrow {\color{red}Val} \right)_{\perp} }_{state\,\mathcal{D}_{BB}}
+\end{align*}
+\item {\color{blue}branch conditions}:
+\begin{align*}
+\mathcal{C}\,:\, \underbrace{\left(BB\rightarrow XX\right)}_{edge} \rightarrow \underbrace{ \left( Var \rightarrow {\color{red}Val} \right)_{\perp} }_{\mathcal{C}_{BB\rightarrow XX}}
+\end{align*}
+\end{itemize}
+\qquad$\rightarrow$ effect of a guard: \begin{align*}
+\mathcal{D}_{XX} \gets \llbracket BB\,\rightarrow\,XX \rrbracket \, \mathcal{D}_{BB} = \mathcal{D}_{BB} \,\oplus\, \mathcal{C}_{BB\rightarrow XX}
+\end{align*}
+\end{frame}
+
+\begin{frame}[fragile]{\textcolor{blue}{Fixpoint Algorithm: Worklist}}
+
+We maintain a {\color{blue}worklist $\mathcal{W}$} of basic blocks to be (re)evaluated.
+
+\begin{algorithm}[H]
+\caption{Fixpoint algorithm}
+\begin{algorithmic}[1]
+\Procedure{Fixpoint}{Function}
+\State $\mathcal{W}$.push(Function.front())\Comment{push entry basic block of function}
+\State \textbf{while} $!\, \mathcal{W}.empty()$ \textbf{then}:
+\State \qquad visit $\mathcal{W}$.pop()
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Fixpoint algorithm terminates iff $\mathcal{W}$ is empty: a fixpoint has been found.
+
+\vfill
+
+Following {\color{blue}initial and boundary conditions} are used (forward analysis):
+\begin{align*}
+\mathcal{D}_0\,:\, BB\rightarrow \, \perp \quad \text{and}\quad
+\mathcal{D}_{BC}\,:\, BB\rightarrow \, \left( Var\rightarrow \top \right)
+\end{align*}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Visitor: (Entering) Basic Block}}
+
+Visiting a basic block is a two-step process:
+\begin{enumerate}
+\item setting up the (temporal) input state $\mathcal{N}_{BB}$ during entering 
+\item visiting all its instructions
+\end{enumerate}
+
+\begin{algorithm}[H]
+\caption{Enter basic block BB}
+\begin{algorithmic}[1]
+\Procedure{Visit}{BB}%\Comment{T: syntax tree}
+\State $\mathcal{N}_{BB}= \bigsqcup \left\lbrace \mathcal{D}_{XX} \oplus \mathcal{C}_{XX\rightarrow BB} \,|\, XX \in \text{prev}(BB)\,\wedge\,\mathcal{D}_{XX}\neq\, \perp \right\rbrace$
+\State \textbf{for each} $instruction \in \text{instructions}(BB)$:
+\State \qquad visit $instruction$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+%\vfill
+%\underline{Implementation details:}
+%\begin{itemize}
+%\item Construct $\mathcal{N}_{BB}$ iteratively: $\mathcal{N}_{BB}^{i+1} \gets \mathcal{N}_{BB}^{i} \,\sqcup\, \{ ... \}$ with $\mathcal{N}_{BB}^{0}\gets\perp$
+%\item if $\{...\}=\perp$: skip it
+%\item three cases: 
+%$\perp \sqcup\, x = x$,
+%$x \,\sqcup \perp = x$, and
+%$x \,\sqcup\, y$
+%\end{itemize}
+\underline{\smash{Explicitly considered instructions}}:
+\begin{itemize}
+\item terminators: (un)conditional jumps, switches
+\item PHI nodes
+\item binary expressions
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Visitor: Leaving Basic Block at Terminator}}
+
+{\color{blue}check for change} of the local state and save it in $\mathcal{D}$:
+\begin{algorithm}[H]
+\caption{Visit terminator}
+\begin{algorithmic}[1]
+\Procedure{Visit}{Terminator}%\Comment{T: syntax tree}
+\State $\mathcal{N}_{BB} \gets \mathcal{D}_{BB} \,{\color{red}\sqcup}\, \mathcal{N}_{BB}$\Comment {\color{red}red: delegated to abstract domain\color{black}}
+\State \textbf{if} $\mathcal{N}_{BB} \,{\color{red}\sqsubseteq}\, \mathcal{D}_{BB}$ \textbf{then}:
+\State \qquad \textbf{return}
+\Comment state has not changed
+\State $\mathcal{D}_{BB} \gets \mathcal{N}_{BB}$
+\State \textbf{for each} $XX \in \text{next}(BB)$:
+\State \qquad\textbf{if} reachable($BB,\,XX$) \textbf{then}:
+%\Comment always true if not-cond. branch
+\State \qquad\qquad $\mathcal{W}$.push($XX$)
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+in the case of change ($\mathcal{N}_{BB} \not\sqsubseteq \mathcal{D}_{BB}$), {\color{blue}push all reachable successors}:
+\begin{itemize}
+\item unconditional branch: push all successors
+\item {\color{blue}conditional branch/switch}: check if $\exists (\#\,\rightarrow\,\perp)\in \mathcal{C}_{BB \,\rightarrow\, XX}$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Visitor: Conditional Branch}}
+
+
+\begin{algorithm}[H]
+\caption{Visit conditional branch (terminator)}
+\begin{algorithmic}[1]
+\Procedure{Visit}{$\textsc{jmp}\,(x \,\square\,y\,?\, XX \,:\, YY$)}%\Comment{T: syntax tree}
+%\State $\mathcal{C}_{BB} \gets \emptyset$
+\State \textbf{if } isVar($x$) \textbf{then}:
+\State \qquad$\mathcal{C}_{BB\rightarrow XX} \gets  \mathcal{C}_{BB\rightarrow XX} \oplus \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,\,\,{\color{red}\square^\#}\,\mathcal{N}_{BB}[y]
+\right\rbrace$
+\State \qquad$\mathcal{C}_{BB\rightarrow YY} \gets  \mathcal{C}_{BB\rightarrow YY} \oplus \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,{\color{red}!\square^\#}\,\mathcal{N}_{BB}[y]
+\right\rbrace$
+\State \textbf{if } isVar($y$) \textbf{then}:
+\State \qquad ...
+%\Comment update conditions
+\State \textsc{VisitTerminator}()
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+considered comparisons:
+\begin{align*}
+\square \in \{ =,\, \neq,\, < ,\,\le,\,\ge,\, > \}
+\end{align*}
+
+
+
+
+%\begin{algorithm}[H]
+%\caption{Reachability of basic block $BBN$ from $BB$}
+%\begin{algorithmic}[1]
+%\Procedure{Reachable}{BB, BBN}%\Comment{T: syntax tree}
+%\State \textbf{return} $\exists (\#\,\rightarrow\,\perp)\in \mathcal{C}_{BB}[BBN]$
+%\EndProcedure
+%\end{algorithmic}
+%\end{algorithm}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Visitor: Switch}}
+
+
+\begin{algorithm}[H]
+\caption{Visit switch (terminator)}
+\begin{algorithmic}[1]
+\Procedure{Visit}{$\textsc{jmp}\,[x=a\,:\,XX][x=b\,:\,YY][default\,:\,ZZ]$}%\Comment{T: syntax tree}
+%\State $\mathcal{C}_{BB} \gets \emptyset$
+\State $\mathcal{C}_{BB\rightarrow XX} \gets \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,{\color{red}=^\#}\,a
+\right\rbrace$
+\State $\mathcal{C}_{BB\rightarrow YY} \gets \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,{\color{red}=^\#}\,b
+\right\rbrace$
+\State $\mathcal{C}_{BB\rightarrow ZZ} \,\gets \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,{\color{red}\backslash}\,\{a,\,b\}
+\right\rbrace$
+\State \textsc{VisitTerminator}()
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Visitor: Parallel Assignments at PHI Node}}
+
+\begin{algorithm}[H]
+\caption{PHI node in basic block BB}
+\begin{algorithmic}[1]
+\Procedure{Phi}{$x\gets [YY\,:y]\,[ZZ\,:z]$}%\Comment{T: syntax tree}
+\State $\mathcal{N}_{BB}\gets\mathcal{N}_{BB}\oplus\left\lbrace x\,\rightarrow\, \left(\mathcal{D}_{YY} \,\oplus\,C_{YY\rightarrow BB} \right) [y] \,\sqcup\, \left(\mathcal{D}_{ZZ} \,\oplus\,C_{ZZ\rightarrow BB} \right)[z] \right\rbrace$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Visitor: Binary Expressions}}
+
+\begin{algorithm}[H]
+\caption{Addition in basic block BB}
+\begin{algorithmic}[1]
+\Procedure{Binary}{$x\gets y \,\square\, z$}%\Comment{T: syntax tree}
+\State $\mathcal{N}_{BB}\gets\mathcal{N}_{BB}\oplus\left\lbrace x\,\rightarrow\, \mathcal{N}_{BB}[y]\,{\color{red}\square^\#}\, \mathcal{N}_{BB}[z] \right\rbrace$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+considered binary instructions:
+\begin{align*}
+\square \in \{ +,\,-,\,\times,\, /,\, \%,\, \ll,\, \gg \}
+\end{align*}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Visitor: Memory access and Not-implemented Operations}}
+
+Data in memory is considered unknown.
+\begin{algorithm}[H]
+\caption{Load in basic block BB}
+\begin{algorithmic}[1]
+\Procedure{Binary}{$x\gets \textsc{load}(...)$}%\Comment{T: syntax tree}
+\State $\mathcal{N}_{BB}\gets\mathcal{N}_{BB}\oplus\left\lbrace x\,\rightarrow\, \top \right\rbrace$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\vspace{0.5cm}
+
+\hfill Not-implemented operations of form $x\gets \#$ are treated {\color{blue}implicitly} in the same way.
+
+\end{frame}

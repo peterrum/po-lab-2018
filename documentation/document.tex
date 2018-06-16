@@ -12,13 +12,14 @@
 \usepackage[absolute,verbose,overlay]{textpos}
 \usepackage{stackengine}
 \usepackage{scalerel}
-%\usepackage{tikz-uml}
+\usepackage{tikz-uml}
 \usepackage{listings}
 \usepackage{forest}
 \usepackage{booktabs}
 \usepackage{listings}
 \usepackage{fancyvrb}
 \usepackage{pgfplots}
+\usepackage{stmaryrd}
 
 \usepackage{amsmath}
 \usepackage{algorithm}
@@ -147,184 +148,10 @@
    ](\astart+\atip:\rmid) arc (\astart+\atip:\aend+\atip:\rmid);
 }
 
-
-\begin{frame}[fragile]{\textcolor{blue}{Fixpoint Algorithm}}
-\begin{algorithm}[H]
-\caption{Fixpoint Algorithm}
-\begin{algorithmic}[1]
-\Procedure{Fixpoint}{Function $\mathcal{F}$}
-\State $\mathcal{W}$.push($\mathcal{F}$.front())\Comment{get first basic block}
-\State \textbf{while} $!\, \mathcal{W}.empty()$ \textbf{then}:
-\State \qquad visit $\mathcal{W}$.pop()
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\end{frame}
-
-
-
-\begin{frame}[fragile]{\textcolor{blue}{Visitor: Entering Basic Block}}
-\begin{algorithm}[H]
-\caption{Enter basic block BB}
-\begin{algorithmic}[1]
-\Procedure{Visit}{BB}%\Comment{T: syntax tree}
-\State $\mathcal{N}_{BB}= \bigsqcup \left\lbrace \mathcal{N}_{XX} \oplus \mathcal{C}_{XX}(BB) \,|\, XX \in \text{prev}(BB) \right\rbrace$
-\State \textbf{for each} $instruction \in \text{insturcions}(BB)$:
-\State \qquad visit $instruction$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\vfill
-\underline{Implementation details:}
-\begin{itemize}
-\item Construct $\mathcal{N}_{BB}$ iteratively: $\mathcal{N}_{BB}^{i+1} \gets \mathcal{N}_{BB}^{i} \,\sqcup\, \{ ... \}$ with $\mathcal{N}_{BB}^{0}\gets\perp$
-\item if $\{...\}=\perp$: skip it
-\item three cases: 
-$\perp \sqcup\, x = x$,
-$x \,\sqcup \perp = x$, and
-$x \,\sqcup\, y$
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile]{\textcolor{blue}{Visitor: Leaving Basic Block (1)}}
-\begin{algorithm}[H]
-\caption{Visit terminator}
-\begin{algorithmic}[1]
-\Procedure{Visit}{Terminator}%\Comment{T: syntax tree}
-\State $\mathcal{N}_{BB} \gets \mathcal{O}_{BB} \,\sqcup\, \mathcal{N}_{BB}$
-\State \textbf{if} $\mathcal{N}_{BB} \sqsubseteq O_{BB}$ \textbf{then}:
-\State \qquad \textbf{return}
-\Comment state has not changed
-\State $\mathcal{O}_{BB} \gets \mathcal{N}_{BB}$
-\State \textbf{for each} $block \in \text{next}(BB)$:
-\State \qquad\textbf{if} reachable($BB,\,block$) \textbf{then}:
-\Comment always true if not-cond. branch
-\State \qquad\qquad $\mathcal{W}$.push($block$)
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\end{frame}
-
-
-\begin{frame}[fragile]{\textcolor{blue}{Visitor: Leaving Basic Block (2)}}
-
-
-\begin{algorithm}[H]
-\caption{Visit conditional branch (terminator)}
-\begin{algorithmic}[1]
-\Procedure{Visit}{Br($x$ \textsc{op} y)}%\Comment{T: syntax tree}
-\State $\mathcal{C}_{BB} \gets \emptyset$
-\State $\mathcal{C}_{BB} \gets  \mathcal{C}_{BB} \oplus \left\lbrace XX \,\rightarrow\, x\,\rightarrow\, \mathcal{N}_{BB}[x]\,\textsc{op}^\#\,\mathcal{N}_{BB}[y]
-\,|\,
-XX = \text{next}_1(BB)
-\right\rbrace$
-\State $\mathcal{C}_{BB}\gets \mathcal{C}_{BB} \oplus ...$
-%\Comment update conditions
-\State \textsc{VisitTerminator}(Br)
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-
-\begin{algorithm}[H]
-\caption{Reachability of basic block $BBN$ from $BB$}
-\begin{algorithmic}[1]
-\Procedure{Reachable}{BB, BBN}%\Comment{T: syntax tree}
-\State \textbf{return} $\exists (\#\,\rightarrow\,\perp)\in \mathcal{C}_{BB}[BBN]$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-\end{frame}
-
-
-%\begin{frame}[fragile]{\textcolor{blue}{Visitor (2)}}
-%
-%\begin{algorithm}[H]
-%\caption{Specialized for Nodes}
-%\begin{algorithmic}[1]
-%\Procedure{Visit}{pair}%\Comment{T: syntax tree}
-%\State $t \gets  \mathcal{D}[p.first] \,\sqcup \, p.second$
-%%\State $T,\,L\gets$ annotate $T$ and identify loops
-%\State \textbf{if} $ t \neq \mathcal{D}[p.first]$ \textbf{then}:
-%\State \qquad $\mathcal{D}[p.first] = t$
-%\State \qquad\textbf{for each} $e \in p.first.E_{out}$:
-%\State \qquad\qquad $\mathcal{W}$.queue(pair($e$, $t$))
-%\EndProcedure
-%\end{algorithmic}
-%\end{algorithm}
-%
-%\begin{algorithm}[H]
-%\caption{Specialized for Edges}
-%\begin{algorithmic}[1]
-%\Procedure{Visit}{pair}%\Comment{T: syntax tree}
-%\State $\mathcal{W}$.queue(pair($p.first.dest$, eval($p.first$ $p.second$)))
-%\EndProcedure
-%\end{algorithmic}
-%\end{algorithm}
-%
-%\end{frame}
-
-\begin{frame}[fragile]{\textcolor{blue}{Visitor: Binary Expressions}}
-
-\begin{algorithm}[H]
-\caption{Phi-Node in basic block BB}
-\begin{algorithmic}[1]
-\Procedure{Phi}{$x\gets cond\,?\,y\,:\,z$}%\Comment{T: syntax tree}
-\State $\mathcal{N}_{BB}\gets\mathcal{N}_{BB}\oplus\left\lbrace x\,\rightarrow\, \mathcal{N}_{BB}[y] \,\sqcup\, \mathcal{N}_{BB}[z] \right\rbrace$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[H]
-\caption{Addition in basic block BB}
-\begin{algorithmic}[1]
-\Procedure{Add}{$x\gets y + z$}%\Comment{T: syntax tree}
-\State $\mathcal{N}_{BB}\gets\mathcal{N}_{BB}\oplus\left\lbrace x\,\rightarrow\, \mathcal{N}_{BB}[y]+^\# \mathcal{N}_{BB}[z] \right\rbrace$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-
-\begin{algorithm}[H]
-\caption{Multiplication in basic block BB}
-\begin{algorithmic}[1]
-\Procedure{Mul}{$x\gets y \cdot z$}%\Comment{T: syntax tree}
-\State $\mathcal{N}_{BB}\gets\mathcal{N}_{BB}\oplus\left\lbrace x\,\rightarrow\, \mathcal{N}_{BB}[y]\cdot^\# \mathcal{N}_{BB}[z] \right\rbrace$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-\end{frame}
-
-%\begin{frame}[fragile]{\textcolor{blue}{Visitor: Binary Expressions}}
-%
-%
-%
-%
-%\begin{algorithm}[H]
-%\caption{Enter basic block BB}
-%\begin{algorithmic}[1]
-%\Procedure{TERMINATOR}{}%\Comment{T: syntax tree}
-%\State $\mathcal{O}_{BB}= \mathcal{O}_{BB} \,\sqcup\, \mathcal{N}_{BB}$
-%\EndProcedure
-%\end{algorithmic}
-%\end{algorithm}
-%
-%
-%\begin{algorithm}[H]
-%\caption{Enter basic block BB}
-%\begin{algorithmic}[1]
-%\Procedure{BR}{}%\Comment{T: syntax tree}
-%\State $\mathcal{C}_{BB} = \left\lbrace XX \,\rightarrow\, X\,\rightarrow\, x
-%\,|\,
-%XX\in \text{next}(BB)
-%\right\rbrace$
-%\EndProcedure
-%\end{algorithmic}
-%\end{algorithm}
-%
-%\end{frame}
+\input{chapters/introduction.tex}
+\input{chapters/abstractdomain.tex}
+\input{chapters/fixpoint.tex}
+\input{chapters/results.tex}
 
 
 

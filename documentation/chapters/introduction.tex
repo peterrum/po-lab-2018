@@ -1,0 +1,161 @@
+\lstset { %
+    language=C++,
+    backgroundcolor=\color{blue!10}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting,
+        commentstyle=\color[rgb]{0.026,0.112,0.095},
+                basicstyle=\ttfamily,
+                keywordstyle=\color{blue}\ttfamily,
+                stringstyle=\color{red}\ttfamily,
+                commentstyle=\color{gray}\ttfamily,
+                morecomment=[l][\color{magenta}]{\#}
+}
+
+\begin{frame}
+
+Part 0:
+\vspace{0.2cm}
+
+{\LARGE \textbf{\textcolor{blue}{Introduction}}}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Value Set Analysis}}
+
+\begin{minipage}{0.49\textwidth}
+
+\underline{\smash{Bounded Set Analysis:}}
+%\begin{itemize}
+%\item
+\begin{align*}
+Var \,\rightarrow\,\{a,\,b,\,c,\,...\}
+\end{align*}
+%\end{itemize}
+
+\underline{\smash{Interval Analysis:}}
+%\begin{itemize}
+%\item
+\begin{align*}
+Var \,\rightarrow\, [a:b]_b
+\end{align*}
+%\end{itemize}
+
+\underline{\smash{Strided Interval Analysis:}}
+%\begin{itemize}
+%\item
+\begin{align*}
+Var \,\rightarrow\,s[a:b]_b
+\end{align*}
+%\end{itemize}
+\end{minipage}
+\begin{minipage}{0.49\textwidth}
+Figure\\
+-SSA\\
+-Control Flow Graph (CFG)\\
+-program points\\
+-basic blocks
+
+\end{minipage}
+
+\vspace{1.5cm}
+
+SSA: sufficient to store the {\color{blue}abstract value for each variable once per basic block}:
+\begin{align*}
+\mathcal{N}\,:\, BB \,\rightarrow\, Var \, \rightarrow\, Val
+\end{align*}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Passes in LLVM}}
+LLVM's analysis and optimization framework {\color{blue} opt}:
+
+
+\vspace{2cm}
+\begin{center}
+Figure: stages of clang and LLVM
+\end{center}
+\vspace{2cm}
+
+
+using existing passes (from command line):
+\begin{footnotesize}
+\begin{lstlisting}[language=C++]
+opt -load -mem2reg -o hello-opt.bc < hello.bc
+\end{lstlisting}
+\end{footnotesize}
+running user passes:
+\begin{footnotesize}
+\begin{lstlisting}[language=C++]
+opt -load llvm/lib/llvm-vsa.so -vsapass -o hello.bc < hello.bc
+\end{lstlisting}
+\end{footnotesize}
+
+\end{frame}
+
+\begin{frame}[fragile]{\textcolor{blue}{Passes in LLVM (cont.)}}
+\underline{\smash{Creating user passes:}}
+\begin{itemize}
+\item inherit from existing passes (module, function, block):
+\begin{footnotesize}
+\begin{lstlisting}[language=C++]
+struct ThisPass : public ModulePass {}
+\end{lstlisting}
+\end{footnotesize}
+
+\item specify required passes, which have to be run in advance:
+\begin{footnotesize}
+\begin{lstlisting}[language=C++]
+void ThisPass::getAnalysisUsage(AnalysisUsage &AU) override {
+  AU.setPreservesAll();
+  AU.addRequired<OtherPass>();
+}
+\end{lstlisting}
+\end{footnotesize}
+
+\item perform analysis by using/accessing results of other passes:
+\begin{footnotesize}
+\begin{lstlisting}[language=C++]
+bool ThisPass::runOnModule(Module &M) override {
+  auto& other_result =  
+    getAnalysis<OtherPass>(function).getResult();
+  /* ... perform analysis and fill result ... */
+  return false;
+}
+\end{lstlisting}
+\end{footnotesize}
+
+\item make results available for other pass (optional): 
+\begin{footnotesize}
+\begin{lstlisting}[language=C++]  
+ThisResult& ThisPass::getResult(){ return result; }
+\end{lstlisting}
+\end{footnotesize}
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Content of the Lab}}
+
+\underline{Tasks:}
+\begin{itemize}
+\item implement {\color{blue}abstract domain}s that suitably represent value sets
+\item develop a new analysis tool in LLVM to determine the value set of each \\
+\qquad variable, using visitor and fixpoint algorithm (worklist) $\triangleright$ {\color{blue} VSAPass}
+\item make results accessible via API: {\color{blue} VSAResult} and {\color{blue} VSAResultValue}
+\item compare results with LLVM's {\color{blue} LazyValueInfo}
+\end{itemize}
+
+\vspace{1cm}
+
+\underline{\smash{Out of scope:}}
+\begin{itemize}
+\item widening and narrowing
+\item inter-procedural analysis
+\item memory access 
+\end{itemize}
+\hfill unknowns (ops, return values and arguments of functions) treated as: {\color{blue} $\top$}
+
+\end{frame}

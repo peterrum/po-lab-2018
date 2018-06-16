@@ -1,0 +1,100 @@
+\begin{frame}
+
+Part 1:
+\vspace{0.2cm}
+
+{\LARGE \textbf{\textcolor{blue}{Abstract Domain}}}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Application Interface}}
+
+\begin{minipage}{0.5\textwidth}
+\begin{center}
+\begin{tikzpicture}[thick,scale=0.8, every node/.style={transform shape}]
+
+\umlclass[fill=red!20
+%,y=+3
+,y=+5, x=-6.5
+]{VSAResult}{
+}{ 
+is\_reachable(basic\_block) : bool \\
+is\_resultat\_available(bb, value) : bool \\
+get\_abstract\_value() : VSAResultValue \\
+}
+
+\umlclass[fill=red!20
+%,y=+3
+,y=1.5, x=-6.5
+]{VSAResultValue}{
+}{ 
+test(predicate, constant) : tristate \\
+min() : int \\
+max() : int \\
+size() : int \\
+consant() : int \\
+is\_constant() : bool \\
+}
+
+\end{tikzpicture}
+\end{center}
+\end{minipage}
+\begin{minipage}{0.49\textwidth}
+\begin{itemize}
+\item after a successful pass:\\
+\quad {\color{blue} auto\& res = vsap.get\_result();}
+\item query information related to \\basic block (reachable or not) and/or variable (abstract value)\\
+%\quad {\color{blue} auto\& res = vsap.get\_result();}
+\end{itemize}
+\end{minipage}
+
+\end{frame}
+
+\begin{frame}[fragile]{\textcolor{blue}{Connection of the Results to the Internal Abstract Domain}}
+
+\begin{center}
+\begin{tikzpicture}[thick,scale=0.8, every node/.style={transform shape}]
+
+\umlinterface[]{AbstractDomain}{
+}{ 
+add(other) : void\\ /* other methods */ \\ \\
+leastUpperBound(other) : void \\ 
+lessOrEqual(other) : bool \\
+}
+
+\umlclass[x=-3.5,y=-3.5]{CompositeDomain}{}{upgrad() : void}
+\umlclass[x=+2.0,y=-3.5]{BoundedSet}{values : set$<$int$>$}{}
+\umlclass[x=+2.0,y=-5.5]{StridedInterval}{min, max, stride : int}{}
+
+\umlclass[fill=red!20
+%,y=+3
+,y=0.5, x=-6.5
+]{VSAResultValue}{
+}{ 
+test(predicate, constant) : bool \\
+min() : int \\
+max() : int \\
+size() : int \\
+consant() : int \\
+is\_constant() : bool \\
+}
+
+%\umlclass[x=-3,y=-6.5]{OperationNDim$<$vec$>$}{}{}
+
+%\umlclass[x=3,y=-6.5]{OperationNDim$<$novec$>$}{}{}
+
+\umlinherit[geometry=|-]{CompositeDomain}{AbstractDomain}
+\umlinherit[anchor1=north,anchor2=-42]{BoundedSet}{AbstractDomain}
+\umlinherit[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
+%\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationMass}
+%\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationConvection}
+\umlaggreg[]{CompositeDomain}{BoundedSet}
+\umlaggreg[geometry=-|-,anchors=east and west]{CompositeDomain}{StridedInterval}
+
+\umlaggreg[geometry=|-|,anchor1=north,anchor2=north,arm1=0.5cm]{VSAResultValue}{AbstractDomain}
+
+\end{tikzpicture}
+\end{center}
+
+\end{frame}
