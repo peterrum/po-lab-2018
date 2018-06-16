@@ -250,10 +250,6 @@ shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
       .normalize();
 }
 
-// *****************************************************
-// * Everything below are incorrect dummy definitions! *
-// *****************************************************
-
 shared_ptr<AbstractDomain> StridedInterval::sub(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
                                                 bool nsw) {
@@ -317,6 +313,10 @@ shared_ptr<AbstractDomain> StridedInterval::mul(unsigned numBits,
   }
   return StridedInterval(e_, f_, u_).normalize();
 }
+
+// *****************************************************
+// * Everything below are incorrect dummy definitions! *
+// *****************************************************
 
 shared_ptr<AbstractDomain> StridedInterval::udiv(unsigned numBits,
                                                  AbstractDomain &other) {
