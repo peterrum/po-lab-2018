@@ -29,9 +29,9 @@ struct Hello : public FunctionPass {
   Hello() : FunctionPass(ID) {}
 
   bool runOnFunction(Function &F) override {
-    pcpo::runBoundedSet();
+    // pcpo::runBoundedSet();
     pcpo::runStridedInterval();
-    pcpo::runCompositeDomain();
+    // pcpo::runCompositeDomain();
     return false;
   }
 };

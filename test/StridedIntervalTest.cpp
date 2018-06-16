@@ -332,7 +332,65 @@ void testContains() {
   }
 }
 
+void assertBottom(shared_ptr<AbstractDomain> ob, std::string test) {
+    if(!ob->isBottom())
+      errs() << test << "  isNotBottom";
+
+    if(ob->isTop())
+        errs() << test << "  isTop";
+}
+
+void assertTop(shared_ptr<AbstractDomain> ob, std::string test) {
+    if(ob->isBottom())
+      errs() << test << "  isBottom\n";
+
+    if(!ob->isTop())
+        errs() << test << "  isNotTop\n";
+}
+
+void testContainsRandom() {
+  const std::string testName = "[containsRandom] ";
+  unsigned bitWidth = 32;
+
+  auto bottom = StridedInterval::create_bottom(bitWidth);
+  auto top = StridedInterval::create_top(bitWidth);
+
+  assertBottom(bottom, "bottom");
+  assertTop(top, "top");
+
+  assertBottom(bottom->leastUpperBound(*bottom), "bottom LUB bottom");
+
+  assertTop(bottom->leastUpperBound(*top), "bottom LUB top");
+  assertTop(top->leastUpperBound(*bottom), "top LUB bottom");
+
+  auto previousIteration = bottom;
+  for(unsigned i=0; i < 10000; i++) {
+    APInt other(bitWidth,i);
+    APInt zero(bitWidth,0);
+    StridedInterval newSI(other, other, zero);
+
+    auto thisIteration = previousIteration->leastUpperBound(newSI);
+    auto thisIterationRev = newSI.leastUpperBound(*previousIteration);
+
+    if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
+        errs() << "== not symmetric";
+        return;
+    }
+
+    errs() << "This iteration: " << *thisIteration << "\n";
+    if (thisIteration->size() != i+1) {
+        errs() << thisIteration->size() << " should be  " << i+1 << " size wrong\n";
+        errs() << *thisIteration;
+        return;
+    }
+
+    previousIteration = thisIteration;
+  }
+}
+
 void runStridedInterval() {
+  testContainsRandom();
+  /**
   testStridedIntervalLessOrEqual();
   testStridedIntervalLeastUpperBound();
   testStridedIntervalIsNormal();
@@ -341,5 +399,6 @@ void runStridedInterval() {
   testStridedIntervalSub();
   testContains();
   testStridedIntervalMul();
+  */
 }
 } // namespace pcpo
