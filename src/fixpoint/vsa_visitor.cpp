@@ -130,7 +130,7 @@ void VsaVisitor::visitBranchInst(BranchInst &I) {
     }
   }
 
-  /// continue as it were a simple terminator
+  /// continue as if it were a simple terminator
   visitTerminatorInst(I);
 }
 
@@ -149,20 +149,26 @@ void VsaVisitor::putBothBranchConditions(BranchInst& I, Value* op,
 
 void VsaVisitor::visitSwitchInst(SwitchInst &I) {
   const auto cond = I.getCondition();
-  auto values = newState.getAbstractValue(cond);
 
+  /// this will be the values for default. We (potentially) shrink this with
+  /// every case that we visit
+  auto values = newState.getAbstractValue(cond);
 
   for (const auto &kase : I.cases()) {
 
     AD_TYPE kaseConst(kase.getCaseValue()->getValue());
 
+    /// split values into those take compare == with the constant (none or one value) and those that
+    /// do not (the rest)
     const auto kaseVals = values->icmp(CmpInst::Predicate::ICMP_EQ,
                           kase.getCaseValue()->getType()->getIntegerBitWidth(),
                           kaseConst);
 
+    /// put branch condition in place
     bcs.putBranchConditions(I.getParent(), kase.getCaseSuccessor(), cond,
                             kaseVals.first);
 
+    /// use information to constrain default case
     values = kaseVals.second;
   }
 
@@ -220,7 +226,7 @@ void VsaVisitor::visitPHINode(PHINode &I) {
       bcs.unApplyCondition(incomingBlock);
     } else {
       /// val is not an instruction but a constant etc., so we do not need to
-      /// go to its basic block but can gte it directly
+      /// go to its basic block but can get it directly
       newValue = newState.getAbstractValue(val);
     }
 
