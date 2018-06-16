@@ -59,12 +59,12 @@ Following {\color{blue}initial and boundary conditions} are used (forward analys
 
 Visiting a basic block is a two-step process:
 \begin{enumerate}
-\item setting up the (temporal) input state $\mathcal{N}_{BB}$ during entering 
+\item setting up the (temporary) input state $\mathcal{N}_{BB}$ during entering 
 \item visiting all its instructions
 \end{enumerate}
 
 \begin{algorithm}[H]
-\caption{Enter basic block BB}
+\caption{Enter basic block BB}  %MS: Missing:pruning?
 \begin{algorithmic}[1]
 \Procedure{Visit}{BB}%\Comment{T: syntax tree}
 \State $\mathcal{N}_{BB}= \bigsqcup \left\lbrace \mathcal{D}_{XX} \oplus \mathcal{C}_{XX\rightarrow BB} \,|\, XX \in \text{prev}(BB)\,\wedge\,\mathcal{D}_{XX}\neq\, \perp \right\rbrace$
@@ -97,7 +97,7 @@ Visiting a basic block is a two-step process:
 {\color{blue}check for change} of the local state and save it in $\mathcal{D}$:
 \begin{algorithm}[H]
 \caption{Visit terminator}
-\begin{algorithmic}[1]
+\begin{algorithmic}[1] %MS: the first LUB is  not necessary and would destroy narrwoing in a real world situation
 \Procedure{Visit}{Terminator}%\Comment{T: syntax tree}
 \State $\mathcal{N}_{BB} \gets \mathcal{D}_{BB} \,{\color{red}\sqcup}\, \mathcal{N}_{BB}$\Comment {\color{red}red: delegated to abstract domain\color{black}}
 \State \textbf{if} $\mathcal{N}_{BB} \,{\color{red}\sqsubseteq}\, \mathcal{D}_{BB}$ \textbf{then}:

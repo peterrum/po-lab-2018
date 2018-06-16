@@ -59,7 +59,7 @@ Figure\\
 
 \vspace{1.5cm}
 
-SSA: sufficient to store the {\color{blue}abstract value for each variable once per basic block}:
+SSA: sufficient to store the {\color{blue}abstract value for each variable once per basic block}:\footnote{The need to store it not just once only arises to preserve information at conditional branches.}
 \begin{align*}
 \mathcal{N}\,:\, BB \,\rightarrow\, Var \, \rightarrow\, Val
 \end{align*}
@@ -120,6 +120,8 @@ bool ThisPass::runOnModule(Module &M) override {
   auto& other_result =  
     getAnalysis<OtherPass>(function).getResult();
   /* ... perform analysis and fill result ... */
+  
+  // Return if the pass modified the bitcode (no)
   return false;
 }
 \end{lstlisting}
