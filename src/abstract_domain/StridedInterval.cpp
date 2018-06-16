@@ -257,7 +257,34 @@ shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
 shared_ptr<AbstractDomain> StridedInterval::sub(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
                                                 bool nsw) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+  StridedInterval *otherB = static_cast<StridedInterval *>(&other);
+  assert(numBits == bitWidth);
+  assert(numBits == otherB->bitWidth);
+  APInt N(pow2(numBits, numBits + 1));
+  APInt a(begin.zext(numBits + 1));
+  APInt b(end.zext(numBits + 1));
+  APInt s(stride.zext(numBits + 1));
+  APInt c(otherB->begin.zext(numBits + 1));
+  APInt d(otherB->end.zext(numBits + 1));
+  APInt t(otherB->stride.zext(numBits + 1));
+  APInt u(GreatestCommonDivisor(s, t));
+  APInt b_(a.ule(b) ? b : add_(b, N));
+  APInt d_(c.ule(d) ? d : add_(d, N));
+  APInt e(sub_(a, d_));
+  APInt f(sub_(b_, c));
+  APInt u_, e_, f_;
+  if (sub_(f, e).ult(N)) {
+    u_ = u;
+    e_ = e.trunc(numBits);
+    f_ = f.trunc(numBits);
+  } else {
+    u_ = GreatestCommonDivisor(u, N).trunc(numBits);
+    e_ = e.trunc(numBits);
+    f_ = sub_(e_, u_);
+  }
+  return StridedInterval(e_.zextOrTrunc(numBits), f_.zextOrTrunc(numBits),
+                         u_.zextOrTrunc(numBits))
+      .normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::mul(unsigned numBits,

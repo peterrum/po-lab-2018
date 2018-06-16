@@ -184,6 +184,38 @@ void testStridedIntervalAdd() {
   }
 }
 
+void testStridedIntervalSub() {
+  StridedInterval lhs;
+  StridedInterval rhs;
+  StridedInterval ref;
+  shared_ptr<AbstractDomain> res_p;
+  StridedInterval res;
+  lhs = {8, 24, 48, 12};
+  rhs = {8, 60, 90, 30};
+  ref = {8, 190, 244, 6};
+  res_p = lhs.sub(8, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSub] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {6, 24, 48, 12};
+  rhs = {6, 12, 18, 6};
+  ref = {6, 6, 36, 6};
+  res_p = lhs.sub(6, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSub] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 13, 3, 2};
+  rhs = {4, 10, 12, 2};
+  ref = {4, 1, 9, 2};
+  res_p = lhs.sub(4, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSub] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+}
+
 void testStridedIntervalMul() {
   StridedInterval lhs;
   StridedInterval rhs;
@@ -249,6 +281,7 @@ void runStridedInterval() {
   testStridedIntervalLessOrEqual();
   testStridedIntervalLeastUpperBound();
   testStridedIntervalAdd();
+  testStridedIntervalSub();
   testContains();
   testStridedIntervalMul();
 }
