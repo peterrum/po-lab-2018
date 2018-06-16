@@ -671,9 +671,9 @@ void testContainsRandom() {
 }
 
 void runStridedInterval() {
-  testStridedIntervalAdd();
-  testContainsRandom();
+  // testContainsRandom();
   /**
+  testStridedIntervalAdd();
   testStridedIntervalLessOrEqual();
   testStridedIntervalLeastUpperBound();
   testStridedIntervalIsNormal();
