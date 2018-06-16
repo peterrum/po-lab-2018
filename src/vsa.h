@@ -51,6 +51,7 @@ public:
       /// our analysis does not change the IR
       return false;
 
+    programPoints.clear();
     VsaVisitor vis(worklist,
             getAnalysis<DominatorTreeWrapperPass>().getDomTree());
 
