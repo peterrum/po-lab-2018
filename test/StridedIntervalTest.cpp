@@ -228,14 +228,254 @@ void testStridedIntervalGamma() {
   errs() << "}\n";
 }
 
+void testStridedIntervalLimits() {
+  StridedInterval i;
+  i = {4, 2, 2, 0};
+  if (!(i.umin() == 2)) {
+    errs() << "[testLimits] umin failed with operand " << i << ": got " << i.umin()
+      << ", expected " << 2 << "\n";
+  }
+  if (!(i.umax() == 2)) {
+    errs() << "[testLimits] umax failed with operand " << i << ": got " << i.umax()
+      << ", expected " << 2 << "\n";
+  }
+  if (!(i.smin() == 2)) {
+    errs() << "[testLimits] smin failed with operand " << i << ": got " << i.smin()
+      << ", expected " << 2 << "\n";
+  }
+  if (!(i.smax() == 2)) {
+    errs() << "[testLimits] smax failed with operand " << i << ": got " << i.smax()
+      << ", expected " << 2 << "\n";
+  }
+
+  i = {4, 1, 10, 3};
+  if (!(i.umin() == 1)) {
+    errs() << "[testLimits] umin failed with operand " << i << ": got " << i.umin()
+      << ", expected " << 1 << "\n";
+  };
+  if (!(i.umax() == 10)) {
+    errs() << "[testLimits] umax failed with operand " << i << ": got " << i.umax()
+      << ", expected " << 10 << "\n";
+  };
+  if (!(i.smin() == 10)) {
+    errs() << "[testLimits] smin failed with operand " << i << ": got " << i.smin()
+      << ", expected " << 10 << "\n";
+  };
+  if (!(i.smax() == 7)) {
+    errs() << "[testLimits] smax failed with operand " << i << ": got " << i.smax()
+      << ", expected " << 7 << "\n";
+  }
+
+  i = {4, 9, 13, 2};
+  if (!(i.umin() == 9)) {
+    errs() << "[testLimits] umin failed with operand " << i << ": got " << i.umin()
+      << ", expected " << 9 << "\n";
+  };
+  if (!(i.umax() == 13)) {
+    errs() << "[testLimits] umax failed with operand " << i << ": got " << i.umax()
+      << ", expected " << 13 << "\n";
+  };
+  if (!(i.smin() == 9)) {
+    errs() << "[testLimits] smin failed with operand " << i << ": got " << i.smin()
+      << ", expected " << 9 << "\n";
+  };
+  if (!(i.smax() == 13)) {
+    errs() << "[testLimits] smax failed with operand " << i << ": got " << i.smax()
+      << ", expected " << 13 << "\n";
+  }
+
+  i = {4, 13, 3, 2};
+  if (!(i.umin() == 1)) {
+    errs() << "[testLimits] umin failed with operand " << i << ": got " << i.umin()
+      << ", expected " << 1 << "\n";
+  };
+  if (!(i.umax() == 15)) {
+    errs() << "[testLimits] umax failed with operand " << i << ": got " << i.umax()
+      << ", expected " << 15 << "\n";
+  };
+  if (!(i.smin() == 13)) {
+    errs() << "[testLimits] smin failed with operand " << i << ": got " << i.smin()
+      << ", expected " << 13 << "\n";
+  };
+  if (!(i.smax() == 3)) {
+    errs() << "[testLimits] smax failed with operand " << i << ": got " << i.smax()
+      << ", expected " << 3 << "\n";
+  }
+}
+
 void testStridedIntervalAdd() {
-  StridedInterval si1{4, 2, 8, 3};
-  StridedInterval si2{4, 1, 3, 2};
-  StridedInterval ref{4, 3, 11, 1};
-  auto result = si1.add(4, si2, false, false);
-  StridedInterval res = *(static_cast<StridedInterval *>(result.get()));
+  StridedInterval lhs;
+  StridedInterval rhs;
+  StridedInterval ref;
+  shared_ptr<AbstractDomain> res_p;
+  StridedInterval res;
+
+  lhs = {6, 0, 4, 2}; rhs = StridedInterval(false, 6);
+  ref = StridedInterval(false, 6);
+  res_p = lhs.add(6, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
   if (res != ref) {
-    errs() << "[testAdd] failed: got " << res << ", expected " << ref << "\n";
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " () "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+
+  lhs = StridedInterval(false, 6); rhs = {6, 0, 4, 2};
+  ref = StridedInterval(false, 6);
+  res_p = lhs.add(6, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " () "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+
+  lhs = {6, 3, 7, 2}; rhs = {6, 1, 9, 4};
+  ref = {6, 4, 16, 2};
+  res_p = lhs.add(6, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " () "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 4, 16, 2};
+  res_p = lhs.add(6, rhs, true, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 4, 16, 2};
+  res_p = lhs.add(6, rhs, false, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 4, 16, 2};
+  res_p = lhs.add(6, rhs, true, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw, nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+
+  lhs = {6, 12, 24, 6}; rhs = {6, 2, 22, 10};
+  ref = {6, 14, 46, 2};
+  res_p = lhs.add(6, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " () "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 14, 46, 2};
+  res_p = lhs.add(6, rhs, true, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, false, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, true, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw, nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+
+  lhs = {6, 3, 21, 6}; rhs = {6, 51, 14, 9};
+  ref = {6, 54, 35, 3};
+  res_p = lhs.add(6, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " () "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, true, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, false, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, true, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw, nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+
+  lhs = {6, 60, 4, 2}; rhs = {6, 52, 6, 3};
+  ref = {6, 48, 10, 1};
+  res_p = lhs.add(6, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " () "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, true, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 48, 10, 1};
+  res_p = lhs.add(6, rhs, false, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, true, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw, nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+
+  lhs = {6, 35, 43, 4}; rhs = {6, 42, 50, 4};
+  ref = {6, 13, 29, 4};
+  res_p = lhs.add(6, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " () "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, true, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, false, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
+  }
+  ref = {6, 0, 63, 1};
+  res_p = lhs.add(6, rhs, true, true);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testADD] failed with operands " << lhs << ", " << rhs << " (nuw, nsw) "
+      << ": got " << res << ", expected " << ref << "\n";
   }
 }
 
@@ -431,12 +671,14 @@ void testContainsRandom() {
 }
 
 void runStridedInterval() {
+  testStridedIntervalAdd();
   testContainsRandom();
   /**
   testStridedIntervalLessOrEqual();
   testStridedIntervalLeastUpperBound();
   testStridedIntervalIsNormal();
   testStridedIntervalGamma();
+  testStridedIntervalLimits();
   testStridedIntervalAdd();
   testStridedIntervalSub();
   testContains();

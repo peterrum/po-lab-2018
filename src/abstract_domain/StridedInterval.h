@@ -24,7 +24,10 @@ public:
   bool isNormal();
   std::set<APInt, Comparator> gamma();
 
-  // std::set<APInt> gamma();
+  APInt umax();
+  APInt umin();
+  APInt smax();
+  APInt smin();
 
   // Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other,
