@@ -184,6 +184,38 @@ void testStridedIntervalAdd() {
   }
 }
 
+void testStridedIntervalMul() {
+  StridedInterval lhs;
+  StridedInterval rhs;
+  StridedInterval ref;
+  shared_ptr<AbstractDomain> res_p;
+  StridedInterval res;
+  lhs = {8, 2, 8, 3};
+  rhs = {8, 5, 9, 2};
+  ref = {8, 10, 72, 1};
+  res_p = lhs.mul(8, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testMul] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {8, 2, 8, 3};
+  rhs = {8, 6, 10, 2};
+  ref = {8, 12, 80, 2};
+  res_p = lhs.mul(8, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testMul] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 4, 12, 4};
+  rhs = {4, 3, 9, 3};
+  ref = {4, 0, 12, 4};
+  res_p = lhs.mul(4, rhs, false, false);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testMul] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+}
+
 void testStridedIntervalLeastUpperBound() {
   StridedInterval lhs, rhs, res;
   lhs = {6, 0, 12, 6}; rhs = {6, 14, 44, 10};
@@ -218,5 +250,6 @@ void runStridedInterval() {
   testStridedIntervalLeastUpperBound();
   testStridedIntervalAdd();
   testContains();
+  testStridedIntervalMul();
 }
 } // namespace pcpo
