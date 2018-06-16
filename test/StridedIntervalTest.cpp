@@ -363,28 +363,70 @@ void testContainsRandom() {
   assertTop(bottom->leastUpperBound(*top), "bottom LUB top");
   assertTop(top->leastUpperBound(*bottom), "top LUB bottom");
 
-  auto previousIteration = bottom;
-  for(unsigned i=0; i < 10000; i++) {
-    APInt other(bitWidth,i);
-    APInt zero(bitWidth,0);
-    StridedInterval newSI(other, other, zero);
+  for(unsigned stride=1; stride < 600; stride++) {
+    auto previousIteration = bottom;
+    unsigned insertCount = 0;
 
-    auto thisIteration = previousIteration->leastUpperBound(newSI);
-    auto thisIterationRev = newSI.leastUpperBound(*previousIteration);
+    for(unsigned i=0; i < 10000; i++) {
+      if(i % stride != 0)
+        continue;
 
-    if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
-        errs() << "== not symmetric";
+      insertCount++;
+
+      APInt other(bitWidth,i);
+      APInt zero(bitWidth,0);
+      StridedInterval newSI(other, other, zero);
+
+      auto thisIteration = previousIteration->leastUpperBound(newSI);
+      auto thisIterationRev = newSI.leastUpperBound(*previousIteration);
+
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
+          errs() << "== not symmetric";
+          return;
+      }
+
+      if (thisIteration->size() != insertCount) {
+          // errs() << thisIteration->size() << " should be  " << insertCount << " size wrong\n";
+          // errs() << *thisIteration;
+          // return;
+      }
+
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get())
+        != *reinterpret_cast<StridedInterval*>(thisIteration->leastUpperBound(*thisIteration).get())) {
+          errs() << "LUB(this,this) != this 1\n";
+          break;
+      }
+
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get())
+        != *reinterpret_cast<StridedInterval*>(thisIteration->leastUpperBound(*previousIteration).get())) {
+          errs() << "LUB(prev,this) != this 2\n";
+          errs() << *thisIteration << " lub " << *previousIteration << " "
+          << *thisIteration->leastUpperBound(*previousIteration);
+          break;
+      }
+
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get())
+        != *reinterpret_cast<StridedInterval*>(previousIteration->leastUpperBound(*thisIteration).get())) {
+          errs() << "LUB(prev,this) != this 3\n";
+          errs() << *thisIteration << " lub " << *previousIteration << " = "
+          << *previousIteration->leastUpperBound(*thisIteration) << "\n";
+          break;
+      }
+
+      if(thisIteration->lessOrEqual(*previousIteration)) {
+        errs() << *thisIteration << " " << *previousIteration << "Less or equal failed";
         return;
-    }
+      }
 
-    errs() << "This iteration: " << *thisIteration << "\n";
-    if (thisIteration->size() != i+1) {
-        errs() << thisIteration->size() << " should be  " << i+1 << " size wrong\n";
-        errs() << *thisIteration;
+      if(!previousIteration->lessOrEqual(*thisIteration)) {
+        errs() << "Less or equal failed";
         return;
-    }
+      }
 
-    previousIteration = thisIteration;
+      // todo max, min, etc.
+
+      previousIteration = thisIteration;
+    }
   }
 }
 
