@@ -1,5 +1,6 @@
 #include "StridedInterval.h"
 #include "AbstractDomain.h"
+#include "Util.h"
 #include "BoundedSet.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Support/raw_os_ostream.h"
@@ -184,8 +185,9 @@ APInt mod(const APInt &a, const APInt &b) { return a.urem(b); }
 APInt div(const APInt &a, const APInt &b) { return a.udiv(b); }
 
 APInt pow2(unsigned n, unsigned bitWidth) {
+  assert(n <= bitWidth); 
   APInt b{bitWidth, 0};
-  b.setBit(n+1);
+  b.setBit(n);
   return b;
 }
 
@@ -215,6 +217,30 @@ std::shared_ptr<AbstractDomain> StridedInterval::normalize() {
   }
   return std::shared_ptr<AbstractDomain>(new StridedInterval(
       a.zextOrTrunc(n), b.zextOrTrunc(n), s.zextOrTrunc(n)));
+}
+
+bool StridedInterval::isNormal() {
+  std::shared_ptr<AbstractDomain> thisNorm = this->normalize();
+  return *this == *(static_cast<StridedInterval *>(thisNorm.get()));
+}
+
+std::set<APInt, Comparator> StridedInterval::gamma() {
+  unsigned n = bitWidth;
+  std::set<APInt, Comparator> res {};
+  APInt s(stride.zext(n+1));
+  if (s.isNullValue()) {
+    res.insert(begin);
+    return res;
+  } else {
+    APInt N(pow2(n, n+1));
+    APInt a(begin.zext(n+1));
+    APInt b(end.zext(n+1));
+    b = a.ule(b) ? b : add_(b, N);
+    for (APInt k = a; k.ule(b); k += s) {
+      res.insert(k.trunc(n));
+    }
+    return res;
+  }
 }
 
 shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,

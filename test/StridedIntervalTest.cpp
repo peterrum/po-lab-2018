@@ -1,3 +1,4 @@
+#include "../src/abstract_domain/Util.h"
 #include "../src/abstract_domain/StridedInterval.h"
 #include "llvm/Support/raw_os_ostream.h"
 #include <set>
@@ -173,6 +174,60 @@ void testStridedIntervalLessOrEqual() {
   }
 }
 
+void testStridedIntervalIsNormal() {
+  StridedInterval i;
+  i = {8, 24, 48, 12};
+  if (!i.isNormal()) {
+    errs() << "[testIsNormal] failed with operand " << i << ": got " << i.isNormal() << ", expected " << true << "\n";
+  }
+  i = {8, 60, 90, 30};
+  if (!i.isNormal()) {
+    errs() << "[testIsNormal] failed with operand " << i << ": got " << i.isNormal() << ", expected " << true << "\n";
+  }
+  i = {8, 190, 244, 6};
+  if (!i.isNormal()) {
+    errs() << "[testIsNormal] failed with operand " << i << ": got " << i.isNormal() << ", expected " << true << "\n";
+  }
+  i = {4, 0, 3, 2};
+  if (i.isNormal()) {
+    errs() << "[testIsNormal] failed with operand " << i << ": got " << i.isNormal() << ", expected " << false << "\n";
+  }
+  i = {4, 14, 2, 4};
+  if (i.isNormal()) {
+    errs() << "[testIsNormal] failed with operand " << i << ": got " << i.isNormal() << ", expected " << false << "\n";
+  }
+  i = {4, 2, 2, 1};
+  if (i.isNormal()) {
+    errs() << "[testIsNormal] failed with operand " << i << ": got " << i.isNormal() << ", expected " << false << "\n";
+  }
+}
+
+void testStridedIntervalGamma() {
+  StridedInterval i;
+  std::set<APInt, Comparator> res;
+  i = {4, 2, 2, 0};
+  res = i.gamma();
+  errs() << "[testGamma] operand: " << i << ": {";
+  for (APInt k : res) {
+    errs() << k.toString(10, false) << ", ";
+  }
+  errs() << "}\n";
+  i = {4, 1, 10, 3};
+  res = i.gamma();
+  errs() << "[testGamma] operand: " << i << ": {";
+  for (APInt k : res) {
+    errs() << k.toString(10, false) << ", ";
+  }
+  errs() << "}\n";
+  i = {4, 7, 3, 4};
+  res = i.gamma();
+  errs() << "[testGamma] operand: " << i << ": {";
+  for (APInt k : res) {
+    errs() << k.toString(10, false) << ", ";
+  }
+  errs() << "}\n";
+}
+
 void testStridedIntervalAdd() {
   StridedInterval si1{4, 2, 8, 3};
   StridedInterval si2{4, 1, 3, 2};
@@ -280,6 +335,8 @@ void testContains() {
 void runStridedInterval() {
   testStridedIntervalLessOrEqual();
   testStridedIntervalLeastUpperBound();
+  testStridedIntervalIsNormal();
+  testStridedIntervalGamma();
   testStridedIntervalAdd();
   testStridedIntervalSub();
   testContains();
