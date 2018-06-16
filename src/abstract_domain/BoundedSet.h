@@ -72,6 +72,7 @@ public:
   bool lessOrEqual(AbstractDomain &other);
 
   bool operator==(const BoundedSet &other);
+  bool operator!=(const BoundedSet &other);
 
   BoundedSet(unsigned ,std::set<APInt, Comparator> values);
   explicit BoundedSet(APInt value);

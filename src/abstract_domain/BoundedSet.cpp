@@ -38,6 +38,11 @@ bool BoundedSet::operator==(const BoundedSet &other) {
   }
 }
 
+bool BoundedSet::operator!=(const BoundedSet &other) {
+  return !(this->operator==(other));
+}
+
+
 shared_ptr<AbstractDomain> BoundedSet::compute(
     AbstractDomain &other,
     std::function<BoundedSet(const APInt &, const APInt &)> op) {
