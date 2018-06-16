@@ -26,15 +26,13 @@ struct VsaTutorialPass : public ModulePass {
   VsaTutorialPass() : ModulePass(ID) {}
 
   bool runOnModule(Module &M) override {
-
-    // extract results from VsaPass
-    auto &results = getAnalysis<VsaPass>().getResult();
-
-    // print states of all basic blocks of this module
-    results.print();
-
     // iterate such that we get a block...
     for (auto &f : M.functions()) {
+
+      // extract results from VsaPass
+      auto &results = getAnalysis<VsaPass>(f).getResult();
+      // print states of all basic blocks of this function
+      results.print();
 
       // check if function is empty
       if(f.begin()==f.end())
