@@ -1,6 +1,7 @@
 #ifndef STRIDED_INTERVAL_H_
 #define STRIDED_INTERVAL_H_
 #include "AbstractDomain.h"
+#include "Util.h"
 #include "BoundedSet.h"
 #include "llvm/ADT/APInt.h"
 #include <functional>
@@ -20,6 +21,13 @@ private:
 
 public:
   std::shared_ptr<AbstractDomain> normalize();
+  bool isNormal();
+  std::set<APInt, Comparator> gamma();
+
+  APInt umax();
+  APInt umin();
+  APInt smax();
+  APInt smin();
 
   // Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other,

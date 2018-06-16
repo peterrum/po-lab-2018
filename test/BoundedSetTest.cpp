@@ -185,7 +185,119 @@ void testLeastUpperBoundWithAdd() {
   }
 }
 
+void assertBottomBs(shared_ptr<AbstractDomain> ob, std::string test) {
+    if(!ob->isBottom())
+      errs() << test << "  isNotBottom";
+
+    if(ob->isTop())
+        errs() << test << "  isTop";
+}
+
+void assertTopBs(shared_ptr<AbstractDomain> ob, std::string test) {
+    if(ob->isBottom())
+      errs() << test << "  isBottom\n";
+
+    if(!ob->isTop())
+        errs() << test << "  isNotTop\n";
+}
+
+void testContainsRandomBs() {
+/**
+  APInt begin{32,0};
+  APInt end{32,3};
+  APInt stride{32,3};
+  StridedInterval interval1{begin,end,stride};
+  auto bottom = StridedInterval::create_bottom(32);
+
+  auto result = bottom->leastUpperBound(interval1);
+  result = bottom->leastUpperBound(*result);
+  errs() << "\n\n" << *result; */
+
+
+  const std::string testName = "[containsRandom] ";
+  unsigned bitWidth = 32;
+
+  auto bottom = BoundedSet::create_bottom(bitWidth);
+  auto top = BoundedSet::create_top(bitWidth);
+
+  assertBottomBs(bottom, "bottom");
+  assertTopBs(top, "top");
+
+  assertBottomBs(bottom->leastUpperBound(*bottom), "bottom LUB bottom");
+
+  assertTopBs(bottom->leastUpperBound(*top), "bottom LUB top");
+  assertTopBs(top->leastUpperBound(*bottom), "top LUB bottom");
+
+  for(unsigned stride=3; stride < 10; stride++) {
+    auto previousIteration = bottom;
+    unsigned insertCount = 0;
+
+    for(unsigned i=0; i < 100; i++) {
+      if(i % stride != 0)
+        continue;
+
+      insertCount++;
+
+      APInt other(bitWidth,i);
+      BoundedSet newSI(other);
+
+      auto thisIteration = previousIteration->leastUpperBound(newSI);
+      auto thisIterationRev = newSI.leastUpperBound(*previousIteration);
+
+      if(!(*reinterpret_cast<BoundedSet*>(thisIteration.get()) == *reinterpret_cast<BoundedSet*>(thisIterationRev.get()))) {
+          errs() << "== not symmetric";
+          return;
+      }
+
+      if (thisIteration->size() != insertCount) {
+          // errs() << thisIteration->size() << " should be  " << insertCount << " size wrong\n";
+          // errs() << *thisIteration;
+          // return;
+      }
+
+
+      if(!(*reinterpret_cast<BoundedSet*>(thisIteration.get())
+        == *reinterpret_cast<BoundedSet*>(thisIteration->leastUpperBound(*thisIteration).get()))) {
+          errs() << "LUB(this,this) != this 1\n";
+          break;
+      }
+
+
+      if(!(*reinterpret_cast<BoundedSet*>(thisIteration.get())
+        == *reinterpret_cast<BoundedSet*>(thisIteration->leastUpperBound(*previousIteration).get()))) {
+          errs() << "LUB(prev,this) != this 2\n";
+          errs() << *thisIteration << " lub " << *previousIteration << " "
+          << *thisIteration->leastUpperBound(*previousIteration);
+          break;
+      }
+
+      if(!(*reinterpret_cast<BoundedSet*>(thisIteration.get())
+        == *reinterpret_cast<BoundedSet*>(previousIteration->leastUpperBound(*thisIteration).get()))) {
+          errs() << "LUB(prev,this) != this 3\n";
+          errs() << *thisIteration << " lub " << *previousIteration << " = "
+          << *previousIteration->leastUpperBound(*thisIteration) << "\n";
+          break;
+      }
+
+      if(thisIteration->lessOrEqual(*previousIteration)) {
+        errs() << *thisIteration << " " << *previousIteration << "Less or equal failed";
+        return;
+      }
+
+      if(!previousIteration->lessOrEqual(*thisIteration)) {
+        errs() << "Less or equal failed";
+        return;
+      }
+
+      // todo max, min, etc.
+
+      previousIteration = thisIteration;
+    }
+  }
+}
 void runBoundedSet() {
+  testContainsRandomBs();
+  /**
   testConstructor();
   testLeastUpperBound();
   testLeastUpperBoundWithAdd();
@@ -198,6 +310,6 @@ void runBoundedSet() {
   testIsBottom();
   testSDiv();
   testSRem();
-  testAdd2();
+  testAdd2(); */
 }
 } // namespace pcpo

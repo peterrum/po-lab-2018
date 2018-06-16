@@ -1,6 +1,7 @@
 #ifndef BOUNDED_SET_H_
 #define BOUNDED_SET_H_
 #include "AbstractDomain.h"
+#include "Util.h"
 #include <functional>
 #include <iostream>
 #include <set>
@@ -9,11 +10,11 @@ using llvm::APInt;
 
 const int SET_LIMIT = 40;
 
-struct Comparator {
-  bool operator()(const APInt &left, const APInt &right) const {
-    return left.ult(right);
-  }
-};
+// struct Comparator {
+//   bool operator()(const APInt &left, const APInt &right) const {
+//     return left.ult(right);
+//   }
+// };
 
 class BoundedSet : public AbstractDomain {
 private:
@@ -71,6 +72,7 @@ public:
   bool lessOrEqual(AbstractDomain &other);
 
   bool operator==(const BoundedSet &other);
+  bool operator!=(const BoundedSet &other);
 
   BoundedSet(unsigned ,std::set<APInt, Comparator> values);
   explicit BoundedSet(APInt value);

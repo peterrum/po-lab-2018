@@ -2,6 +2,7 @@
 
 #include "BoundedSet.h"
 #include "AbstractDomain.h"
+#include "Util.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Support/raw_os_ostream.h"
 #include <initializer_list>
@@ -36,6 +37,11 @@ bool BoundedSet::operator==(const BoundedSet &other) {
     return this->values == other.values;
   }
 }
+
+bool BoundedSet::operator!=(const BoundedSet &other) {
+  return !(this->operator==(other));
+}
+
 
 shared_ptr<AbstractDomain> BoundedSet::compute(
     AbstractDomain &other,

@@ -1,5 +1,6 @@
 #include "StridedInterval.h"
 #include "AbstractDomain.h"
+#include "Util.h"
 #include "BoundedSet.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Support/raw_os_ostream.h"
@@ -41,8 +42,6 @@ StridedInterval::StridedInterval(bool isTop, unsigned bitWidth): bitWidth(bitWid
   stride(APInt(bitWidth, 1)),
   isBot(!isTop) {
 }
-
-
 
 StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
                                  uint64_t end, uint64_t stride)
@@ -183,15 +182,16 @@ APInt mod(const APInt &a, const APInt &b) { return a.urem(b); }
 
 APInt div(const APInt &a, const APInt &b) { return a.udiv(b); }
 
-APInt pow2(unsigned n, int a) {
-  APInt b{n, 0};
+APInt pow2(unsigned n, unsigned bitWidth) {
+  assert(n <= bitWidth); 
+  APInt b{bitWidth, 0};
   b.setBit(n);
   return b;
 }
 
 std::shared_ptr<AbstractDomain> StridedInterval::normalize() {
   unsigned n = bitWidth;
-  APInt N(pow2(n + 1, n));
+  APInt N(pow2(n, n + 1));
   APInt a(begin.zext(n + 1));
   APInt b(end.zext(n + 1));
   APInt s(stride.zext(n + 1));
@@ -217,19 +217,116 @@ std::shared_ptr<AbstractDomain> StridedInterval::normalize() {
       a.zextOrTrunc(n), b.zextOrTrunc(n), s.zextOrTrunc(n)));
 }
 
+bool StridedInterval::isNormal() {
+  std::shared_ptr<AbstractDomain> thisNorm = this->normalize();
+  return *this == *(static_cast<StridedInterval *>(thisNorm.get()));
+}
+
+std::set<APInt, Comparator> StridedInterval::gamma() {
+  unsigned n = bitWidth;
+  std::set<APInt, Comparator> res {};
+  APInt s(stride.zext(n+1));
+  if (s.isNullValue()) {
+    res.insert(begin);
+    return res;
+  } else {
+    APInt N(pow2(n, n+1));
+    APInt a(begin.zext(n+1));
+    APInt b(end.zext(n+1));
+    b = a.ule(b) ? b : add_(b, N);
+    for (APInt k = a; k.ule(b); k += s) {
+      res.insert(k.trunc(n));
+    }
+    return res;
+  }
+}
+
+APInt StridedInterval::umax() {
+  APInt a = begin;
+  APInt b = end;
+  APInt s = stride;
+  if (a.ule(b)) {
+    return b;
+  } else {
+    APInt m = APInt::getMaxValue(bitWidth);
+    return sub_(m, mod(sub_(m, a), s));
+  }
+}
+
+APInt StridedInterval::umin() {
+  APInt a = begin;
+  APInt b = end;
+  APInt s = stride;
+  if (a.ule(b)) {
+    return a;
+  } else {
+    return mod(b, s);
+  }
+}
+
+APInt StridedInterval::smax() {
+  APInt a = begin;
+  APInt b = end;
+  APInt s = stride;
+  if (a.sle(b)) {
+    return b;
+  } else {
+    APInt m = APInt::getSignedMaxValue(bitWidth);
+    return sub_(m, mod(sub_(m, a), s));
+  }
+}
+
+APInt StridedInterval::smin() {
+  APInt a = begin;
+  APInt b = end;
+  APInt s = stride;
+  if (a.sle(b)) {
+    return a;
+  } else {
+    APInt m = APInt::getSignedMinValue(bitWidth);
+    return add_(mod(sub_(b, m), s), m);
+  }
+}
+
 shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
-                                                AbstractDomain &other, bool nuw,
-                                                bool nsw) {
-  StridedInterval *otherB = static_cast<StridedInterval *>(&other);
+    AbstractDomain &other, bool nuw, bool nsw) {
+  StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
   assert(numBits == bitWidth);
-  assert(numBits == otherB->bitWidth);
-  APInt N(pow2(numBits + 1, numBits));
+  assert(numBits == otherSI->bitWidth);
+  if (this->isBottom() || otherSI->isBottom()) {
+    return StridedInterval::create_bottom(bitWidth);
+  }
+  if (nuw) {
+    APInt maxThis = this->umax();
+    APInt maxOther = otherSI->umax();
+    bool ov;
+    maxThis.uadd_ov(maxOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+  }
+  if (nsw) {
+    APInt maxThis = this->smax();
+    APInt maxOther = otherSI->smax();
+    APInt minThis = this->smin();
+    APInt minOther = otherSI->smin();
+    bool ov;
+    maxThis.sadd_ov(maxOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+    minThis.sadd_ov(minOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+  }
+  APInt N(pow2(numBits, numBits + 1));
   APInt a(begin.zext(numBits + 1));
   APInt b(end.zext(numBits + 1));
   APInt s(stride.zext(numBits + 1));
-  APInt c(otherB->begin.zext(numBits + 1));
-  APInt d(otherB->end.zext(numBits + 1));
-  APInt t(otherB->stride.zext(numBits + 1));
+  APInt c(otherSI->begin.zext(numBits + 1));
+  APInt d(otherSI->end.zext(numBits + 1));
+  APInt t(otherSI->stride.zext(numBits + 1));
   APInt u(GreatestCommonDivisor(s, t));
   APInt b_(a.ule(b) ? b : add_(b, N));
   APInt d_(c.ule(d) ? d : add_(d, N));
@@ -250,21 +347,140 @@ shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
       .normalize();
 }
 
-// *****************************************************
-// * Everything below are incorrect dummy definitions! *
-// *****************************************************
-
 shared_ptr<AbstractDomain> StridedInterval::sub(unsigned numBits,
-                                                AbstractDomain &other, bool nuw,
-                                                bool nsw) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+    AbstractDomain &other, bool nuw, bool nsw) {
+  StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
+  assert(numBits == bitWidth);
+  assert(numBits == otherSI->bitWidth);
+  if (this->isBottom() || otherSI->isBottom()) {
+    return StridedInterval::create_bottom(bitWidth);
+  }
+  if (nuw) {
+    APInt maxThis = this->smax();
+    APInt maxOther = otherSI->smax();
+    APInt minThis = this->smin();
+    APInt minOther = otherSI->smin();
+    bool ov;
+    maxThis.usub_ov(minOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+    minThis.usub_ov(maxOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+  }
+  if (nsw) {
+    APInt maxThis = this->smax();
+    APInt maxOther = otherSI->smax();
+    APInt minThis = this->smin();
+    APInt minOther = otherSI->smin();
+    bool ov;
+    maxThis.ssub_ov(minOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+    minThis.ssub_ov(maxOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+  }
+  APInt N(pow2(numBits, numBits + 1));
+  APInt a(begin.zext(numBits + 1));
+  APInt b(end.zext(numBits + 1));
+  APInt s(stride.zext(numBits + 1));
+  APInt c(otherSI->begin.zext(numBits + 1));
+  APInt d(otherSI->end.zext(numBits + 1));
+  APInt t(otherSI->stride.zext(numBits + 1));
+  APInt u(GreatestCommonDivisor(s, t));
+  APInt b_(a.ule(b) ? b : add_(b, N));
+  APInt d_(c.ule(d) ? d : add_(d, N));
+  APInt e(sub_(a, d_));
+  APInt f(sub_(b_, c));
+  APInt u_, e_, f_;
+  if (sub_(f, e).ult(N)) {
+    u_ = u;
+    e_ = e.trunc(numBits);
+    f_ = f.trunc(numBits);
+  } else {
+    u_ = GreatestCommonDivisor(u, N).trunc(numBits);
+    e_ = e.trunc(numBits);
+    f_ = sub_(e_, u_);
+  }
+  return StridedInterval(e_.zextOrTrunc(numBits), f_.zextOrTrunc(numBits),
+                         u_.zextOrTrunc(numBits))
+      .normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::mul(unsigned numBits,
                                                 AbstractDomain &other, bool nuw,
                                                 bool nsw) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+  StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
+  assert(numBits == bitWidth);
+  assert(numBits == otherSI->bitWidth);
+  if (this->isBottom() || otherSI->isBottom()) {
+    return StridedInterval::create_bottom(bitWidth);
+  }
+  if (nuw) {
+    APInt maxThis = this->umax();
+    APInt maxOther = otherSI->umax();
+    bool ov;
+    maxThis.umul_ov(maxOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+  }
+  if (nsw) {
+    APInt maxThis = this->smax();
+    APInt maxOther = otherSI->smax();
+    APInt minThis = this->smin();
+    APInt minOther = otherSI->smin();
+    bool ov;
+    maxThis.smul_ov(maxOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+    maxThis.smul_ov(minOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+    minThis.smul_ov(maxOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+    minThis.smul_ov(minOther, ov);
+    if (ov) {
+      return StridedInterval::create_top(bitWidth);
+    }
+  }
+  APInt N(pow2(numBits+1, 2*numBits));
+  APInt a(begin.zext(2*numBits));
+  APInt b(end.zext(2*numBits));
+  APInt s(stride.zext(2*numBits));
+  APInt c(otherSI->begin.zext(2*numBits));
+  APInt d(otherSI->end.zext(2*numBits));
+  APInt t(otherSI->stride.zext(2*numBits));
+  APInt u(mul_(GreatestCommonDivisor(a, s), GreatestCommonDivisor(c, t)));
+  APInt b_(a.ule(b) ? b : add_(b, N));
+  APInt d_(c.ule(d) ? d : add_(d, N));
+  APInt e(mul_(a, c));
+  APInt f(mul_(b_, d_));
+  APInt u_, e_, f_;
+  if (sub_(f, e).ult(N)) {
+    u_ = u.trunc(bitWidth);
+    e_ = e.trunc(bitWidth) /* mod 2^n */;
+    f_ = f.trunc(bitWidth) /* mod 2^n */;
+  } else {
+    u_ = GreatestCommonDivisor(u, N).trunc(bitWidth);
+    e_ = e.trunc(bitWidth) /* mod 2^n */;
+    f_ = sub_(e_, u_) /* mod 2^n */;
+  }
+  return StridedInterval(e_, f_, u_).normalize();
 }
+
+// *****************************************************
+// * Everything below are incorrect dummy definitions! *
+// *****************************************************
 
 shared_ptr<AbstractDomain> StridedInterval::udiv(unsigned numBits,
                                                  AbstractDomain &other) {
@@ -514,7 +730,9 @@ size_t StridedInterval::size() const {
     return 1;
   } else {
     APInt d = sub_(this->end, this->begin);
-    return div(d, this->stride).getZExtValue();
+    APInt res = div(d, this->stride);
+    res += 1;
+    return res.getZExtValue();
   }
 }
 
@@ -530,53 +748,44 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   } else if (otherMSI->isBot) {
     return std::shared_ptr<AbstractDomain>(new StridedInterval(*this)); // pm  
   }
-  
   assert(otherMSI->bitWidth == bitWidth);
-  // pm: range s[a,b] should be left of range t[c,d]
-  APInt a(begin.ult(otherMSI->begin) ? begin            : otherMSI->begin);
-  APInt b(begin.ult(otherMSI->begin) ? end              : otherMSI->end);
-  APInt s(begin.ult(otherMSI->begin) ? stride           : otherMSI->stride);
-  APInt c(begin.ult(otherMSI->begin) ? otherMSI->begin  : begin);
-  APInt d(begin.ult(otherMSI->begin) ? otherMSI->end    : end);
-  APInt t(begin.ult(otherMSI->begin) ? otherMSI->stride : stride);
-  
 
-  {
-    APInt b_ (sub_(b, a) /* mod N */);
-    APInt c_ (sub_(c, a) /* mod N */);
-    APInt d_ (sub_(d, a) /* mod N */);
-    APInt e, f, u;
-    if (b_.ult(c_) && c_.ule(d_)) { // no overlapping regions; pm: ule 
-      APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));
-      APInt e1 = a, f1 = d;
-      APInt u2 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, d));
-      APInt e2 = c, f2 = b;
-      StridedInterval opt1 (e1, f1, u1);
-      StridedInterval opt2 (e2, f2, u2);
-      if (opt1.size() <= opt2.size()) { // pm: less or equal!
-        e = e1; f = f1; u = u1;
-      } else {
-        e = e2; f = f2; u = u2;
-      }
-    } else if (c_.ule(b_) && c_.ule(d_) || d_.ule(b_) && c_.ult(d_)) { // one overlapping region
-      if (c_.ule(b_)) {
-        e = a;
-      } else {
-        e = c;
-      }
-      if (d_.ule(b_)) {
-        f = b;
-      } else {
-        f = d;
-      }
-      u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(d, b));
-    } else { // two overlapping regions
-      u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, c));
-      e = mod(a, u);
-      f = sub_(APInt(bitWidth, 0), u); /* mod 2^n */
+  // pm: range s[a,b] should be left of range t[c,d]
+  APInt a = begin;
+  APInt b = end;
+  APInt s = stride;
+  APInt c = otherMSI->begin;
+  APInt d = otherMSI->end;
+  APInt t = otherMSI->stride;
+  APInt b_ (sub_(b, a) /* mod N */);
+  APInt c_ (sub_(c, a) /* mod N */);
+  APInt d_ (sub_(d, a) /* mod N */);
+  APInt e, f, u;
+  if (b_.ult(c_) && c_.ult(d_)) { // no overlapping regions 
+    APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));
+    APInt e1 = a, f1 = d;
+    APInt u2 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, d));
+    APInt e2 = c, f2 = b;
+    StridedInterval opt1 (e1, f1, u1);
+    StridedInterval opt2 (e2, f2, u2);
+    if (opt1.size() < opt2.size()) {
+      e = e1; f = f1; u = u1;
+    } else {
+      e = e2; f = f2; u = u2;
     }
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(e, f, u));
+  } else if (d_.ult(c_) and c_.ule(b_)) {
+    u = GreatestCommonDivisor(
+      GreatestCommonDivisor(s, t),
+      GreatestCommonDivisor(c_.ule(d_) ? c_ : d_, pow2(bitWidth-1, bitWidth))
+    );
+    e = mod(a, u);
+    f = sub_(e, u);
+  } else {
+    e = c_.ule(d_) ? a : c;
+    f = d_.ule(b_) ? b : d;
+    u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), c_.ule(d_) ? c_ : d_);
   }
+  return std::shared_ptr<AbstractDomain>(new StridedInterval(e, f, u));
 }
 
 bool StridedInterval::lessOrEqual(AbstractDomain &other) {
@@ -615,7 +824,7 @@ bool StridedInterval::lessOrEqual(AbstractDomain &other) {
   } else if (b == add_(a, s)) /* mod N */ {
     return otherMSI->contains(a) && otherMSI->contains(b);
   } else if (mod(s, t).isNullValue()) {
-    if (mod(pow2(bitWidth, bitWidth-1), t).isNullValue() && sub_(c, d) /* mod N */ == t) { // t | 2^n <=> 2**(n-1) = 0 mod t
+    if (mod(pow2(bitWidth, bitWidth+1), t.zext(bitWidth+1)).isNullValue() && sub_(c, d) /* mod N */ == t) { // t | 2^n <=> 2**(n-1) = 0 mod t
       return mod(sub_(a.zext(bitWidth+1), c.zext(bitWidth+1)).trunc(bitWidth), t).isNullValue() && mod(s, t).isNullValue();
     } else {
       APInt b_ (sub_(b, a) /* mod N */);

@@ -28,13 +28,13 @@ struct VsaBenchmarkPass : public ModulePass {
       uint64_t lvi_count = 0;
       uint64_t eq_count = 0;
 
-      /// extract results from VsaPass
-      const auto& vsa = getAnalysis<VsaPass>().getResult();
-
       for (auto &f : M.functions()) {
           /// check if function is empty
           if(f.begin()==f.end())
               continue;
+
+          /// extract results from VsaPass
+          const auto& vsa = getAnalysis<VsaPass>(f).getResult();
 
           /// get LazyValueInfo for function
           LazyValueInfo& lvi = getAnalysis<LazyValueInfoWrapperPass>(f).getLVI();

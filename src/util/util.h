@@ -12,8 +12,8 @@
 #define DEBUG
 
 /// type of abstract domain
-#define AD_TYPE BoundedSet
-//#define AD_TYPE StridedInterval
+//#define AD_TYPE BoundedSet
+#define AD_TYPE StridedInterval
 //#define AD_TYPE CompositeDomain
 
 /// do not to touch anything beneath here (useful functions)
