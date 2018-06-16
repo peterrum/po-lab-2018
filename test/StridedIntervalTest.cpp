@@ -621,14 +621,15 @@ void testContainsRandom() {
       auto thisIterationRev = newSI.leastUpperBound(*previousIteration);
 
       if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
-          errs() << "== not symmetric";
+          errs() << "old " <<  newSI << " new " << *previousIteration;
+          errs() << *thisIteration << " " << *thisIterationRev << " least upper bound not symmetric \n";
           return;
       }
 
       if (thisIteration->size() != insertCount) {
-          // errs() << thisIteration->size() << " should be  " << insertCount << " size wrong\n";
-          // errs() << *thisIteration;
-          // return;
+          errs() << thisIteration->size() << " should be  " << insertCount << " size wrong\n";
+          errs() << *thisIteration;
+          return;
       }
 
       if(*reinterpret_cast<StridedInterval*>(thisIteration.get())
@@ -663,15 +664,13 @@ void testContainsRandom() {
         return;
       }
 
-      // todo max, min, etc.
-
       previousIteration = thisIteration;
     }
   }
 }
 
 void runStridedInterval() {
-  // testContainsRandom();
+  testContainsRandom();
   /**
   testStridedIntervalAdd();
   testStridedIntervalLessOrEqual();

@@ -28,15 +28,14 @@ struct VsaTutorialPass : public ModulePass {
   bool runOnModule(Module &M) override {
     // iterate such that we get a block...
     for (auto &f : M.functions()) {
+      // check if function is empty
+      if(f.begin()==f.end())
+        continue;
 
       // extract results from VsaPass
       auto &results = getAnalysis<VsaPass>(f).getResult();
       // print states of all basic blocks of this function
       results.print();
-
-      // check if function is empty
-      if(f.begin()==f.end())
-        continue;
 
       errs() << "\n----------------------------------\n";
       errs() << "Function: " << f.getName() << ":\n";
