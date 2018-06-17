@@ -542,29 +542,6 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
                                      CmpInst::Predicate pred) {
   StridedInterval *otherB = static_cast<StridedInterval *>(&other);
 
-  if (isTop()) {
-    // In case of EQ and NEQ we can still obtain some information
-    // in case this is top.
-    if (pred == CmpInst::Predicate::ICMP_EQ) {
-      shared_ptr<AbstractDomain> trueSet(new StridedInterval(*otherB));
-      shared_ptr<AbstractDomain> falseSet(
-          StridedInterval::create_top(this->bitWidth));
-      return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-          trueSet, falseSet);
-    } else if (pred == CmpInst::Predicate::ICMP_NE) {
-      shared_ptr<AbstractDomain> trueSet(
-          StridedInterval::create_top(this->bitWidth));
-      shared_ptr<AbstractDomain> falseSet(new StridedInterval(*otherB));
-      return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>{
-          trueSet, falseSet};
-    }
-
-    // if this set is top, it will be top in both branches afterwards
-    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-        StridedInterval::create_top(this->bitWidth),
-        StridedInterval::create_top(this->bitWidth));
-  }
-
   if (otherB->isTop()) {
     // if the other set is top; we cannot infer more details about our set
     // in both branches afterwards thus, the set stays the same
@@ -574,6 +551,8 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
         copy, anotherCopy);
   }
 
+  // We do a case distinction on the type of predicate
+  // SGE will be reduced to SLE, UGT to SGT and so on.
   if (pred == CmpInst::Predicate::ICMP_EQ) {
     return subsetsForPredicateEQ(*this, *otherB);
   }
@@ -615,6 +594,7 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
         temp.second, temp.first);
   }
 
+  // In case we don't know the predicate, we return top in both cases
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       StridedInterval::create_top(this->bitWidth),
       StridedInterval::create_top(this->bitWidth));
@@ -649,11 +629,13 @@ StridedInterval::subsetsForPredicateSLE(StridedInterval &A,
 
   auto minSigned = APInt::getSignedMinValue(B.bitWidth);
   auto maxSigned = APInt::getSignedMaxValue(B.bitWidth);
-  auto maxB = B.getSMin();
+  auto maxB = B.getSMax();
   auto minB = B.getSMin();
 
+  // the subset of A that can be less or equal to some element in B
   auto trueSet =
       intersect(A, StridedInterval(minSigned, maxB, APInt(B.bitWidth, 1)));
+  // the subset of A that can be greater than some element in B
   auto falseSet =
       intersect(A, StridedInterval(minB + 1, maxSigned, APInt(B.bitWidth, 1)));
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
@@ -667,31 +649,15 @@ StridedInterval::subsetsForPredicateSLT(StridedInterval &A,
 
   auto minSigned = APInt::getSignedMinValue(B.bitWidth);
   auto maxSigned = APInt::getSignedMaxValue(B.bitWidth);
-  auto maxB = B.getSMin();
+  auto maxB = B.getSMax();
   auto minB = B.getSMin();
 
+  // the subset of A that can be less to some element in B
   auto trueSet =
       intersect(A, StridedInterval(minSigned + 1, maxB, APInt(B.bitWidth, 1)));
+  // the subset of A that can be greater or equal to some element in B
   auto falseSet =
       intersect(A, StridedInterval(minB, maxSigned, APInt(B.bitWidth, 1)));
-  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-      trueSet, falseSet);
-}
-
-std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-StridedInterval::subsetsForPredicateULT(StridedInterval &A,
-                                        StridedInterval &B) {
-  assert(A.bitWidth == B.bitWidth);
-
-  auto minUnsigned = APInt::getMinValue(B.bitWidth);
-  auto maxUnsigned = APInt::getMaxValue(B.bitWidth);
-  auto maxB = B.getSMin();
-  auto minB = B.getSMin();
-
-  auto trueSet =
-      intersect(A, StridedInterval(minUnsigned + 1, maxB, APInt(B.bitWidth, 1)));
-  auto falseSet =
-      intersect(A, StridedInterval(minB, maxUnsigned, APInt(B.bitWidth, 1)));
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       trueSet, falseSet);
 }
@@ -703,13 +669,35 @@ StridedInterval::subsetsForPredicateULE(StridedInterval &A,
 
   auto minUnsigned = APInt::getMinValue(B.bitWidth);
   auto maxUnsigned = APInt::getMaxValue(B.bitWidth);
-  auto maxB = B.getSMin();
-  auto minB = B.getSMin();
+  auto maxB = B.getUMax();
+  auto minB = B.getUMin();
   
+  // the subset of A that can be less or equal to some element in B
   auto trueSet =
       intersect(A, StridedInterval(minUnsigned, maxB, APInt(B.bitWidth, 1)));
+  // the subset of A that can be greater than some element in B
   auto falseSet =
       intersect(A, StridedInterval(minB + 1, maxUnsigned, APInt(B.bitWidth, 1)));
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+      trueSet, falseSet);
+}
+
+std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+StridedInterval::subsetsForPredicateULT(StridedInterval &A,
+                                        StridedInterval &B) {
+  assert(A.bitWidth == B.bitWidth);
+
+  auto minUnsigned = APInt::getMinValue(B.bitWidth);
+  auto maxUnsigned = APInt::getMaxValue(B.bitWidth);
+  auto maxB = B.getUMax();
+  auto minB = B.getUMin();
+
+  // the subset of A that can be less to some element in B
+  auto trueSet =
+      intersect(A, StridedInterval(minUnsigned + 1, maxB, APInt(B.bitWidth, 1)));
+  // the subset of A that can be greater or equal to some element in B
+  auto falseSet =
+      intersect(A, StridedInterval(minB, maxUnsigned, APInt(B.bitWidth, 1)));
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       trueSet, falseSet);
 }
