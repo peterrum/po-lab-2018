@@ -101,21 +101,17 @@ public:
   bool contains(APInt &value) const;
   size_t size() const;
 
+  /// TODO comment
   std::shared_ptr<AbstractDomain> normalize();
   bool isNormal();
   std::set<APInt, Comparator> gamma();
 
-  /// Member functions for API TODO
-  APInt getValueAt(uint64_t i) const { return APInt(); }
-  APInt getUMin() const { return APInt(); }
-  APSInt getSMin() const { return APSInt(); }
-  APInt getUMax() const { return APInt(); }
-  APSInt getSMax() const { return APSInt(); }
-  /// TODO
-  APInt umax();
-  APInt umin();
-  APInt smax();
-  APInt smin();
+  /// Member functions for API
+  APInt getValueAt(uint64_t i) const { return APInt(/*TODO*/); }
+  APInt getUMin() const { return umin(); }
+  APSInt getSMin() const { return APSInt(smin()); }
+  APInt getUMax() const { return umax(); }
+  APSInt getSMax() const { return APSInt(smax()); }
 
   /// Print
   friend std::ostream &operator<<(std::ostream &os, const StridedInterval &bs);
@@ -123,6 +119,13 @@ public:
   void printOut() const;
 
 private:
+
+    /// TODO: this vs get methods API
+    APInt umax();
+    APInt umin();
+    APInt smax();
+    APInt smin();
+
     unsigned bitWidth;
     APInt begin;
     APInt end;
