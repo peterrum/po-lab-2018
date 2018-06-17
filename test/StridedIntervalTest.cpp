@@ -629,7 +629,7 @@ void testContainsRandom() {
       StridedInterval* thisRaw = reinterpret_cast<StridedInterval*>(thisIteration.get());
       auto thisNorm = thisRaw->normalize();
 
-      if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisRevNorm.get())) {
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
           errs() << "new " <<  newSI << "    prev " << *previousIteration << "\n";
           errs() << "prev->lub(new)                 " << *thisIteration << "\n";
           errs() << "prev->lub(new) (norm.)         " << *thisNorm << "\n";
@@ -684,26 +684,28 @@ void testContainsRandom() {
 void testFromBoundedSet() {
     unsigned bitWidth = 32;
 
-    auto bs = BoundedSet::create_bottom(bitWidth);
-    auto si = StridedInterval::create_bottom(bitWidth);
 
-    for(int i=0; i <30;i++) {
-        APInt other(bitWidth,i);
-        APInt zero(bitWidth,0);
-        StridedInterval newSI(other, other, zero);
+    for(int stride=1;stride < 60; stride++) {
+      auto bs = BoundedSet::create_bottom(bitWidth);
+      auto si = StridedInterval::create_bottom(bitWidth);
 
-        BoundedSet newBs(other);
+      for(int i=0; i <30;i++) {
+          APInt other(bitWidth,i*stride);
+          APInt zero(bitWidth,0);
+          StridedInterval newSI(other, other, zero);
 
-        bs = bs->leastUpperBound(newBs);
-        si = si->leastUpperBound(newSI);
+          BoundedSet newBs(other);
 
-        StridedInterval siFromBs(*reinterpret_cast<BoundedSet*>(bs.get()));
+          bs = bs->leastUpperBound(newBs);
+          si = si->leastUpperBound(newSI);
 
-        if(siFromBs != *reinterpret_cast<StridedInterval*>(si.get())) {
-          errs() << "Failed: strided interval " << siFromBs << " from bounded set "
-           << *bs << " \n";
-        }
+          StridedInterval siFromBs(*reinterpret_cast<BoundedSet*>(bs.get()));
 
+          if(siFromBs != *reinterpret_cast<StridedInterval*>(si.get())) {
+            errs() << "Failed: strided interval " << siFromBs << " from bounded set "
+             << *bs << " \n";
+          }
+      }
     }
 }
 
