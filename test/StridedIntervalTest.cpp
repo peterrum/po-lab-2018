@@ -709,9 +709,142 @@ void testFromBoundedSet() {
     }
 }
 
+void testContainsRandomNeg() {
+  const std::string testName = "[containsRandom] ";
+  unsigned bitWidth = 32;
+
+  auto bottom = StridedInterval::create_bottom(bitWidth);
+  auto top = StridedInterval::create_top(bitWidth);
+
+  assertBottom(bottom, "bottom");
+  assertTop(top, "top");
+
+  assertBottom(bottom->leastUpperBound(*bottom), "bottom LUB bottom");
+
+  assertTop(bottom->leastUpperBound(*top), "bottom LUB top");
+  assertTop(top->leastUpperBound(*bottom), "top LUB bottom");
+
+  for(unsigned stride=1; stride < 600; stride++) {
+    auto previousIteration = bottom;
+    unsigned insertCount = 0;
+
+    for(unsigned i=0; i < 10000; i++) {
+      if(i % stride != 0)
+        continue;
+
+      insertCount++;
+
+      APInt other(bitWidth,-i);
+      APInt zero(bitWidth,0);
+      StridedInterval newSI(other, other, zero);
+
+      auto thisIteration = previousIteration->leastUpperBound(newSI);
+      auto thisIterationRev = newSI.leastUpperBound(*previousIteration);
+
+      StridedInterval* thisRevRaw = reinterpret_cast<StridedInterval*>(thisIterationRev.get());
+      auto thisRevNorm = thisRevRaw->normalize();
+
+      StridedInterval* thisRaw = reinterpret_cast<StridedInterval*>(thisIteration.get());
+      auto thisNorm = thisRaw->normalize();
+
+      errs() << "new " <<  newSI << "    prev " << *previousIteration << "\n";
+      errs() << "prev->lub(new)                 " << *thisIteration << "\n";
+      errs() << "prev->lub(new) (norm.)         " << *thisNorm << "\n";
+      errs() << "new->lub(prev)                 " << *thisIterationRev << "\n";
+      errs() << "new->lub(prev) (norm.)         " << *thisRevNorm << "\n";
+
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
+          errs() << "new " <<  newSI << "    prev " << *previousIteration << "\n";
+          errs() << "prev->lub(new)                 " << *thisIteration << "\n";
+          errs() << "prev->lub(new) (norm.)         " << *thisNorm << "\n";
+          errs() << "new->lub(prev)                 " << *thisIterationRev << "\n";
+          errs() << "new->lub(prev) (norm.)         " << *thisRevNorm << "\n";
+      }
+
+
+      if (thisIteration->size() != insertCount) {
+          StridedInterval* prevRaw = reinterpret_cast<StridedInterval*>(previousIteration.get());
+          auto prevNorm = prevRaw->normalize();
+          errs() << *prevNorm  << "\n";
+
+          errs() << *previousIteration << "\n";
+          errs() << newSI << "\n";
+          errs() << *thisIteration << "\n";
+          errs() << thisIteration->size() << " should be  " << insertCount << " size wrong\n";
+          return;
+      }
+
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get())
+        != *reinterpret_cast<StridedInterval*>(thisIteration->leastUpperBound(*thisIteration).get())) {
+          errs() << "LUB(this,this) != this 1\n";
+          break;
+      }
+
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get())
+        != *reinterpret_cast<StridedInterval*>(thisIteration->leastUpperBound(*previousIteration).get())) {
+          errs() << "LUB(prev,this) != this 2\n";
+          errs() << *thisIteration << " lub " << *previousIteration << " "
+          << *thisIteration->leastUpperBound(*previousIteration);
+          break;
+      }
+
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get())
+        != *reinterpret_cast<StridedInterval*>(previousIteration->leastUpperBound(*thisIteration).get())) {
+          errs() << "LUB(prev,this) != this 3\n";
+          errs() << *thisIteration << " lub " << *previousIteration << " = "
+          << *previousIteration->leastUpperBound(*thisIteration) << "\n";
+          break;
+      }
+
+      if(thisIteration->lessOrEqual(*previousIteration)) {
+        errs() << *thisIteration << " " << *previousIteration << "Less or equal failed";
+        return;
+      }
+
+      if(!previousIteration->lessOrEqual(*thisIteration)) {
+        errs() << "Less or equal failed";
+        return;
+      }
+
+      previousIteration = thisNorm;
+    }
+  }
+}
+
+void testFromBoundedSetNeg() {
+    unsigned bitWidth = 32;
+
+
+    for(int stride=1;stride < 60; stride++) {
+      auto bs = BoundedSet::create_bottom(bitWidth);
+      auto si = StridedInterval::create_bottom(bitWidth);
+
+      for(int i=0; i <30;i++) {
+          APInt other(bitWidth,-i*stride);
+          APInt zero(bitWidth,0);
+          StridedInterval newSI(other, other, zero);
+
+          BoundedSet newBs(other);
+
+          bs = bs->leastUpperBound(newBs);
+          si = si->leastUpperBound(newSI);
+
+          StridedInterval siFromBs(*reinterpret_cast<BoundedSet*>(bs.get()));
+
+          if(siFromBs != *reinterpret_cast<StridedInterval*>(si.get())) {
+            errs() << "Failed: strided interval " << siFromBs << " from bounded set "
+             << *bs << " \n";
+             return;
+          }
+      }
+    }
+}
+
 void runStridedInterval() {
   testContainsRandom();
+  testContainsRandomNeg();
   testFromBoundedSet();
+  testFromBoundedSetNeg();
   /**
   testStridedIntervalLessOrEqual();
   testStridedIntervalLeastUpperBound();
