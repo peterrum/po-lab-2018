@@ -17,9 +17,9 @@ using std::vector;
 
 
 StridedInterval::StridedInterval(const StridedInterval& other)
-    : bitWidth(other.bitWidth), 
-      begin(other.begin), 
-      end(other.end), 
+    : bitWidth(other.bitWidth),
+      begin(other.begin),
+      end(other.end),
       stride(other.stride),
       isBot(other.isBot) {}
 
@@ -33,8 +33,6 @@ StridedInterval::StridedInterval(APInt begin, APInt end, APInt stride)
 StridedInterval::StridedInterval(APInt value)
     : bitWidth(value.getBitWidth()), begin(value), end(value),
       stride({value.getBitWidth(), 0}), isBot{false} {}
-
-StridedInterval::StridedInterval() : isBot(true) {}
 
 StridedInterval::StridedInterval(bool isTop, unsigned bitWidth): bitWidth(bitWidth)
   ,begin(APInt(bitWidth, 0)),
@@ -151,10 +149,6 @@ bool StridedInterval::operator==(const StridedInterval &other) {
     return this->begin == other.begin && this->end == other.end &&
            this->stride == other.stride;
   }
-}
-
-bool StridedInterval::operator!=(const StridedInterval &other) {
-  return !(this->operator==(other));
 }
 
 APInt add_(const APInt &a, const APInt &b) {
@@ -862,8 +856,6 @@ bool StridedInterval::lessOrEqual(AbstractDomain &other) {
   }
 }
 
-unsigned StridedInterval::getBitWidth() const { return bitWidth; }
-
 bool StridedInterval::contains(APInt &value) const {
   assert(value.getBitWidth() == bitWidth);
   if (value.getBitWidth() != bitWidth) {
@@ -900,8 +892,6 @@ bool StridedInterval::isTop() const {
            end == APInt::getMaxValue(this->getBitWidth());
   }
 }
-
-bool StridedInterval::isBottom() const { return isBot; }
 
 llvm::raw_ostream &StridedInterval::print(llvm::raw_ostream &os) {
   if (isBot) {

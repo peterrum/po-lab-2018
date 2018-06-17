@@ -1,12 +1,12 @@
 #ifndef STRIDED_INTERVAL_H_
 #define STRIDED_INTERVAL_H_
-#include "AbstractDomain.h"
-#include "Util.h"
-#include "BoundedSet.h"
-#include "llvm/ADT/APInt.h"
+#include <llvm/ADT/APInt.h>
 #include <functional>
 #include <iostream>
 #include <set>
+#include "AbstractDomain.h"
+#include "Util.h"
+#include "BoundedSet.h"
 
 namespace pcpo {
 using llvm::APInt;
@@ -15,13 +15,18 @@ class StridedInterval : public AbstractDomain {
 
 public:
 
-  /// Constructors
-  explicit StridedInterval(APInt value);
-  explicit StridedInterval(bool isTop, unsigned bitWidth);
-  StridedInterval();
+  /// Constructor: Bottom
+  StridedInterval() : isBot(true) {}
+  /// Constructor: Top
+  StridedInterval(bool isTop, unsigned bitWidth);
+  /// Constructor: Constant
+  StridedInterval(APInt value);
+  /// Constructor: Interval with APInt
   StridedInterval(APInt begin, APInt end, APInt stride);
-  StridedInterval(unsigned numBits, std::initializer_list<uint64_t> vals);
+  /// Constructor: Interval with uint64_t
   StridedInterval(unsigned bitWidth, uint64_t begin, uint64_t end, uint64_t stride);
+  //StridedInterval(unsigned numBits, std::initializer_list<uint64_t> vals);
+  /// Constructor: From BoundedSet
   StridedInterval(BoundedSet &set);
 
   /// Copy constructor
@@ -31,20 +36,18 @@ public:
 
   /// Comparison Operators
   bool operator==(const StridedInterval &other);
-  bool operator!=(const StridedInterval &other);
+  bool operator!=(const StridedInterval &other) {return !(operator==(other));}
 
   /// Member functions
-  unsigned getBitWidth() const;
+  unsigned getBitWidth() const { return bitWidth; }
   bool isTop() const;
-  bool isBottom() const;
+  bool isBottom() const { return isBot; }
   bool contains(APInt &value) const;
+  size_t size() const;
 
   std::shared_ptr<AbstractDomain> normalize();
   bool isNormal();
   std::set<APInt, Comparator> gamma();
-
-  /// |gamma(this)| ???
-  size_t size() const;
 
   /// Member functions for API TODO
   APInt getValueAt(uint64_t i) const { return APInt(); }
@@ -52,7 +55,7 @@ public:
   APSInt getSMin() const { return APSInt(); }
   APInt getUMax() const { return APInt(); }
   APSInt getSMax() const { return APSInt(); }
-  /// same as prev?
+  /// TODO
   APInt umax();
   APInt umin();
   APInt smax();

@@ -10,12 +10,6 @@ using llvm::APInt;
 
 const int SET_LIMIT = 40;
 
-// struct Comparator {
-//   bool operator()(const APInt &left, const APInt &right) const {
-//     return left.ult(right);
-//   }
-// };
-
 class BoundedSet : public AbstractDomain {
 private:
   unsigned bitWidth;
@@ -75,10 +69,10 @@ public:
   bool operator!=(const BoundedSet &other);
 
   BoundedSet(unsigned ,std::set<APInt, Comparator> values);
-  explicit BoundedSet(APInt value);
+  BoundedSet(APInt value);
 
   BoundedSet(const BoundedSet & b);
-  explicit BoundedSet(unsigned numBits, bool isTop);
+  BoundedSet(unsigned numBits, bool isTop);
   BoundedSet(unsigned numBits, std::initializer_list<APInt> vals);
   BoundedSet(unsigned numBits, std::initializer_list<uint64_t> vals);
   unsigned getBitWidth() const;
