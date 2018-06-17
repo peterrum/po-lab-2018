@@ -538,58 +538,83 @@ shared_ptr<AbstractDomain> StridedInterval::xor_(unsigned numBits,
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-StridedInterval::subsetsForPredicate(
-    AbstractDomain &other,
-    CmpInst::Predicate pred) {
-  if (StridedInterval *otherB = static_cast<StridedInterval *>(&other)) {
+StridedInterval::subsetsForPredicate(AbstractDomain &other,
+                                     CmpInst::Predicate pred) {
+  StridedInterval *otherB = static_cast<StridedInterval *>(&other);
 
-    if (isTop()) {
-      if (pred == CmpInst::Predicate::ICMP_EQ) {
-        shared_ptr<AbstractDomain> trueSet(new StridedInterval(*otherB));
-        shared_ptr<AbstractDomain> falseSet(StridedInterval::create_top(this->bitWidth));
-        return std::pair<shared_ptr<AbstractDomain>,
-                         shared_ptr<AbstractDomain>>(trueSet, falseSet);
-      } else if (pred == CmpInst::Predicate::ICMP_NE) {
-        shared_ptr<AbstractDomain> trueSet(StridedInterval::create_top(this->bitWidth));
-        shared_ptr<AbstractDomain> falseSet(new StridedInterval(*otherB));
-        return std::pair<shared_ptr<AbstractDomain>,
-                         shared_ptr<AbstractDomain>>{trueSet, falseSet};
-      }
-      
-      // if this set is top, it will be top in both branches afterwards
-
+  if (isTop()) {
+    // In case of EQ and NEQ we can still obtain some information
+    // in case this is top.
+    if (pred == CmpInst::Predicate::ICMP_EQ) {
+      shared_ptr<AbstractDomain> trueSet(new StridedInterval(*otherB));
+      shared_ptr<AbstractDomain> falseSet(
+          StridedInterval::create_top(this->bitWidth));
       return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+          trueSet, falseSet);
+    } else if (pred == CmpInst::Predicate::ICMP_NE) {
+      shared_ptr<AbstractDomain> trueSet(
+          StridedInterval::create_top(this->bitWidth));
+      shared_ptr<AbstractDomain> falseSet(new StridedInterval(*otherB));
+      return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>{
+          trueSet, falseSet};
+    }
+
+    // if this set is top, it will be top in both branches afterwards
+    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
         StridedInterval::create_top(this->bitWidth),
         StridedInterval::create_top(this->bitWidth));
-    }
-
-    if (otherB->isTop()) {
-      // if the other set is top; we cannot infer more details about our set
-      // in both branches afterwards thus, the set stays the same
-      shared_ptr<AbstractDomain> copy(new StridedInterval(*this));
-      shared_ptr<AbstractDomain> anotherCopy(new StridedInterval(*this));
-      return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-          copy, anotherCopy);
-    }
-    
-    if(pred == CmpInst::Predicate::ICMP_EQ){
-      return subsetsForPredicateEQ(*this, *otherB);  
-    }
-    if(pred == CmpInst::Predicate::ICMP_NE){
-        auto temp = subsetsForPredicateEQ(*this, *otherB);
-        return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(temp.second, temp.first);        
-    }
-    if(pred == CmpInst::Predicate::ICMP_ULE ||
-                    pred == CmpInst::Predicate::ICMP_SLE){    
-        return subsetsForPredicateULE(*this, *otherB);
-    }
-    if(pred == CmpInst::Predicate::ICMP_UGE ||
-                    pred == CmpInst::Predicate::ICMP_SGE){
-        auto temp = subsetsForPredicateULE(*this, *otherB);
-        return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(temp.second, temp.first);
-    }
   }
-  
+
+  if (otherB->isTop()) {
+    // if the other set is top; we cannot infer more details about our set
+    // in both branches afterwards thus, the set stays the same
+    shared_ptr<AbstractDomain> copy(new StridedInterval(*this));
+    shared_ptr<AbstractDomain> anotherCopy(new StridedInterval(*this));
+    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+        copy, anotherCopy);
+  }
+
+  if (pred == CmpInst::Predicate::ICMP_EQ) {
+    return subsetsForPredicateEQ(*this, *otherB);
+  }
+  if (pred == CmpInst::Predicate::ICMP_NE) {
+    auto temp = subsetsForPredicateEQ(*this, *otherB);
+    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+        temp.second, temp.first);
+  }
+  if (pred == CmpInst::Predicate::ICMP_SLE) {
+    return subsetsForPredicateSLE(*this, *otherB);
+  }
+  if (pred == CmpInst::Predicate::ICMP_SGE) {
+    auto temp = subsetsForPredicateSLE(*this, *otherB);
+    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+        temp.second, temp.first);
+  }
+  if (pred == CmpInst::Predicate::ICMP_SLT) {
+    return subsetsForPredicateSLT(*this, *otherB);
+  }
+  if (pred == CmpInst::Predicate::ICMP_SGT) {
+    auto temp = subsetsForPredicateSLT(*this, *otherB);
+    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+        temp.second, temp.first);
+  }
+  if (pred == CmpInst::Predicate::ICMP_ULE) {
+    return subsetsForPredicateULE(*this, *otherB);
+  }
+  if (pred == CmpInst::Predicate::ICMP_UGE) {
+    auto temp = subsetsForPredicateULE(*this, *otherB);
+    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+        temp.second, temp.first);
+  }
+  if (pred == CmpInst::Predicate::ICMP_ULT) {
+    return subsetsForPredicateULT(*this, *otherB);
+  }
+  if (pred == CmpInst::Predicate::ICMP_UGE) {
+    auto temp = subsetsForPredicateULT(*this, *otherB);
+    return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+        temp.second, temp.first);
+  }
+
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       StridedInterval::create_top(this->bitWidth),
       StridedInterval::create_top(this->bitWidth));
@@ -618,38 +643,84 @@ StridedInterval::subsetsForPredicateEQ(
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-StridedInterval::subsetsForPredicateULE(
-    StridedInterval &A, StridedInterval &B) {
-        APInt maxBeginFalse = A.begin.uge(B.begin+1) ? 
-            A.begin : (B.begin+1);
-        
-        APInt minEndTrue = A.end.ule(B.end) ? 
-            A.end : B.end;
-        
-        shared_ptr<AbstractDomain> a1, a2;
-                
-        if(A.begin.ugt(minEndTrue)){
-            a1 = StridedInterval::create_bottom(A.bitWidth);
-        }else {
-            a1 = shared_ptr<AbstractDomain>(new StridedInterval(
-                    A.begin, minEndTrue, APInt(A.bitWidth, 1)));
-        }
-                
-        if(maxBeginFalse.ugt(A.end)){
-            a2 = StridedInterval::create_bottom(A.bitWidth);
-        }else {
-            a2 = shared_ptr<AbstractDomain>(new StridedInterval(
-                    maxBeginFalse, A.end, APInt(A.bitWidth, 1)));
-        }
-        
-        return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-              a1, a2);
+StridedInterval::subsetsForPredicateSLE(StridedInterval &A,
+                                        StridedInterval &B) {
+  assert(A.bitWidth == B.bitWidth);
+
+  auto minSigned = APInt::getSignedMinValue(B.bitWidth);
+  auto maxSigned = APInt::getSignedMaxValue(B.bitWidth);
+  auto maxB = B.getSMin();
+  auto minB = B.getSMin();
+
+  auto trueSet =
+      intersect(A, StridedInterval(minSigned, maxB, APInt(B.bitWidth, 1)));
+  auto falseSet =
+      intersect(A, StridedInterval(minB + 1, maxSigned, APInt(B.bitWidth, 1)));
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+      trueSet, falseSet);
+}
+
+std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+StridedInterval::subsetsForPredicateSLT(StridedInterval &A,
+                                        StridedInterval &B) {
+  assert(A.bitWidth == B.bitWidth);
+
+  auto minSigned = APInt::getSignedMinValue(B.bitWidth);
+  auto maxSigned = APInt::getSignedMaxValue(B.bitWidth);
+  auto maxB = B.getSMin();
+  auto minB = B.getSMin();
+
+  auto trueSet =
+      intersect(A, StridedInterval(minSigned + 1, maxB, APInt(B.bitWidth, 1)));
+  auto falseSet =
+      intersect(A, StridedInterval(minB, maxSigned, APInt(B.bitWidth, 1)));
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+      trueSet, falseSet);
+}
+
+std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+StridedInterval::subsetsForPredicateULT(StridedInterval &A,
+                                        StridedInterval &B) {
+  assert(A.bitWidth == B.bitWidth);
+
+  auto minUnsigned = APInt::getMinValue(B.bitWidth);
+  auto maxUnsigned = APInt::getMaxValue(B.bitWidth);
+  auto maxB = B.getSMin();
+  auto minB = B.getSMin();
+
+  auto trueSet =
+      intersect(A, StridedInterval(minUnsigned + 1, maxB, APInt(B.bitWidth, 1)));
+  auto falseSet =
+      intersect(A, StridedInterval(minB, maxUnsigned, APInt(B.bitWidth, 1)));
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+      trueSet, falseSet);
+}
+
+std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+StridedInterval::subsetsForPredicateULE(StridedInterval &A,
+                                        StridedInterval &B) {
+  assert(A.bitWidth == B.bitWidth);
+
+  auto minUnsigned = APInt::getMinValue(B.bitWidth);
+  auto maxUnsigned = APInt::getMaxValue(B.bitWidth);
+  auto maxB = B.getSMin();
+  auto minB = B.getSMin();
+  
+  auto trueSet =
+      intersect(A, StridedInterval(minUnsigned, maxB, APInt(B.bitWidth, 1)));
+  auto falseSet =
+      intersect(A, StridedInterval(minB + 1, maxUnsigned, APInt(B.bitWidth, 1)));
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+      trueSet, falseSet);
 }
 
 // A possibly overapproximated intersection of two StridedIntervals
-shared_ptr<AbstractDomain> StridedInterval::intersect(StridedInterval &A,
-                                                      StridedInterval &B) {
-  assert(A.bitWidth == B.bitWidth);
+shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &first,
+                                                      const StridedInterval &second) {
+  assert(first.bitWidth == second.bitWidth);
+
+  StridedInterval A(first);
+  StridedInterval B(second);
 
   // if one of the SIs is bottom, the intersection is bottom, too
   if (isBottom() || B.isBottom()) {
@@ -721,7 +792,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(StridedInterval &A,
       new StridedInterval(beginMax, B.end, APInt(A.bitWidth, 1)));
 }
 
-bool StridedInterval::isWrapAround(){
+bool StridedInterval::isWrapAround() const{
   if(isBottom()){
     return false;
   } else {

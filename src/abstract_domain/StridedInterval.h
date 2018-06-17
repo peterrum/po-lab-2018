@@ -71,18 +71,25 @@ public:
 
   /// Functions for icmp predicates
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+  subsetsForPredicateEQ(StridedInterval &A, StridedInterval &B);
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+  subsetsForPredicateSLE(StridedInterval &A, StridedInterval &B);
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+  subsetsForPredicateSLT(StridedInterval &A, StridedInterval &B);
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   subsetsForPredicateULE(StridedInterval &A, StridedInterval &B);
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-  subsetsForPredicateEQ(StridedInterval &A, StridedInterval &B);
+  subsetsForPredicateULT(StridedInterval &A, StridedInterval &B);
+  
 
   /// icmp
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
 
   // Check whether this is an wrap around interval
-  bool isWrapAround();
+  bool isWrapAround() const;
   // Conduct an overapproximated intersection of two intervals.
-  shared_ptr<AbstractDomain> intersect(StridedInterval &A, StridedInterval &B);
+  shared_ptr<AbstractDomain> intersect(const StridedInterval &A, const StridedInterval &B);
 
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
   bool lessOrEqual(AbstractDomain &other);
