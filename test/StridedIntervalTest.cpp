@@ -621,9 +621,9 @@ void testContainsRandom() {
       auto thisIterationRev = newSI.leastUpperBound(*previousIteration);
 
       if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
-          errs() << "old " <<  newSI << " new " << *previousIteration;
-          errs() << *thisIteration << " " << *thisIterationRev << " least upper bound not symmetric \n";
-          return;
+        //  errs() << "old " <<  newSI << " new " << *previousIteration;
+        //  errs() << *thisIteration << " " << *thisIterationRev << " least upper bound not symmetric \n";
+        //  return;
       }
 
       if (thisIteration->size() != insertCount) {
@@ -669,8 +669,35 @@ void testContainsRandom() {
   }
 }
 
+void testFromBoundedSet() {
+    unsigned bitWidth = 32;
+
+    auto bs = BoundedSet::create_bottom(bitWidth);
+    auto si = StridedInterval::create_bottom(bitWidth);
+
+    for(int i=0; i <30;i++) {
+        APInt other(bitWidth,i);
+        APInt zero(bitWidth,0);
+        StridedInterval newSI(other, other, zero);
+
+        BoundedSet newBs(other);
+
+        bs = bs->leastUpperBound(newBs);
+        si = si->leastUpperBound(newSI);
+
+        StridedInterval siFromBs(*reinterpret_cast<BoundedSet*>(bs.get()));
+
+        if(siFromBs != *reinterpret_cast<StridedInterval*>(si.get())) {
+          errs() << "Failed: strided interval " << siFromBs << " from bounded set "
+           << *bs << " \n";
+        }
+
+    }
+}
+
 void runStridedInterval() {
   testContainsRandom();
+  testFromBoundedSet();
   /**
   testStridedIntervalAdd();
   testStridedIntervalLessOrEqual();
