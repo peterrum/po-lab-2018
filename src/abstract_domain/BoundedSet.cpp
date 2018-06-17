@@ -18,9 +18,7 @@ using namespace llvm;
 using std::shared_ptr;
 
 BoundedSet::BoundedSet(const BoundedSet & b) : bitWidth(b.bitWidth), values(b.values), top(b.top) {}
-BoundedSet::BoundedSet(unsigned bitWidth, std::set<APInt, Comparator> vals) : bitWidth(bitWidth) { 
-  values = vals;
-}
+BoundedSet::BoundedSet(unsigned bitWidth, std::set<APInt, Comparator> vals) : bitWidth(bitWidth) { values = vals; }
 BoundedSet::BoundedSet(APInt val) : bitWidth(val.getBitWidth()) { values.insert(val); }
 BoundedSet::BoundedSet(unsigned numBits, bool isTop) : bitWidth(numBits), top(isTop) {}
 BoundedSet::BoundedSet(unsigned numBits, std::initializer_list<APInt> vals) : bitWidth(numBits) { values = vals; }
