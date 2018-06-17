@@ -67,7 +67,6 @@ public:
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   subsetsForPredicate(
           AbstractDomain &other,
-          std::function<bool(const APInt &, const APInt &)> comparision,
           CmpInst::Predicate pred);
 
   /// Functions for icmp predicates

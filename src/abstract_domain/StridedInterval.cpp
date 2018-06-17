@@ -540,7 +540,6 @@ shared_ptr<AbstractDomain> StridedInterval::xor_(unsigned numBits,
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
 StridedInterval::subsetsForPredicate(
     AbstractDomain &other,
-    std::function<bool(const APInt &, const APInt &)> comparision,
     CmpInst::Predicate pred) {
   if (StridedInterval *otherB = static_cast<StridedInterval *>(&other)) {
 
@@ -644,44 +643,13 @@ StridedInterval::subsetsForPredicateULE(
         return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
               a1, a2);
 }
-        
-
-std::function<bool(const APInt &, const APInt &)>
-getComparisionFunctionTemp(CmpInst::Predicate pred) {
-  switch (pred) {
-  case CmpInst::Predicate::ICMP_EQ:
-    return [](APInt lhs, APInt rhs) { return lhs == rhs; };
-  case CmpInst::Predicate::ICMP_NE:
-    return [](APInt lhs, APInt rhs) { return !(lhs == rhs); };
-  case CmpInst::Predicate::ICMP_UGT:
-    return [](APInt lhs, APInt rhs) { return lhs.ugt(rhs); };
-  case CmpInst::Predicate::ICMP_UGE:
-    return [](APInt lhs, APInt rhs) { return lhs.uge(rhs); };
-  case CmpInst::Predicate::ICMP_ULT:
-    return [](APInt lhs, APInt rhs) { return lhs.ult(rhs); };
-  case CmpInst::Predicate::ICMP_ULE:
-    return [](APInt lhs, APInt rhs) { return lhs.ule(rhs); };
-  case CmpInst::Predicate::ICMP_SGT:
-    return [](APInt lhs, APInt rhs) { return lhs.sgt(rhs); };
-  case CmpInst::Predicate::ICMP_SGE:
-    return [](APInt lhs, APInt rhs) { return lhs.sge(rhs); };
-  case CmpInst::Predicate::ICMP_SLT:
-    return [](APInt lhs, APInt rhs) { return lhs.slt(rhs); };
-  case CmpInst::Predicate::ICMP_SLE:
-    return [](APInt lhs, APInt rhs) { return lhs.sle(rhs); };
-  default:
-    // We don't handle this case
-    return nullptr;
-  }
-}
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
 StridedInterval::icmp(CmpInst::Predicate pred, unsigned numBits,
                       AbstractDomain &other) {
   if (pred >= CmpInst::Predicate::ICMP_EQ &&
       pred <= CmpInst::Predicate::ICMP_SLE) {
-    auto comparisionFunction = getComparisionFunctionTemp(pred);
-    return subsetsForPredicate(other, comparisionFunction, pred);
+    return subsetsForPredicate(other, pred);
   }
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       shared_ptr<AbstractDomain>(StridedInterval::create_top(this->bitWidth)),
