@@ -557,6 +557,9 @@ void testStridedIntervalLeastUpperBound() {
   lhs = {4, 0, 8, 2}; rhs = {4, 6, 2, 2};
   res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
   errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
+  lhs = {32, 2, 2, 0}; rhs = {32, 0, 1, 1};
+  res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
+  errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
 }
 
 void testContains() {
@@ -672,7 +675,6 @@ void testContainsRandom() {
 void runStridedInterval() {
   testContainsRandom();
   /**
-  testStridedIntervalAdd();
   testStridedIntervalLessOrEqual();
   testStridedIntervalLeastUpperBound();
   testStridedIntervalIsNormal();
@@ -680,8 +682,8 @@ void runStridedInterval() {
   testStridedIntervalLimits();
   testStridedIntervalAdd();
   testStridedIntervalSub();
-  testContains();
   testStridedIntervalMul();
+  testContains();
   */
 }
 } // namespace pcpo
