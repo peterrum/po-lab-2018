@@ -665,13 +665,13 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(StridedInterval &A,
   }
 
   // We do a case distinction on the kind of intervals
-  // Case 1: both don't are wrap around
+  // Case 1: both aren't wrap around
   if (!A.isWrapAround() && !B.isWrapAround()) {
     auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
     auto endMin = A.end.ule(B.end) ? A.end : B.end;
 
     if (beginMax.uge(endMin)) {
-      // We had no overlap in this case
+      // We have no overlap in this case
       return create_bottom(A.bitWidth);
     } else {
       return shared_ptr<AbstractDomain>(
@@ -695,7 +695,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(StridedInterval &A,
   }
 
   // Case 4: A is wrap around, B is not
-  // Check if and where an overlap happens
+  // Check if and where we have an overlap
   if (B.end.ult(A.begin) && A.begin.ugt(B.end)) {
     // We have no overlap
     return create_bottom(A.bitWidth);
