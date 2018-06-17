@@ -69,9 +69,12 @@ public:
           AbstractDomain &other,
           std::function<bool(const APInt &, const APInt &)> comparision,
           CmpInst::Predicate pred);
-  /// subsets for predicate ULE
+
+  /// Functions for icmp predicates
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   subsetsForPredicateULE(StridedInterval &A, StridedInterval &B);
+  std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
+  subsetsForPredicateEQ(StridedInterval &A, StridedInterval &B);
 
   /// icmp
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
