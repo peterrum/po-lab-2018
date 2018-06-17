@@ -654,7 +654,7 @@ StridedInterval::subsetsForPredicateSLT(StridedInterval &A,
 
   // the subset of A that can be less to some element in B
   auto trueSet =
-      intersect(A, StridedInterval(minSigned + 1, maxB, APInt(B.bitWidth, 1)));
+      intersect(A, StridedInterval(minSigned + 1, maxB - 1, APInt(B.bitWidth, 1)));
   // the subset of A that can be greater or equal to some element in B
   auto falseSet =
       intersect(A, StridedInterval(minB, maxSigned, APInt(B.bitWidth, 1)));
@@ -694,7 +694,7 @@ StridedInterval::subsetsForPredicateULT(StridedInterval &A,
 
   // the subset of A that can be less to some element in B
   auto trueSet =
-      intersect(A, StridedInterval(minUnsigned + 1, maxB, APInt(B.bitWidth, 1)));
+      intersect(A, StridedInterval(minUnsigned + 1, maxB - 1, APInt(B.bitWidth, 1)));
   // the subset of A that can be greater or equal to some element in B
   auto falseSet =
       intersect(A, StridedInterval(minB, maxUnsigned, APInt(B.bitWidth, 1)));
@@ -711,7 +711,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &fir
   StridedInterval B(second);
 
   // if one of the SIs is bottom, the intersection is bottom, too
-  if (isBottom() || B.isBottom()) {
+  if (A.isBottom() || B.isBottom()) {
     return create_bottom(A.bitWidth);
   }
 
@@ -729,7 +729,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &fir
     auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
     auto endMin = A.end.ule(B.end) ? A.end : B.end;
 
-    if (beginMax.uge(endMin)) {
+    if (beginMax.ugt(endMin)) {
       // We have no overlap in this case
       return create_bottom(A.bitWidth);
     } else {
@@ -755,7 +755,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &fir
 
   // Case 4: A is wrap around, B is not
   // Check if and where we have an overlap
-  if (B.end.ult(A.begin) && A.begin.ugt(B.end)) {
+  if (B.end.ult(A.begin) && B.begin.ugt(A.end)) {
     // We have no overlap
     return create_bottom(A.bitWidth);
   }
@@ -785,7 +785,7 @@ bool StridedInterval::isWrapAround() const{
     return false;
   } else {
     // if begin > end this is a wrap around interval
-    return begin.uge(end);
+    return begin.ugt(end);
   }
 }
 
