@@ -588,7 +588,7 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
   if (pred == CmpInst::Predicate::ICMP_ULT) {
     return subsetsForPredicateULT(*this, *otherB);
   }
-  if (pred == CmpInst::Predicate::ICMP_UGE) {
+  if (pred == CmpInst::Predicate::ICMP_UGT) {
     auto temp = subsetsForPredicateULT(*this, *otherB);
     return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
         temp.second, temp.first);
