@@ -893,8 +893,11 @@ bool StridedInterval::isBottom() const { return isBot; }
 
 llvm::raw_ostream &StridedInterval::print(llvm::raw_ostream &os) {
   if (isBot) {
-    os << "[]";
-  } else {
+    os << "[]" << "_" << bitWidth;
+  } else if(isTop()) {
+    os << "T" << "_" << bitWidth;
+  }
+  else {
     os << stride << "[" << begin.toString(OUTPUT_BASE, OUTPUT_SIGNED) << ", "
        << end.toString(OUTPUT_BASE, OUTPUT_SIGNED) << "]_" << bitWidth;
   }
