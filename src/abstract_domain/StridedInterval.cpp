@@ -1,14 +1,14 @@
+#include <llvm/ADT/APInt.h>
+#include <llvm/Support/raw_os_ostream.h>
+#include <initializer_list>
+#include <iterator>
+#include <limits>
+#include <vector>
+
 #include "StridedInterval.h"
 #include "AbstractDomain.h"
 #include "Util.h"
 #include "BoundedSet.h"
-#include "llvm/ADT/APInt.h"
-#include "llvm/Support/raw_os_ostream.h"
-#include <initializer_list>
-#include <iostream>
-#include <iterator>
-#include <limits>
-#include <vector>
 
 namespace pcpo {
 using llvm::APInt;
@@ -300,7 +300,8 @@ shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
     APInt maxThis = this->umax();
     APInt maxOther = otherSI->umax();
     bool ov;
-    maxThis.uadd_ov(maxOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) maxThis.uadd_ov(maxOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
@@ -311,11 +312,13 @@ shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
     APInt minThis = this->smin();
     APInt minOther = otherSI->smin();
     bool ov;
-    maxThis.sadd_ov(maxOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) maxThis.sadd_ov(maxOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
-    minThis.sadd_ov(minOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) minThis.sadd_ov(minOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
@@ -361,11 +364,13 @@ shared_ptr<AbstractDomain> StridedInterval::sub(unsigned numBits,
     APInt minThis = this->smin();
     APInt minOther = otherSI->smin();
     bool ov;
-    maxThis.usub_ov(minOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) maxThis.usub_ov(minOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
-    minThis.usub_ov(maxOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) minThis.usub_ov(maxOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
@@ -376,11 +381,13 @@ shared_ptr<AbstractDomain> StridedInterval::sub(unsigned numBits,
     APInt minThis = this->smin();
     APInt minOther = otherSI->smin();
     bool ov;
-    maxThis.ssub_ov(minOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) maxThis.ssub_ov(minOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
-    minThis.ssub_ov(maxOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) minThis.ssub_ov(maxOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
@@ -425,7 +432,8 @@ shared_ptr<AbstractDomain> StridedInterval::mul(unsigned numBits,
     APInt maxThis = this->umax();
     APInt maxOther = otherSI->umax();
     bool ov;
-    maxThis.umul_ov(maxOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) maxThis.umul_ov(maxOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
@@ -436,19 +444,23 @@ shared_ptr<AbstractDomain> StridedInterval::mul(unsigned numBits,
     APInt minThis = this->smin();
     APInt minOther = otherSI->smin();
     bool ov;
-    maxThis.smul_ov(maxOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) maxThis.smul_ov(maxOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
-    maxThis.smul_ov(minOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) maxThis.smul_ov(minOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
-    minThis.smul_ov(maxOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) minThis.smul_ov(maxOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
-    minThis.smul_ov(minOther, ov);
+    ///ignoring return value -> checking if overflow bit (ov) is being set
+    (void) minThis.smul_ov(minOther, ov);
     if (ov) {
       return StridedInterval::create_top(bitWidth);
     }
