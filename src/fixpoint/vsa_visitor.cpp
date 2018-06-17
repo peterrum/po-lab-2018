@@ -154,6 +154,8 @@ void VsaVisitor::visitSwitchInst(SwitchInst &I) {
   /// every case that we visit
   auto values = newState.getAbstractValue(cond);
 
+  std::map<BasicBlock*, std::shared_ptr<AbstractDomain>> tempConditions;
+
   for (const auto &kase : I.cases()) {
 
     AD_TYPE kaseConst(kase.getCaseValue()->getValue());
@@ -165,14 +167,43 @@ void VsaVisitor::visitSwitchInst(SwitchInst &I) {
                           kaseConst);
 
     /// put branch condition in place
-    bcs.putBranchConditions(I.getParent(), kase.getCaseSuccessor(), cond,
-                            kaseVals.first);
+    /// since several cases might jump to the same BB, we need to build it first and set it in another loop
+    auto successor = kase.getCaseSuccessor();
+    if(tempConditions.find(successor) != tempConditions.end()) {
+      // value present -> compute LUB
+      tempConditions[successor] = tempConditions[successor]->leastUpperBound(*kaseVals.first);
+    }
+    else {
+      // no value present -> put
+      tempConditions[successor] = kaseVals.first;
+    }
 
     /// use information to constrain default case
     values = kaseVals.second;
   }
 
-  bcs.putBranchConditions(I.getParent(), I.getDefaultDest(), cond, values);
+  // put default condition
+  auto defaultSuccessor = I.getDefaultDest();
+
+  if(tempConditions.find(defaultSuccessor) != tempConditions.end()) {
+      // value present -> compute LUB
+    tempConditions[defaultSuccessor] = tempConditions[defaultSuccessor]->leastUpperBound(*values);
+  }
+  else {
+    // no value present -> put
+    tempConditions[defaultSuccessor] = values;
+  }
+
+
+  for (const auto &kase : I.cases()) {
+    /// put branch condition in place
+    bcs.putBranchConditions(I.getParent(), kase.getCaseSuccessor(), cond,
+                            tempConditions[kase.getCaseSuccessor()]);
+  }
+
+  // put default condition
+  bcs.putBranchConditions(I.getParent(), I.getDefaultDest(), cond, tempConditions[I.getDefaultDest()]);
+
 
   /// continue as if it were a simple terminator
   visitTerminatorInst(I);
