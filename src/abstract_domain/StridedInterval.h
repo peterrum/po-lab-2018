@@ -28,6 +28,7 @@ public:
   APInt umin();
   APInt smax();
   APInt smin();
+  APInt ustride();
 
   // Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other,
