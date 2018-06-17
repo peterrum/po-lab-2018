@@ -629,8 +629,8 @@ StridedInterval::subsetsForPredicateSLE(StridedInterval &A,
 
   auto minSigned = APInt::getSignedMinValue(B.bitWidth);
   auto maxSigned = APInt::getSignedMaxValue(B.bitWidth);
-  auto maxB = B.getSMax();
-  auto minB = B.getSMin();
+  auto maxB = B.smax();
+  auto minB = B.smin();
 
   // the subset of A that can be less or equal to some element in B
   auto trueSet =
@@ -649,8 +649,8 @@ StridedInterval::subsetsForPredicateSLT(StridedInterval &A,
 
   auto minSigned = APInt::getSignedMinValue(B.bitWidth);
   auto maxSigned = APInt::getSignedMaxValue(B.bitWidth);
-  auto maxB = B.getSMax();
-  auto minB = B.getSMin();
+  auto maxB = B.smax();
+  auto minB = B.smin();
 
   // the subset of A that can be less to some element in B
   auto trueSet =
@@ -669,8 +669,8 @@ StridedInterval::subsetsForPredicateULE(StridedInterval &A,
 
   auto minUnsigned = APInt::getMinValue(B.bitWidth);
   auto maxUnsigned = APInt::getMaxValue(B.bitWidth);
-  auto maxB = B.getUMax();
-  auto minB = B.getUMin();
+  auto maxB = B.umax();
+  auto minB = B.umin();
   
   // the subset of A that can be less or equal to some element in B
   auto trueSet =
@@ -689,8 +689,8 @@ StridedInterval::subsetsForPredicateULT(StridedInterval &A,
 
   auto minUnsigned = APInt::getMinValue(B.bitWidth);
   auto maxUnsigned = APInt::getMaxValue(B.bitWidth);
-  auto maxB = B.getUMax();
-  auto minB = B.getUMin();
+  auto maxB = B.umax();
+  auto minB = B.umin();
 
   // the subset of A that can be less to some element in B
   auto trueSet =
