@@ -560,6 +560,9 @@ void testStridedIntervalLeastUpperBound() {
   lhs = {32, 2, 2, 0}; rhs = {32, 0, 1, 1};
   res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
   errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
+  lhs = {32, 4294967294, 4294967294, 0}; rhs = {32, 0, 4294967295, 4294967295};
+  res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
+  errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
 }
 
 void testContains() {

@@ -754,9 +754,16 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   APInt c = otherMSI->begin;
   APInt d = otherMSI->end;
   APInt t = otherMSI->stride;
+  // shift both intervals to the left by `a`, so fewer cases need to be considered
   APInt b_ (sub_(b, a) /* mod N */);
   APInt c_ (sub_(c, a) /* mod N */);
   APInt d_ (sub_(d, a) /* mod N */);
+  // if other contains exctly 2 elements, t[d_, c_] may not be normalized anymore
+  if (sub_(d_, c_) == t && d_.ult(c_)) {
+    std::swap(c, d);
+    std::swap(c_, d_);
+    t = sub_(d_, c_);
+  }
   StridedInterval res;
   if (b_.ult(c_) && c_.ult(d_)) { // no overlapping regions 
     APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));
@@ -895,8 +902,8 @@ llvm::raw_ostream &StridedInterval::print(llvm::raw_ostream &os) {
   if (isBot) {
     os << "[]";
   } else {
-    os << stride << "[" << begin.toString(OUTPUT_BASE, OUTPUT_SIGNED) << ", "
-       << end.toString(OUTPUT_BASE, OUTPUT_SIGNED) << "]_" << bitWidth;
+    os << stride.toString(10, false) << "[" << begin.toString(10, false) << ", "
+       << end.toString(10, false) << "]_" << bitWidth;
   }
   return os;
 }
