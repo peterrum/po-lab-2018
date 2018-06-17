@@ -235,7 +235,7 @@ std::set<APInt, Comparator> StridedInterval::gamma() {
   }
 }
 
-APInt StridedInterval::umax() {
+APInt StridedInterval::umax() const{
   APInt a = begin;
   APInt b = end;
   APInt s = stride;
@@ -247,7 +247,7 @@ APInt StridedInterval::umax() {
   }
 }
 
-APInt StridedInterval::umin() {
+APInt StridedInterval::umin() const{
   APInt a = begin;
   APInt b = end;
   APInt s = stride;
@@ -258,7 +258,7 @@ APInt StridedInterval::umin() {
   }
 }
 
-APInt StridedInterval::smax() {
+APInt StridedInterval::smax() const{
   APInt a = begin;
   APInt b = end;
   APInt s = stride;
@@ -270,7 +270,7 @@ APInt StridedInterval::smax() {
   }
 }
 
-APInt StridedInterval::smin() {
+APInt StridedInterval::smin() const{
   APInt a = begin;
   APInt b = end;
   APInt s = stride;

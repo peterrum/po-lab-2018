@@ -231,74 +231,74 @@ void testStridedIntervalGamma() {
 void testStridedIntervalLimits() {
   StridedInterval i;
   i = {4, 2, 2, 0};
-  if (!(i.umin() == 2)) {
-    errs() << "[testLimits] umin failed with operand " << i << ": got " << i.umin()
+  if (!(i.getUMin() == 2)) {
+    errs() << "[testLimits] getUMin failed with operand " << i << ": got " << i.getUMin()
       << ", expected " << 2 << "\n";
   }
-  if (!(i.umax() == 2)) {
-    errs() << "[testLimits] umax failed with operand " << i << ": got " << i.umax()
+  if (!(i.getUMax() == 2)) {
+    errs() << "[testLimits] getUMax failed with operand " << i << ": got " << i.getUMax()
       << ", expected " << 2 << "\n";
   }
-  if (!(i.smin() == 2)) {
-    errs() << "[testLimits] smin failed with operand " << i << ": got " << i.smin()
+  if (!(i.getSMin() == 2)) {
+    errs() << "[testLimits] getSMin failed with operand " << i << ": got " << i.getSMin()
       << ", expected " << 2 << "\n";
   }
-  if (!(i.smax() == 2)) {
-    errs() << "[testLimits] smax failed with operand " << i << ": got " << i.smax()
+  if (!(i.getSMax() == 2)) {
+    errs() << "[testLimits] getSMax failed with operand " << i << ": got " << i.getSMax()
       << ", expected " << 2 << "\n";
   }
 
   i = {4, 1, 10, 3};
-  if (!(i.umin() == 1)) {
-    errs() << "[testLimits] umin failed with operand " << i << ": got " << i.umin()
+  if (!(i.getUMin() == 1)) {
+    errs() << "[testLimits] getUMin failed with operand " << i << ": got " << i.getUMin()
       << ", expected " << 1 << "\n";
   };
-  if (!(i.umax() == 10)) {
-    errs() << "[testLimits] umax failed with operand " << i << ": got " << i.umax()
+  if (!(i.getUMax() == 10)) {
+    errs() << "[testLimits] getUMax failed with operand " << i << ": got " << i.getUMax()
       << ", expected " << 10 << "\n";
   };
-  if (!(i.smin() == 10)) {
-    errs() << "[testLimits] smin failed with operand " << i << ": got " << i.smin()
+  if (!(i.getSMin() == 10)) {
+    errs() << "[testLimits] getSMin failed with operand " << i << ": got " << i.getSMin()
       << ", expected " << 10 << "\n";
   };
-  if (!(i.smax() == 7)) {
-    errs() << "[testLimits] smax failed with operand " << i << ": got " << i.smax()
+  if (!(i.getSMax() == 7)) {
+    errs() << "[testLimits] getSMax failed with operand " << i << ": got " << i.getSMax()
       << ", expected " << 7 << "\n";
   }
 
   i = {4, 9, 13, 2};
-  if (!(i.umin() == 9)) {
-    errs() << "[testLimits] umin failed with operand " << i << ": got " << i.umin()
+  if (!(i.getUMin() == 9)) {
+    errs() << "[testLimits] getUMin failed with operand " << i << ": got " << i.getUMin()
       << ", expected " << 9 << "\n";
   };
-  if (!(i.umax() == 13)) {
-    errs() << "[testLimits] umax failed with operand " << i << ": got " << i.umax()
+  if (!(i.getUMax() == 13)) {
+    errs() << "[testLimits] getUMax failed with operand " << i << ": got " << i.getUMax()
       << ", expected " << 13 << "\n";
   };
-  if (!(i.smin() == 9)) {
-    errs() << "[testLimits] smin failed with operand " << i << ": got " << i.smin()
+  if (!(i.getSMin() == 9)) {
+    errs() << "[testLimits] getSMin failed with operand " << i << ": got " << i.getSMin()
       << ", expected " << 9 << "\n";
   };
-  if (!(i.smax() == 13)) {
-    errs() << "[testLimits] smax failed with operand " << i << ": got " << i.smax()
+  if (!(i.getSMax() == 13)) {
+    errs() << "[testLimits] getSMax failed with operand " << i << ": got " << i.getSMax()
       << ", expected " << 13 << "\n";
   }
 
   i = {4, 13, 3, 2};
-  if (!(i.umin() == 1)) {
-    errs() << "[testLimits] umin failed with operand " << i << ": got " << i.umin()
+  if (!(i.getUMin() == 1)) {
+    errs() << "[testLimits] getUMin failed with operand " << i << ": got " << i.getUMin()
       << ", expected " << 1 << "\n";
   };
-  if (!(i.umax() == 15)) {
-    errs() << "[testLimits] umax failed with operand " << i << ": got " << i.umax()
+  if (!(i.getUMax() == 15)) {
+    errs() << "[testLimits] getUMax failed with operand " << i << ": got " << i.getUMax()
       << ", expected " << 15 << "\n";
   };
-  if (!(i.smin() == 13)) {
-    errs() << "[testLimits] smin failed with operand " << i << ": got " << i.smin()
+  if (!(i.getSMin() == 13)) {
+    errs() << "[testLimits] getSMin failed with operand " << i << ": got " << i.getSMin()
       << ", expected " << 13 << "\n";
   };
-  if (!(i.smax() == 3)) {
-    errs() << "[testLimits] smax failed with operand " << i << ": got " << i.smax()
+  if (!(i.getSMax() == 3)) {
+    errs() << "[testLimits] getSMax failed with operand " << i << ": got " << i.getSMax()
       << ", expected " << 3 << "\n";
   }
 }

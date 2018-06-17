@@ -121,10 +121,10 @@ public:
 private:
 
     /// TODO: this vs get methods API
-    APInt umax();
-    APInt umin();
-    APInt smax();
-    APInt smin();
+    APInt umax() const;
+    APInt umin() const;
+    APInt smax() const;
+    APInt smin() const;
 
     unsigned bitWidth;
     APInt begin;
