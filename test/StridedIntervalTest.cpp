@@ -620,10 +620,19 @@ void testContainsRandom() {
       auto thisIteration = previousIteration->leastUpperBound(newSI);
       auto thisIterationRev = newSI.leastUpperBound(*previousIteration);
 
-      if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
-        //  errs() << "old " <<  newSI << " new " << *previousIteration;
-        //  errs() << *thisIteration << " " << *thisIterationRev << " least upper bound not symmetric \n";
-        //  return;
+      StridedInterval* thisRevRaw = reinterpret_cast<StridedInterval*>(thisIterationRev.get());
+      auto thisRevNorm = thisRevRaw->normalize();
+
+      StridedInterval* thisRaw = reinterpret_cast<StridedInterval*>(thisIteration.get());
+      auto thisNorm = thisRaw->normalize();
+
+      if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisRevNorm.get())) {
+          errs() << "new " <<  newSI << "    prev " << *previousIteration << "\n";
+          errs() << "prev->lub(new)                 " << *thisIteration << "\n";
+          errs() << "prev->lub(new) (norm.)         " << *thisNorm << "\n";
+          errs() << "new->lub(prev)                 " << *thisIterationRev << "\n";
+          errs() << "new->lub(prev) (norm.)         " << *thisRevNorm << "\n";
+
       }
 
       if (thisIteration->size() != insertCount) {
