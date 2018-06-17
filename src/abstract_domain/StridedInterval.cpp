@@ -574,18 +574,20 @@ StridedInterval::subsetsForPredicate(
     
     if(pred == CmpInst::Predicate::ICMP_EQ){
       return subsetsForPredicateEQ(*this, *otherB);  
-    } else if(pred == CmpInst::Predicate::ICMP_NE){
+    }
+    if(pred == CmpInst::Predicate::ICMP_NE){
         auto temp = subsetsForPredicateEQ(*this, *otherB);
         return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(temp.second, temp.first);        
-    } else if(pred == CmpInst::Predicate::ICMP_ULE ||
+    }
+    if(pred == CmpInst::Predicate::ICMP_ULE ||
                     pred == CmpInst::Predicate::ICMP_SLE){    
         return subsetsForPredicateULE(*this, *otherB);
-    } else if(pred == CmpInst::Predicate::ICMP_UGE ||
+    }
+    if(pred == CmpInst::Predicate::ICMP_UGE ||
                     pred == CmpInst::Predicate::ICMP_SGE){
         auto temp = subsetsForPredicateULE(*this, *otherB);
         return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(temp.second, temp.first);
     }
-
   }
   
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
@@ -642,6 +644,90 @@ StridedInterval::subsetsForPredicateULE(
         
         return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
               a1, a2);
+}
+
+// A possibly overapproximated intersection of two StridedIntervals
+shared_ptr<AbstractDomain> StridedInterval::intersect(StridedInterval &A,
+                                                      StridedInterval &B) {
+  assert(A.bitWidth == B.bitWidth);
+
+  // if one of the SIs is bottom, the intersection is bottom, too
+  if (isBottom() || B.isBottom()) {
+    return create_bottom(A.bitWidth);
+  }
+
+  // if one the SIs is top, we return the other, so we don't overapproximate
+  if (A.isTop()) {
+    return shared_ptr<AbstractDomain>(new StridedInterval(B));
+  }
+  if (B.isTop()) {
+    return shared_ptr<AbstractDomain>(new StridedInterval(A));
+  }
+
+  // We do a case distinction on the kind of intervals
+  // Case 1: both don't are wrap around
+  if (!A.isWrapAround() && !B.isWrapAround()) {
+    auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
+    auto endMin = A.end.ule(B.end) ? A.end : B.end;
+
+    if (beginMax.uge(endMin)) {
+      // We had no overlap in this case
+      return create_bottom(A.bitWidth);
+    } else {
+      return shared_ptr<AbstractDomain>(
+          new StridedInterval(beginMax, endMin, APInt(A.bitWidth, 1)));
+    }
+  }
+
+  // Case 2: both are wrap around
+  if (A.isWrapAround() && B.isWrapAround()) {
+    // If both are wrap around, we always have an overlap
+    auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
+    auto endMin = A.end.ule(B.end) ? A.end : B.end;
+    return shared_ptr<AbstractDomain>(
+        new StridedInterval(beginMax, endMin, APInt(A.bitWidth, 1)));
+  }
+
+  // Case 3: B is wrap around, A is not
+  // will be reduced to case 4
+  if (B.isWrapAround()) {
+    std::swap(A, B);
+  }
+
+  // Case 4: A is wrap around, B is not
+  // Check if and where an overlap happens
+  if (B.end.ult(A.begin) && A.begin.ugt(B.end)) {
+    // We have no overlap
+    return create_bottom(A.bitWidth);
+  }
+  if (B.begin.ule(A.end) && B.end.uge(A.begin)) {
+    // We have an overlap at both ends
+    // We return the interval that has fewer elements
+    if (A.size() < B.size()) {
+      return shared_ptr<AbstractDomain>(new StridedInterval(A));
+    } else {
+      return shared_ptr<AbstractDomain>(new StridedInterval(B));
+    }
+  }
+  if (B.begin.ule(A.end)) {
+    // We have an overlap at the left side
+    auto endMin = A.end.ule(B.end) ? A.end : B.end;
+    return shared_ptr<AbstractDomain>(
+        new StridedInterval(B.begin, endMin, APInt(A.bitWidth, 1)));
+  }
+  // We have an overlap the the right side
+  auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
+  return shared_ptr<AbstractDomain>(
+      new StridedInterval(beginMax, B.end, APInt(A.bitWidth, 1)));
+}
+
+bool StridedInterval::isWrapAround(){
+  if(isBottom()){
+    return false;
+  } else {
+    // if begin > end this is a wrap around interval
+    return begin.uge(end);
+  }
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>

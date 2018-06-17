@@ -79,6 +79,11 @@ public:
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
 
+  // Check whether this is an wrap around interval
+  bool isWrapAround();
+  // Conduct an overapproximated intersection of two intervals.
+  shared_ptr<AbstractDomain> intersect(StridedInterval &A, StridedInterval &B);
+
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
   bool lessOrEqual(AbstractDomain &other);
 
