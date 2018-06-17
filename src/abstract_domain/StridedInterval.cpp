@@ -730,7 +730,7 @@ size_t StridedInterval::size() const {
     return 1;
   } else {
     APInt d = sub_(this->end, this->begin);
-    APInt res = div(d, this->stride);
+    APInt res = div(d, this->stride).zext(bitWidth+1);
     res += 1;
     return res.getZExtValue();
   }
@@ -739,7 +739,7 @@ size_t StridedInterval::size() const {
 shared_ptr<AbstractDomain>
 StridedInterval::leastUpperBound(AbstractDomain &other) {
   StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
-  // pm: shortcut for both abstract domains are equal
+  assert(otherMSI->bitWidth == bitWidth);
   if(*this == *otherMSI){
       return shared_ptr<AbstractDomain>(new StridedInterval(*this));
   } 
@@ -748,9 +748,6 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   } else if (otherMSI->isBot) {
     return std::shared_ptr<AbstractDomain>(new StridedInterval(*this)); // pm  
   }
-  assert(otherMSI->bitWidth == bitWidth);
-
-  // pm: range s[a,b] should be left of range t[c,d]
   APInt a = begin;
   APInt b = end;
   APInt s = stride;
@@ -760,7 +757,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   APInt b_ (sub_(b, a) /* mod N */);
   APInt c_ (sub_(c, a) /* mod N */);
   APInt d_ (sub_(d, a) /* mod N */);
-  APInt e, f, u;
+  StridedInterval res;
   if (b_.ult(c_) && c_.ult(d_)) { // no overlapping regions 
     APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));
     APInt e1 = a, f1 = d;
@@ -768,24 +765,23 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
     APInt e2 = c, f2 = b;
     StridedInterval opt1 (e1, f1, u1);
     StridedInterval opt2 (e2, f2, u2);
-    if (opt1.size() < opt2.size()) {
-      e = e1; f = f1; u = u1;
+    if (opt1.size() < opt2.size()) { // choose the option representing the smallest set
+      res = StridedInterval(e1, f1, u1);
     } else {
-      e = e2; f = f2; u = u2;
+      res = StridedInterval(e2, f2, u2);
     }
-  } else if (d_.ult(c_) and c_.ule(b_)) {
-    u = GreatestCommonDivisor(
+  } else if (d_.ult(c_) and c_.ule(b_)) { // tow overlapping regions
+    APInt u = GreatestCommonDivisor(
       GreatestCommonDivisor(s, t),
       GreatestCommonDivisor(c_.ule(d_) ? c_ : d_, pow2(bitWidth-1, bitWidth))
     );
-    e = mod(a, u);
-    f = sub_(e, u);
-  } else {
-    e = c_.ule(d_) ? a : c;
-    f = d_.ule(b_) ? b : d;
-    u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), c_.ule(d_) ? c_ : d_);
+    APInt e = mod(a, u);
+    res = StridedInterval(e, sub_(e, u), u);
+  } else { // one overlapping region
+    APInt u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), c_.ule(d_) ? c_ : d_);
+    res = StridedInterval(c_.ule(d_) ? a : c, d_.ule(b_) ? b : d, u);
   }
-  return std::shared_ptr<AbstractDomain>(new StridedInterval(e, f, u));
+  return res.normalize();
 }
 
 bool StridedInterval::lessOrEqual(AbstractDomain &other) {
