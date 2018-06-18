@@ -16,6 +16,7 @@ using namespace llvm;
 namespace pcpo {
 
 class State {
+    friend class BranchConditions;
 
 public:
   /// constructor: bottom
@@ -34,6 +35,9 @@ public:
   /// true -> change, false -> no change (see State::put)
   bool leastUpperBound(State &other);
 
+  /// is other less or equal to this
+  bool lessOrEqual(State &other);
+
   /// make deep copy of state
   bool copyState(State &other);
 
@@ -50,9 +54,8 @@ public:
   /// print abstract domain of each variable
   void print() const;
 
-  std::map<Value *, std::shared_ptr<AbstractDomain>> vars;
-
 private:
+  std::map<Value *, std::shared_ptr<AbstractDomain>> vars;
   bool bottom;
 };
 
