@@ -851,10 +851,11 @@ void testContainsRandomNeg() {
 
       if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
           errs() << "new " <<  newSI << "    prev " << *previousIteration << "\n";
-          errs() << "prev->lub(new)                 " << *thisIteration << "\n";
-          errs() << "prev->lub(new) (norm.)         " << *thisNorm << "\n";
-          errs() << "new->lub(prev)                 " << *thisIterationRev << "\n";
-          errs() << "new->lub(prev) (norm.)         " << *thisRevNorm << "\n";
+          errs() << "prev->lub(new)                 " << *thisIterationRev << "\n";
+          errs() << "prev->lub(new) (norm.)         " << *thisRevNorm << "\n";
+          errs() << "new->lub(prev)                 " << *thisIteration << "\n";
+          errs() << "new->lub(prev) (norm.)         " << *thisNorm << "\n";
+          return;
       }
 
 
@@ -925,11 +926,12 @@ void testFromBoundedSetNeg() {
           bs = bs->leastUpperBound(newBs);
           si = si->leastUpperBound(newSI);
 
-          StridedInterval siFromBs(*reinterpret_cast<BoundedSet*>(bs.get()));
+          StridedInterval siFromBsRaw(*reinterpret_cast<BoundedSet*>(bs.get()));
+          auto siFromBs = siFromBsRaw.normalize();
 
-          if(siFromBs != *reinterpret_cast<StridedInterval*>(si.get())) {
-            errs() << "Failed: strided interval " << siFromBs << " from bounded set "
-             << *bs << " \n";
+          if(*reinterpret_cast<StridedInterval*>(siFromBs.get()) != *reinterpret_cast<StridedInterval*>(si.get())) {
+            errs() << "Failed: strided interval " << *siFromBs << " from bounded set "
+             << *bs << " conventional SI yielded " << *si <<"\n";
              return;
           }
       }

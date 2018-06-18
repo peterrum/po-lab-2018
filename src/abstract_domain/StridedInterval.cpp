@@ -55,9 +55,9 @@ StridedInterval::StridedInterval(BoundedSet &set)
     return;
   } else if (set.isTop()) {
     isBot = false;
-    begin = APInt{bitWidth, 0};
+    begin = APInt(bitWidth, 0);
     end = APInt::getMaxValue(bitWidth);
-    stride = APInt{bitWidth, 1};
+    stride = APInt(bitWidth, 1);
   } else {
     // create a custom interval
 
@@ -69,7 +69,7 @@ StridedInterval::StridedInterval(BoundedSet &set)
       auto value = vals.begin();
       begin = *value;
       end = *value;
-      stride = *value;
+      stride = APInt(bitWidth, 0);
       isBot = false;
     } else {
       // Create StridedInterval from BoundedSet with multiple values
@@ -130,6 +130,9 @@ StridedInterval::StridedInterval(BoundedSet &set)
         // check whether interval starting at b has minimum number of elements
         StridedInterval tmp{b, e, gcd};
         if (tmp.size() <= min) {
+          if(tmp.size() < set.size()) {
+            continue;
+          }
           min = tmp.size();
           minInterval = StridedInterval(tmp);
         }
