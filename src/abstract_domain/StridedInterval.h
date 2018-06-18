@@ -80,7 +80,7 @@ public:
   subsetsForPredicateULE(StridedInterval &A, StridedInterval &B);
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   subsetsForPredicateULT(StridedInterval &A, StridedInterval &B);
-  
+
 
   /// icmp
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
@@ -125,6 +125,8 @@ private:
     APInt umin() const;
     APInt smax() const;
     APInt smin() const;
+
+    APInt ustride();
 
     unsigned bitWidth;
     APInt begin;

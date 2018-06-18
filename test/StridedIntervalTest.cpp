@@ -543,6 +543,102 @@ void testStridedIntervalMul() {
   }
 }
 
+void testStridedIntervalUdiv() {
+  StridedInterval lhs;
+  StridedInterval rhs;
+  StridedInterval ref;
+  shared_ptr<AbstractDomain> res_p;
+  StridedInterval res;
+  lhs = {6, 18, 36, 6};
+  rhs = {6, 3, 3, 0};
+  ref = {6, 6, 12, 2};
+  res_p = lhs.udiv(6, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUdiv] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {6, 18, 36, 6};
+  rhs = {6, 3, 6, 2};
+  ref = {6, 3, 12, 1};
+  res_p = lhs.udiv(6, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUdiv] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {6, 48, 8, 6};
+  rhs = {6, 3, 6, 2};
+  ref = {6, 0, 20, 1};
+  res_p = lhs.udiv(6, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUdiv] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {6, 3, 6, 2};
+  rhs = {6, 48, 8, 6};
+  ref = {6, 0, 3, 1};
+  res_p = lhs.udiv(6, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUdiv] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+}
+
+void testStridedIntervalUrem() {
+  StridedInterval lhs;
+  StridedInterval rhs;
+  StridedInterval ref;
+  shared_ptr<AbstractDomain> res_p;
+  StridedInterval res;
+  lhs = {6, 3, 13, 5};
+  rhs = {6, 14, 18, 2};
+  ref = {6, 3, 13, 5};
+  res_p = lhs.urem(6, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {6, 4, 13, 3};
+  rhs = {6, 10, 10, 0};
+  ref = {6, 0, 9, 1};
+  res_p = lhs.urem(6, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {6, 12, 48, 6};
+  rhs = {6, 30, 40, 10};
+  ref = {6, 0, 40, 2};
+  res_p = lhs.urem(6, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 4, 8, 2};
+  rhs = {4, 10, 2, 4};
+  ref = {4, 0, 8, 2};
+  res_p = lhs.urem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 10, 2, 1};
+  rhs = {4, 13, 1, 1};
+  ref = {4, 0, 15, 1};
+  res_p = lhs.urem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 10, 2, 2};
+  rhs = {4, 8, 8, 0};
+  ref = {4, 0, 6, 2};
+  res_p = lhs.urem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testUrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+}
+
 void testStridedIntervalLeastUpperBound() {
   StridedInterval lhs, rhs, res;
   lhs = {6, 0, 12, 6}; rhs = {6, 14, 44, 10};
@@ -558,6 +654,12 @@ void testStridedIntervalLeastUpperBound() {
   res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
   errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
   lhs = {32, 2, 2, 0}; rhs = {32, 0, 1, 1};
+  res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
+  errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
+  lhs = {32, 4294967294, 4294967294, 0}; rhs = {32, 0, 4294967295, 4294967295};
+  res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
+  errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
+  lhs = {32, 1, 1, 0}; rhs = {32, 0, 2, 2};
   res = *(static_cast<StridedInterval *>(lhs.leastUpperBound(rhs).get()));
   errs() << "[leastUpperBound] sup " << lhs << " " << rhs << ": " << res << '\n';
 }
@@ -854,6 +956,8 @@ void runStridedInterval() {
   testStridedIntervalAdd();
   testStridedIntervalSub();
   testStridedIntervalMul();
+  testStridedIntervalUdiv();
+  testStridedIntervalUrem();
   testContains();
   */
 }

@@ -123,7 +123,7 @@ StridedInterval::StridedInterval(BoundedSet &set)
           } else {
             diff = current;
             diff -= next;
-            gcd = GreatestCommonDivisor(gcd, diff);            
+            gcd = GreatestCommonDivisor(gcd, diff);
           }
         }
 
@@ -174,10 +174,10 @@ APInt mul_(const APInt &a, const APInt &b) {
 
 APInt mod(const APInt &a, const APInt &b) { return a.urem(b); }
 
-APInt div(const APInt &a, const APInt &b) { return a.udiv(b); }
+// APInt udiv_(const APInt &a, const APInt &b) { return a.udiv(b); }
 
 APInt pow2(unsigned n, unsigned bitWidth) {
-  assert(n <= bitWidth); 
+  assert(n <= bitWidth);
   APInt b{bitWidth, 0};
   b.setBit(n);
   return b;
@@ -279,6 +279,17 @@ APInt StridedInterval::smin() const{
   } else {
     APInt m = APInt::getSignedMinValue(bitWidth);
     return add_(mod(sub_(b, m), s), m);
+  }
+}
+
+APInt StridedInterval::ustride() {
+  APInt a = begin;
+  APInt b = end;
+  APInt s = stride;
+  if (a.ule(b)) {
+    return s;
+  } else {
+    return GreatestCommonDivisor(s, sub_(a, b));
   }
 }
 
@@ -490,17 +501,82 @@ shared_ptr<AbstractDomain> StridedInterval::mul(unsigned numBits,
 
 shared_ptr<AbstractDomain> StridedInterval::udiv(unsigned numBits,
                                                  AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+  StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
+  assert(numBits == bitWidth);
+  assert(numBits == otherSI->bitWidth);
+  if (this->isBottom() || otherSI->isBottom()) {
+    return StridedInterval::create_bottom(bitWidth);
+  }
+  APInt a = this->umin(); APInt  b = this->umax();
+  APInt c = otherSI->umin(); APInt  d = otherSI->umax();
+  APInt s = this->ustride();
+  APInt t = otherSI->ustride();
+  if (c == 0) { // handling possible division by 0
+    if (t == 0) { // definite division by 0
+      errs() << "ERROR: Input program includes division by zero.\n";
+      errs() << "Exiting.\n";
+      exit(EXIT_FAILURE);
+    } else {
+      errs() << "WARNING: Input program includes possible division by zero.\n";
+      c = t; // exclude 0 from rhs
+    }
+  }
+  StridedInterval res;
+  if (t == 0) { // division by constant
+    APInt s_ = GreatestCommonDivisor(a, s);
+    APInt u = s_.udiv(c);
+    u = mul_(u, c) == s ? u : APInt(bitWidth, 1);
+    res = StridedInterval(a.udiv(c), b.udiv(c), u);
+  } else { // general case
+    res = StridedInterval(a.udiv(d), b.udiv(c), APInt(bitWidth, 1));
+  }
+  return res.normalize();
 }
+
 shared_ptr<AbstractDomain> StridedInterval::sdiv(unsigned numBits,
                                                  AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 shared_ptr<AbstractDomain> StridedInterval::urem(unsigned numBits,
-                                                 AbstractDomain &other) {
-
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+  AbstractDomain &other) {
+  StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
+  assert(numBits == bitWidth);
+  assert(numBits == otherSI->bitWidth);
+  if (this->isBottom() || otherSI->isBottom()) {
+    return StridedInterval::create_bottom(bitWidth);
+  }
+  APInt a = this->umin(); APInt  b = this->umax();
+  APInt c = otherSI->umin(); APInt  d = otherSI->umax();
+  APInt s = this->ustride();
+  APInt t = otherSI->ustride();
+  if (c == 0) { // handling possible division by 0
+    if (t == 0) { // definite division by 0
+      errs() << "ERROR: Input program includes division by zero.\n";
+      errs() << "Exiting.\n";
+      exit(EXIT_FAILURE);
+    } else {
+      errs() << "WARNING: Input program includes possible division by zero.\n";
+      c = t; // exclude 0 from rhs
+    }
+  }
+  StridedInterval res;
+  if (b.ult(c)) { // urem has no effect
+    res = *this;
+  } else if (t == 0) { // division by constant
+    if (a.udiv(c) == b.udiv(c)) { // all remainders are obtained by subtracting
+                                  // the same value from lhs
+      res = StridedInterval(mod(a, c), mod(b, c), s);
+    } else {
+      APInt u = GreatestCommonDivisor(s, c);
+      res = StridedInterval(mod(a, u), c-1, u);
+    }
+  } else { // general case
+    APInt u = GreatestCommonDivisor(GreatestCommonDivisor(c, t), s);
+    res = StridedInterval(mod(a, u), APIntOps::umin(b, d), u);
+  }
+  return res.normalize();
 }
+
 shared_ptr<AbstractDomain> StridedInterval::srem(unsigned numBits,
                                                  AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
@@ -603,21 +679,21 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
 StridedInterval::subsetsForPredicateEQ(
     StridedInterval &A, StridedInterval &B) {
-  APInt maxBegin = A.begin.uge(B.begin) ? 
+  APInt maxBegin = A.begin.uge(B.begin) ?
             A.begin : B.begin;
-        
-        APInt minEnd = A.end.ule(B.end) ? 
+
+        APInt minEnd = A.end.ule(B.end) ?
             A.end : B.end;
-        
+
         if(maxBegin.ugt(minEnd)){
             // no intersection
             return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
                   StridedInterval::create_bottom(A.bitWidth),
                   shared_ptr<AbstractDomain>(new StridedInterval(A)));
         } // else
-        
+
         return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-              shared_ptr<AbstractDomain>(new StridedInterval(maxBegin, minEnd, 
+              shared_ptr<AbstractDomain>(new StridedInterval(maxBegin, minEnd,
                         APInt(A.bitWidth, 1))),
               shared_ptr<AbstractDomain>(new StridedInterval(A)));
 }
@@ -671,7 +747,7 @@ StridedInterval::subsetsForPredicateULE(StridedInterval &A,
   auto maxUnsigned = APInt::getMaxValue(B.bitWidth);
   auto maxB = B.umax();
   auto minB = B.umin();
-  
+
   // the subset of A that can be less or equal to some element in B
   auto trueSet =
       intersect(A, StridedInterval(minUnsigned, maxB, APInt(B.bitWidth, 1)));
@@ -808,7 +884,7 @@ size_t StridedInterval::size() const {
     return 1;
   } else {
     APInt d = sub_(this->end, this->begin);
-    APInt res = div(d, this->stride).zext(bitWidth+1);
+    APInt res = d.udiv(this->stride).zext(bitWidth+1);
     res += 1;
     return res.getZExtValue();
   }
@@ -820,11 +896,11 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   assert(otherMSI->bitWidth == bitWidth);
   if(*this == *otherMSI){
       return shared_ptr<AbstractDomain>(new StridedInterval(*this));
-  } 
+  }
   if (isBot) {
     return std::shared_ptr<AbstractDomain>(new StridedInterval(*otherMSI)); // pm
   } else if (otherMSI->isBot) {
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(*this)); // pm  
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*this)); // pm
   }
   APInt a = begin;
   APInt b = end;
@@ -832,11 +908,18 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   APInt c = otherMSI->begin;
   APInt d = otherMSI->end;
   APInt t = otherMSI->stride;
+  // shift both intervals to the left by `a`, so fewer cases need to be considered
   APInt b_ (sub_(b, a) /* mod N */);
   APInt c_ (sub_(c, a) /* mod N */);
   APInt d_ (sub_(d, a) /* mod N */);
+  // if other contains exctly 2 elements, t[d_, c_] may not be normalized anymore
+  if (sub_(d_, c_) == t && d_.ult(c_)) {
+    std::swap(c, d);
+    std::swap(c_, d_);
+    t = sub_(d_, c_);
+  }
   StridedInterval res;
-  if (b_.ult(c_) && c_.ult(d_)) { // no overlapping regions 
+  if (b_.ult(c_) && c_.ult(d_)) { // no overlapping regions
     APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));
     APInt e1 = a, f1 = d;
     APInt u2 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, d));
@@ -869,7 +952,7 @@ bool StridedInterval::lessOrEqual(AbstractDomain &other) {
   if(*this == *otherMSI){
       return true;
   }
-  
+
   // pm: check for topness
   if(isTop()){
       if(other.isTop())
@@ -905,8 +988,8 @@ bool StridedInterval::lessOrEqual(AbstractDomain &other) {
       APInt c_ (sub_(c, a) /* mod N */);
       APInt d_ (sub_(d, a) /* mod N */);
       if (d_.ult(c_) && c_.ule(b_)) {
-        APInt e_ = mul_(s, div(d_, s));
-        APInt f_ = sub_(b_, mul_(s, div(sub_(b_, c_), s))) /* mod N */; // save since c_ < b_
+        APInt e_ = mul_(s, d_.udiv(s));
+        APInt f_ = sub_(b_, mul_(s, sub_(b_, c_).udiv(s))) /* mod N */; // save since c_ < b_
         if (sub_(f_, e_) == s) { // e_ <= f_?
           if (e_.ult(s)) {
             if (otherMSI->contains(a) && mod(c_, t).isNullValue()) {
@@ -972,8 +1055,8 @@ llvm::raw_ostream &StridedInterval::print(llvm::raw_ostream &os) {
     os << "T" << "_" << bitWidth;
   }
   else {
-    os << stride << "[" << begin.toString(OUTPUT_BASE, OUTPUT_SIGNED) << ", "
-       << end.toString(OUTPUT_BASE, OUTPUT_SIGNED) << "]_" << bitWidth;
+    os << stride.toString(10, false) << "[" << begin.toString(10, false) << ", "
+       << end.toString(10, false) << "]_" << bitWidth;
   }
   return os;
 }
