@@ -925,16 +925,29 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   APInt c = otherMSI->begin;
   APInt d = otherMSI->end;
   APInt t = otherMSI->stride;
+
+  // TODO: comment
+  if(add_(a,s) == b && s.ugt(pow2(bitWidth-1, bitWidth))) {
+    std::swap(a,b);
+    s = sub_(APInt(bitWidth,0),s);
+  }
+
+  // TODO: comment
+  if(add_(c,t) == d && t.ugt(pow2(bitWidth-1, bitWidth))) {
+    std::swap(c,d);
+    t = sub_(APInt(bitWidth,0),t);
+  }
+
   // shift both intervals to the left by `a`, so fewer cases need to be considered
   APInt b_ (sub_(b, a) /* mod N */);
   APInt c_ (sub_(c, a) /* mod N */);
   APInt d_ (sub_(d, a) /* mod N */);
   // if other contains exctly 2 elements, t[d_, c_] may not be normalized anymore
-  if (sub_(d_, c_) == t && d_.ult(c_)) {
-    std::swap(c, d);
-    std::swap(c_, d_);
-    t = sub_(d_, c_);
-  }
+  // if (sub_(d_, c_) == t && d_.ult(c_)) {
+  //   std::swap(c, d);
+  //   std::swap(c_, d_);
+  //   t = sub_(d_, c_);
+  // }
   StridedInterval res;
   if (b_.ult(c_) && c_.ult(d_)) { // no overlapping regions
     APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));

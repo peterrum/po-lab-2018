@@ -257,9 +257,9 @@ void testStridedIntervalLimits() {
     errs() << "[testLimits] getUMax failed with operand " << i << ": got " << i.getUMax()
       << ", expected " << 10 << "\n";
   };
-  if (!(i.getSMin() == 10)) {
+  if (!(i.getSMin() == -6)) {
     errs() << "[testLimits] getSMin failed with operand " << i << ": got " << i.getSMin()
-      << ", expected " << 10 << "\n";
+      << ", expected " << -6 << "\n";
   };
   if (!(i.getSMax() == 7)) {
     errs() << "[testLimits] getSMax failed with operand " << i << ": got " << i.getSMax()
@@ -275,13 +275,13 @@ void testStridedIntervalLimits() {
     errs() << "[testLimits] getUMax failed with operand " << i << ": got " << i.getUMax()
       << ", expected " << 13 << "\n";
   };
-  if (!(i.getSMin() == 9)) {
+  if (!(i.getSMin() == -7)) {
     errs() << "[testLimits] getSMin failed with operand " << i << ": got " << i.getSMin()
-      << ", expected " << 9 << "\n";
+      << ", expected " << -7 << "\n";
   };
-  if (!(i.getSMax() == 13)) {
+  if (!(i.getSMax() == -3)) {
     errs() << "[testLimits] getSMax failed with operand " << i << ": got " << i.getSMax()
-      << ", expected " << 13 << "\n";
+      << ", expected " << -3 << "\n";
   }
 
   i = {4, 13, 3, 2};
@@ -293,9 +293,9 @@ void testStridedIntervalLimits() {
     errs() << "[testLimits] getUMax failed with operand " << i << ": got " << i.getUMax()
       << ", expected " << 15 << "\n";
   };
-  if (!(i.getSMin() == 13)) {
+  if (!(i.getSMin() == -3)) {
     errs() << "[testLimits] getSMin failed with operand " << i << ": got " << i.getSMin()
-      << ", expected " << 13 << "\n";
+      << ", expected " << -3 << "\n";
   };
   if (!(i.getSMax() == 3)) {
     errs() << "[testLimits] getSMax failed with operand " << i << ": got " << i.getSMax()
@@ -840,20 +840,14 @@ void testContainsRandomNeg() {
       APInt zero(bitWidth,0);
       StridedInterval newSI(other, other, zero);
 
-      auto thisIteration = previousIteration->leastUpperBound(newSI);
-      auto thisIterationRev = newSI.leastUpperBound(*previousIteration);
+      auto thisIteration = newSI.leastUpperBound(*previousIteration);
+      auto thisIterationRev = previousIteration->leastUpperBound(newSI);
 
       StridedInterval* thisRevRaw = reinterpret_cast<StridedInterval*>(thisIterationRev.get());
       auto thisRevNorm = thisRevRaw->normalize();
 
       StridedInterval* thisRaw = reinterpret_cast<StridedInterval*>(thisIteration.get());
       auto thisNorm = thisRaw->normalize();
-
-      errs() << "new " <<  newSI << "    prev " << *previousIteration << "\n";
-      errs() << "prev->lub(new)                 " << *thisIteration << "\n";
-      errs() << "prev->lub(new) (norm.)         " << *thisNorm << "\n";
-      errs() << "new->lub(prev)                 " << *thisIterationRev << "\n";
-      errs() << "new->lub(prev) (norm.)         " << *thisRevNorm << "\n";
 
       if(*reinterpret_cast<StridedInterval*>(thisIteration.get()) != *reinterpret_cast<StridedInterval*>(thisIterationRev.get())) {
           errs() << "new " <<  newSI << "    prev " << *previousIteration << "\n";
@@ -946,19 +940,19 @@ void runStridedInterval() {
   testContainsRandom();
   testContainsRandomNeg();
   testFromBoundedSet();
-  testFromBoundedSetNeg();
-  /**
+  // testFromBoundedSetNeg();
+
   testStridedIntervalLessOrEqual();
-  testStridedIntervalLeastUpperBound();
+  // testStridedIntervalLeastUpperBound();
   testStridedIntervalIsNormal();
-  testStridedIntervalGamma();
+  // testStridedIntervalGamma();
   testStridedIntervalLimits();
   testStridedIntervalAdd();
   testStridedIntervalSub();
   testStridedIntervalMul();
   testStridedIntervalUdiv();
-  testStridedIntervalUrem();
-  testContains();
-  */
+  // testStridedIntervalUrem();
+  // testContains();
+
 }
 } // namespace pcpo
