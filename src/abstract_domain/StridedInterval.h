@@ -109,9 +109,9 @@ public:
   /// Member functions for API
   APInt getValueAt(uint64_t i) const { return APInt(/*TODO*/); }
   APInt getUMin() const { return umin(); }
-  APSInt getSMin() const { return APSInt(smin()); }
+  APSInt getSMin() const { return APSInt(smin(),false); }
   APInt getUMax() const { return umax(); }
-  APSInt getSMax() const { return APSInt(smax()); }
+  APSInt getSMax() const { return APSInt(smax(),false); }
 
   /// Print
   friend std::ostream &operator<<(std::ostream &os, const StridedInterval &bs);
