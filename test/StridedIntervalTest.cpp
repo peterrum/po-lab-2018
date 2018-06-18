@@ -811,6 +811,25 @@ void testFromBoundedSet() {
     }
 }
 
+void testFromBoundedSetDiffStrides() {
+  unsigned bitWidth = 32;
+
+  std::set<APInt, Comparator> values;
+
+  for(auto i=0;i < 6000; i++) {
+    if(i%6 == 0 || i%8 == 0)
+      values.insert(APInt(bitWidth,i));
+    if(i%100 == 0){
+      BoundedSet bs(bitWidth,values);
+      StridedInterval si(bs);
+      for(auto v:values) {
+        if (!si.contains(v))
+          errs() <<"Si "<< si << "should contain " << v << "from Bs " << bs <<"\n";
+      }
+    }
+  }
+}
+
 void testContainsRandomNeg() {
   const std::string testName = "[containsRandom] ";
   unsigned bitWidth = 32;
@@ -942,8 +961,8 @@ void runStridedInterval() {
   testContainsRandom();
   testContainsRandomNeg();
   testFromBoundedSet();
-  // testFromBoundedSetNeg();
-
+  testFromBoundedSetNeg();
+  testFromBoundedSetDiffStrides();
   testStridedIntervalLessOrEqual();
   // testStridedIntervalLeastUpperBound();
   testStridedIntervalIsNormal();

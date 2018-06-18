@@ -1093,6 +1093,9 @@ bool StridedInterval::contains(APInt &value) const {
   // value inside of interval bounds
   // check if it agrees with stride
 
+  /// Singleton
+  if(size() == 1) return true;
+
   APInt offset(value);
   // subtract interval start
   offset -= begin;

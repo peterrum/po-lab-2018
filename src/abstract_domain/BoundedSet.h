@@ -15,7 +15,7 @@ class BoundedSet : public AbstractDomain {
 public:
 
   /// Constructors
-  BoundedSet(unsigned ,std::set<APInt, Comparator> values);
+  BoundedSet(unsigned bitWidth,std::set<APInt, Comparator> values);
   BoundedSet(APInt value);
   BoundedSet(unsigned numBits, bool isTop);
   BoundedSet(unsigned numBits, std::initializer_list<APInt> vals);
