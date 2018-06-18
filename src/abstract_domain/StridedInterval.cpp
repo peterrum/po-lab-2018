@@ -938,6 +938,10 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
     t = sub_(APInt(bitWidth,0),t);
   }
 
+  if(otherMSI->size() < size()) {
+    return otherMSI->leastUpperBound(*this);
+  }
+
   // shift both intervals to the left by `a`, so fewer cases need to be considered
   APInt b_ (sub_(b, a) /* mod N */);
   APInt c_ (sub_(c, a) /* mod N */);
