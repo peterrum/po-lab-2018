@@ -74,29 +74,24 @@ bool State::leastUpperBound(State &other) {
   return change;
 }
 
-/// is other less or equal to this  this <= other
+/// is other less or equal to this  other <= this
 bool State::lessOrEqual(State &other){
 
+  /// bot <= x
   if (isBottom())
     return other.isBottom();
 
-  /// case 1: le(bottom, bottom) = equal
+  ///
   if (other.isBottom())
     return true;
 
-  ///
+  /// other
   for (const auto &var : other.vars){
     if (vars.find(var.first) != vars.end()) {
-      if (!var.second->lessOrEqual(*vars[var.first]))
+      if (!vars[var.first]->lessOrEqual(*var.second))
         return false;
     } else
       return false;
-  }
-
-  for (const auto &var : vars){
-    if (vars.find(var.first) == vars.end()) {
-        return false;
-    }
   }
   return true;
 }
