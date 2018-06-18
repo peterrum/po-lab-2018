@@ -927,17 +927,23 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
     StridedInterval opt1 (e1, f1, u1);
     StridedInterval opt2 (e2, f2, u2);
     if (opt1.size() < opt2.size()) { // choose the option representing the smallest set
-      res = StridedInterval(e1, f1, u1);
+      res = opt1;
     } else {
-      res = StridedInterval(e2, f2, u2);
+      res = opt2;
     }
-  } else if (d_.ult(c_) and c_.ule(b_)) { // tow overlapping regions
+  } else if (d_.ult(c_) and c_.ule(b_)) { // two overlapping regions
+    //
+    APInt distanceFromStartOfA = c_.ule(d_) ? c_ : d_;
+    // to ensure that the stride behaves well for wraparounds
+    APInt wrapAround = pow2(bitWidth-1, bitWidth);
+
     APInt u = GreatestCommonDivisor(
       GreatestCommonDivisor(s, t),
-      GreatestCommonDivisor(c_.ule(d_) ? c_ : d_, pow2(bitWidth-1, bitWidth))
+      GreatestCommonDivisor(distanceFromStartOfA, wrapAround)
     );
-    APInt e = mod(a, u);
-    res = StridedInterval(e, sub_(e, u), u);
+    APInt e = mod(a, u); // could be any member, shift as far left as possible
+    APInt f = sub_(e, u); // last member to the left
+    res = StridedInterval(e, f, u);
   } else { // one overlapping region
     APInt u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), c_.ule(d_) ? c_ : d_);
     res = StridedInterval(c_.ule(d_) ? a : c, d_.ule(b_) ? b : d, u);
