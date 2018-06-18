@@ -142,6 +142,12 @@ StridedInterval::StridedInterval(BoundedSet &set)
       end = minInterval.end;
       stride = minInterval.stride;
     }
+
+    std::shared_ptr<AbstractDomain> thisNorm = this->normalize();
+    StridedInterval other = *(static_cast<StridedInterval *>(thisNorm.get()));
+    begin = other.begin;
+    end = other.end;
+    stride = other.stride;
   }
 }
 
@@ -957,6 +963,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   // }
   StridedInterval res;
   if (b_.ult(c_) && c_.ult(d_)) { // no overlapping regions
+    // errs() << "No Overlapping!\n" << *this << " " << *otherMSI  << "\n";
     APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));
     APInt e1 = a, f1 = d;
     APInt u2 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, d));
@@ -968,7 +975,9 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
     } else {
       res = opt2;
     }
-  } else if (d_.ult(c_) and c_.ule(b_)) { // two overlapping regions
+  } else if (d_.ult(c_) and c_.ule(b_)) {
+    // errs() << "Two Overlapping!" << *this << " " << *otherMSI  << "\n";
+    // two overlapping regions
     //
     APInt distanceFromStartOfA = c_.ule(d_) ? c_ : d_;
     // to ensure that the stride behaves well for wraparounds
@@ -982,6 +991,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
     APInt f = sub_(e, u); // last member to the left
     res = StridedInterval(e, f, u);
   } else { // one overlapping region
+    // errs() << "One Overlapping!" << *this << " " << *otherMSI  << "\n";
     APInt u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), c_.ule(d_) ? c_ : d_);
     res = StridedInterval(c_.ule(d_) ? a : c, d_.ule(b_) ? b : d, u);
   }
