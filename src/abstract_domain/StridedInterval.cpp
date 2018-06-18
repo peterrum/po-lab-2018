@@ -892,16 +892,33 @@ size_t StridedInterval::size() const {
 
 shared_ptr<AbstractDomain>
 StridedInterval::leastUpperBound(AbstractDomain &other) {
+  // get other
   StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
+
+  // LUB of things with differet bitWidth is not defined
   assert(otherMSI->bitWidth == bitWidth);
+
   if(*this == *otherMSI){
+      // operands equal
       return shared_ptr<AbstractDomain>(new StridedInterval(*this));
   }
+
   if (isBot) {
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(*otherMSI)); // pm
+    // if this is bot, LUB is other
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*otherMSI));
   } else if (otherMSI->isBot) {
-    return std::shared_ptr<AbstractDomain>(new StridedInterval(*this)); // pm
+    // if other is bot, LUB is this
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*this));
   }
+
+  if (isTop()) {
+    // if this is top, LUB is top
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*this));
+  } else if (otherMSI->isTop()) {
+    // if other is top, LUB is other
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*otherMSI));
+  }
+
   APInt a = begin;
   APInt b = end;
   APInt s = stride;
@@ -1019,32 +1036,41 @@ bool StridedInterval::lessOrEqual(AbstractDomain &other) {
 
 bool StridedInterval::contains(APInt &value) const {
   assert(value.getBitWidth() == bitWidth);
-  if (value.getBitWidth() != bitWidth) {
+
+  if (value.getBitWidth() != bitWidth)
     return false;
-  } else if (isBottom()) {
+
+  if (isBottom())
     return false;
+
+  if(isTop())
+    return true;
+
+  if (begin.ule(end)) {
+    // normal intervals
+    if (value.ult(begin) || value.ugt(end)) {
+      // value outside of interval bounds
+      return false;
+    }
   } else {
-    if (begin.ule(end)) {
-      if (value.ult(begin) || value.ugt(end)) {
-        return false;
-      } else {
-        APInt offset(value);
-        offset -= begin;
-        APInt remainder = offset.urem(stride);
-        return remainder.isNullValue();
-      }
-    } else { // begin > end
-      if (value.ugt(end) && value.ult(begin)) {
-        return false;
-      } else {
-        APInt offset(value);
-        offset -= begin;
-        APInt remainder = offset.urem(stride);
-        return remainder.isNullValue();
-      }
+    // wrapAround intervals begin > end
+    if (value.ugt(end) && value.ult(begin)) {
+      // value outside of interval bounds
+      return false;
     }
   }
+
+  // value inside of interval bounds
+  // check if it agrees with stride
+
+  APInt offset(value);
+  // subtract interval start
+  offset -= begin;
+
+  APInt remainder = offset.urem(stride);
+  return remainder.isNullValue();
 }
+
 bool StridedInterval::isTop() const {
   if (isBot) {
     return false;
