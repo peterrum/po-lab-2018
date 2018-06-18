@@ -69,7 +69,7 @@ bool VsaBenchmarkPass::runOnModule(Module &M) {
         }
     }
 
-    errs() << "Benchmark: " << vsa_count << "," << lvi_count << "," << eq_count << '\n';
+    errs() << vsa_count << "," << lvi_count << "," << eq_count << '\n';
 
     /// analysis has made no modifications
     return false;
