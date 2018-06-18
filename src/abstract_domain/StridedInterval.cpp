@@ -928,6 +928,11 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
     return std::shared_ptr<AbstractDomain>(new StridedInterval(*otherMSI));
   }
 
+  /// To simplify cases we assume that |other| >= |this|
+  if(otherMSI->size() < size()) {
+    return otherMSI->leastUpperBound(*this);
+  }
+
   APInt a = begin;
   APInt b = end;
   APInt s = stride;
@@ -935,50 +940,40 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   APInt d = otherMSI->end;
   APInt t = otherMSI->stride;
 
-  // TODO: comment
+  /// If an interval of two elements is represented with a stride > 2^(bitWidth-1)
+  /// we convert to non-normalized representation to get tighter intervals later
   if(add_(a,s) == b && s.ugt(pow2(bitWidth-1, bitWidth))) {
     std::swap(a,b);
     s = sub_(APInt(bitWidth,0),s);
   }
 
-  // TODO: comment
+  /// If an interval of two elements is represented with a stride > 2^(bitWidth-1)
+  /// we convert to non-normalized representation to get tighter intervals later
   if(add_(c,t) == d && t.ugt(pow2(bitWidth-1, bitWidth))) {
     std::swap(c,d);
     t = sub_(APInt(bitWidth,0),t);
-  }
-
-  if(otherMSI->size() < size()) {
-    return otherMSI->leastUpperBound(*this);
   }
 
   // shift both intervals to the left by `a`, so fewer cases need to be considered
   APInt b_ (sub_(b, a) /* mod N */);
   APInt c_ (sub_(c, a) /* mod N */);
   APInt d_ (sub_(d, a) /* mod N */);
-  // if other contains exctly 2 elements, t[d_, c_] may not be normalized anymore
-  // if (sub_(d_, c_) == t && d_.ult(c_)) {
-  //   std::swap(c, d);
-  //   std::swap(c_, d_);
-  //   t = sub_(d_, c_);
-  // }
-  StridedInterval res;
+
   if (b_.ult(c_) && c_.ult(d_)) { // no overlapping regions
-    // errs() << "No Overlapping!\n" << *this << " " << *otherMSI  << "\n";
     APInt u1 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(c, b));
     APInt e1 = a, f1 = d;
     APInt u2 = GreatestCommonDivisor(GreatestCommonDivisor(s, t), sub_(a, d));
     APInt e2 = c, f2 = b;
     StridedInterval opt1 (e1, f1, u1);
     StridedInterval opt2 (e2, f2, u2);
-    if (opt1.size() < opt2.size()) { // choose the option representing the smallest set
-      res = opt1;
-    } else {
-      res = opt2;
-    }
-  } else if (d_.ult(c_) and c_.ule(b_)) {
-    // errs() << "Two Overlapping!" << *this << " " << *otherMSI  << "\n";
+
+    // choose the option representing the smallest set
+    StridedInterval smaller = opt1.size() < opt2.size()?opt1:opt2;
+    return smaller.normalize();
+  }
+
+  if (d_.ult(c_) and c_.ule(b_)) {
     // two overlapping regions
-    //
     APInt distanceFromStartOfA = c_.ule(d_) ? c_ : d_;
     // to ensure that the stride behaves well for wraparounds
     APInt wrapAround = pow2(bitWidth-1, bitWidth);
@@ -989,24 +984,23 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
     );
     APInt e = mod(a, u); // could be any member, shift as far left as possible
     APInt f = sub_(e, u); // last member to the left
-    res = StridedInterval(e, f, u);
-  } else { // one overlapping region
-    // errs() << "One Overlapping!" << *this << " " << *otherMSI  << "\n";
-    APInt u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), c_.ule(d_) ? c_ : d_);
-    res = StridedInterval(c_.ule(d_) ? a : c, d_.ule(b_) ? b : d, u);
+    return StridedInterval(e, f, u).normalize();
   }
-  return res.normalize();
+
+  // one overlapping region
+  APInt u = GreatestCommonDivisor(GreatestCommonDivisor(s, t), c_.ule(d_) ? c_ : d_);
+  return StridedInterval(c_.ule(d_) ? a : c, d_.ule(b_) ? b : d, u).normalize();
 }
 
 bool StridedInterval::lessOrEqual(AbstractDomain &other) {
   StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
 
-  // pm: shortcut for both abstract domains are equal
+  /// shortcut for both abstract domains are equal
   if(*this == *otherMSI){
       return true;
   }
 
-  // pm: check for topness
+  /// check for topness
   if(isTop()){
       if(other.isTop())
           return true;

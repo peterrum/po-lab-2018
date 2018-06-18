@@ -930,8 +930,7 @@ void testContainsRandomNeg() {
 void testFromBoundedSetNeg() {
     unsigned bitWidth = 32;
 
-
-    for(int stride=1;stride < 60; stride++) {
+    for(int stride=3;stride < 500; stride++) {
       auto bs = BoundedSet::create_bottom(bitWidth);
       auto si = StridedInterval::create_bottom(bitWidth);
 
