@@ -170,15 +170,37 @@ APInt mul_(const APInt &a, const APInt &b) {
   return c;
 }
 
-APInt mod(const APInt &a, const APInt &b) { return a.urem(b); }
+APInt mod(const APInt &a, const APInt &b) {
+  return a.urem(b);
+}
 
-// APInt udiv_(const APInt &a, const APInt &b) { return a.udiv(b); }
+APInt neg(const APInt a) {
+  APInt zero = APInt(a.getBitWidth(), 0);
+  return sub_(zero, a);
+}
 
 APInt pow2(unsigned n, unsigned bitWidth) {
   assert(n <= bitWidth);
   APInt b{bitWidth, 0};
   b.setBit(n);
   return b;
+}
+
+APInt smax_(const APInt a, const APInt b) {
+  return a.sge(b) ? a : b;
+}
+
+APInt umax_(const APInt a, const APInt b) {
+  return a.uge(b) ? a : b;
+}
+
+APInt smin_(const APInt a, const APInt b) {
+  return a.sle(b) ? a : b;
+}
+
+APInt sabs(const APInt a) {
+  APInt zero = APInt(a.getBitWidth(), 0);
+  return a.sge(zero) ? a : neg(a);
 }
 
 std::shared_ptr<AbstractDomain> StridedInterval::normalize() {
@@ -275,16 +297,28 @@ APInt StridedInterval::smin() const{
   if (a.sle(b)) {
     return a;
   } else {
-    APInt m = APInt::getSignedMinValue(bitWidth);
-    return add_(mod(sub_(b, m), s), m);
+    return sub_(mod(add_(b, pow2(bitWidth-1, bitWidth)), s), pow2(bitWidth-1, bitWidth));
+    // APInt m = APInt::getSignedMinValue(bitWidth);
+    // return add_(mod(sub_(b, m), s), m);
   }
 }
 
-APInt StridedInterval::ustride() {
+APInt StridedInterval::ustride() const {
   APInt a = begin;
   APInt b = end;
   APInt s = stride;
   if (a.ule(b)) {
+    return s;
+  } else {
+    return GreatestCommonDivisor(s, sub_(a, b));
+  }
+}
+
+APInt StridedInterval::sstride() const {
+  APInt a = begin;
+  APInt b = end;
+  APInt s = stride;
+  if (a.sle(b)) {
     return s;
   } else {
     return GreatestCommonDivisor(s, sub_(a, b));
@@ -493,10 +527,6 @@ shared_ptr<AbstractDomain> StridedInterval::mul(unsigned numBits,
   return StridedInterval(e_, f_, u_).normalize();
 }
 
-// *****************************************************
-// * Everything below are incorrect dummy definitions! *
-// *****************************************************
-
 shared_ptr<AbstractDomain> StridedInterval::udiv(unsigned numBits,
                                                  AbstractDomain &other) {
   StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
@@ -515,7 +545,7 @@ shared_ptr<AbstractDomain> StridedInterval::udiv(unsigned numBits,
       errs() << "Exiting.\n";
       exit(EXIT_FAILURE);
     } else {
-      errs() << "WARNING: Input program includes possible division by zero.\n";
+      errs() << "WARNING: Input program may include division by zero.\n";
       c = t; // exclude 0 from rhs
     }
   }
@@ -531,10 +561,6 @@ shared_ptr<AbstractDomain> StridedInterval::udiv(unsigned numBits,
   return res.normalize();
 }
 
-shared_ptr<AbstractDomain> StridedInterval::sdiv(unsigned numBits,
-                                                 AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
-}
 shared_ptr<AbstractDomain> StridedInterval::urem(unsigned numBits,
   AbstractDomain &other) {
   StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
@@ -549,11 +575,11 @@ shared_ptr<AbstractDomain> StridedInterval::urem(unsigned numBits,
   APInt t = otherSI->ustride();
   if (c == 0) { // handling possible division by 0
     if (t == 0) { // definite division by 0
-      errs() << "ERROR: Input program includes division by zero.\n";
+      errs() << "ERROR: Input program includes remainder by zero.\n";
       errs() << "Exiting.\n";
       exit(EXIT_FAILURE);
     } else {
-      errs() << "WARNING: Input program includes possible division by zero.\n";
+      errs() << "WARNING: Input program may include remainder by zero.\n";
       c = t; // exclude 0 from rhs
     }
   }
@@ -576,44 +602,111 @@ shared_ptr<AbstractDomain> StridedInterval::urem(unsigned numBits,
 }
 
 shared_ptr<AbstractDomain> StridedInterval::srem(unsigned numBits,
-                                                 AbstractDomain &other) {
+    AbstractDomain &other) {
+  StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
+  assert(numBits == bitWidth);
+  assert(numBits == otherSI->bitWidth);
+  if (this->isBottom() || otherSI->isBottom()) {
+    return StridedInterval::create_bottom(bitWidth);
+  }
+  APInt zero = APInt(bitWidth+1, 0); APInt one = APInt(bitWidth+1, 1);
+  APInt a = this->smin().sext(bitWidth+1); APInt  b = this->smax().sext(bitWidth+1);
+  APInt c = otherSI->smin().sext(bitWidth+1); APInt  d = otherSI->smax().sext(bitWidth+1);
+  APInt s = this->sstride().sext(bitWidth+1);
+  APInt t = otherSI->sstride().sext(bitWidth+1);
+  // check for remainder by zero and reduce remainder by negative rhs to
+  // remainder negative of rhs
+  if (d.slt(0)) {                      // rhs is definitly negative
+    std::swap(c, d);
+    c = neg(c); d = neg(d);
+  } else if (c.slt(zero)) {            // rhs by be negative
+    APInt d_ = d; APInt c_ = c;        // save values
+    c = smin_(mod(neg(c_), t), mod(d_, t));
+    d = smax_(neg(c_), d_);
+    t = GreatestCommonDivisor(t, add_(c_, d_));
+  }
+  if (c == 0) {                        // remainder by bound not possible
+    if (t == 0) {                      // definitly remainder by zero
+      errs() << "ERROR: Input program includes remainder by zero.\n";
+      errs() << "Exiting.\n";
+      exit(EXIT_FAILURE);
+    } else {                           // possibly remainer by zero
+      errs() << "WARNING: Input program may include remainder by zero.\n";
+      c = add_(c, t);                  // exclude zero from rhs
+      if (c == d) {                    // renormalization neccessary
+        t = zero;
+      }
+    }
+  }
+  APInt m = smax_(sabs(a), sabs(b));
+  if (m.slt(c)) {                      // remainder has no effect
+    return this->normalize();
+  } else if (t == 0) {                 // remainder by constant
+    if (a.sdiv(c) == b.sdiv(c)) {      // E x. x*rhs <= lhs < (x+1)*rhs
+      return StridedInterval(
+        a.srem(c).trunc(bitWidth), b.srem(c).trunc(bitWidth),
+        s.trunc(bitWidth)
+      ).normalize();
+    }
+  }
+  APInt u = GreatestCommonDivisor(GreatestCommonDivisor(c, t), s);
+  APInt e, f;
+  if (zero.slt(a)) {
+    e = mod(a, u);
+  } else {
+    e = smax_(a, add_(sub_(one, d), mod(sub_(add_(a, d), one), u)));
+  }
+  if (zero.slt(b)) {
+    f = smin_(b, sub_(d, one));
+  } else {
+    f = add_(mod(sub_(e, one), u), sub_(one, u));
+  }
+  return StridedInterval(
+    e.trunc(bitWidth), f.trunc(bitWidth),
+    u.trunc(bitWidth)
+  ).normalize();
+}
+
+// All operations below always return top, even if one of the operands are bottom.
+
+shared_ptr<AbstractDomain> StridedInterval::sdiv(unsigned numBits,
+    AbstractDomain &other) {
   return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::shl(unsigned numBits,
-                                                AbstractDomain &other, bool nuw,
-                                                bool nsw) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+  AbstractDomain &other, bool nuw, bool nsw) {
+  return StridedInterval::create_top(numBits);
 }
 
 shared_ptr<AbstractDomain> StridedInterval::lshr(unsigned numBits,
-                                                 AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+    AbstractDomain &other) {
+  return StridedInterval::create_top(numBits);
 }
 
 shared_ptr<AbstractDomain> StridedInterval::ashr(unsigned numBits,
-                                                 AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+    AbstractDomain &other) {
+  return StridedInterval::create_top(numBits);
 }
 
 shared_ptr<AbstractDomain> StridedInterval::and_(unsigned numBits,
-                                                 AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+    AbstractDomain &other) {
+  return StridedInterval::create_top(numBits);
 }
 
 shared_ptr<AbstractDomain> StridedInterval::or_(unsigned numBits,
-                                                AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+    AbstractDomain &other) {
+  return StridedInterval::create_top(numBits);
 }
 
 shared_ptr<AbstractDomain> StridedInterval::xor_(unsigned numBits,
-                                                 AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+    AbstractDomain &other) {
+  return StridedInterval::create_top(numBits);
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
 StridedInterval::subsetsForPredicate(AbstractDomain &other,
-                                     CmpInst::Predicate pred) {
+    CmpInst::Predicate pred) {
   StridedInterval *otherB = static_cast<StridedInterval *>(&other);
 
   if (otherB->isTop()) {

@@ -967,6 +967,7 @@ void testFromBoundedSetNeg() {
 }
 
 void runStridedInterval() {
+  // testStridedIntervalSrem();
   testContainsRandom();
   testContainsRandomNeg();
   testFromBoundedSet();

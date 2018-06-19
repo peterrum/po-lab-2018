@@ -126,8 +126,8 @@ private:
     APInt umin() const;
     APInt smax() const;
     APInt smin() const;
-
-    APInt ustride();
+    APInt sstride() const;
+    APInt ustride() const;
 
     unsigned bitWidth;
     APInt begin;
