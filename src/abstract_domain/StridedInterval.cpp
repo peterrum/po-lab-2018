@@ -730,7 +730,7 @@ StridedInterval::subsetsForPredicateSLT(StridedInterval &A,
 
   // the subset of A that can be less to some element in B
   auto trueSet =
-      intersectWithBounds(A, StridedInterval(minSigned + 1, maxB - 1, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minSigned, maxB - 1, APInt(B.bitWidth, 1)));
   // the subset of A that can be greater or equal to some element in B
   auto falseSet =
       intersectWithBounds(A, StridedInterval(minB, maxSigned, APInt(B.bitWidth, 1)));
@@ -770,7 +770,7 @@ StridedInterval::subsetsForPredicateULT(StridedInterval &A,
 
   // the subset of A that can be less to some element in B
   auto trueSet =
-      intersectWithBounds(A, StridedInterval(minUnsigned + 1, maxB - 1, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minUnsigned, maxB - 1, APInt(B.bitWidth, 1)));
   // the subset of A that can be greater or equal to some element in B
   auto falseSet =
       intersectWithBounds(A, StridedInterval(minB, maxUnsigned, APInt(B.bitWidth, 1)));
