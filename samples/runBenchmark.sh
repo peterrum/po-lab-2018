@@ -20,7 +20,7 @@ printf "Program, VSAbetter, LVIbetter, Equal\n"
 for f in ${ARRAY[*]};
 do
     # ... print file name
-    printf "$(pwd)/$f,"
+    printf "$f,"
     # ... clean up for old run
     rm -f build/$f.out
     rm -f build/$f.bc
