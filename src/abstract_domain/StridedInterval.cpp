@@ -650,7 +650,7 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
     return subsetsForPredicateSLE(*this, *otherB);
   }
   if (pred == CmpInst::Predicate::ICMP_SGE) {
-    auto temp = subsetsForPredicateSLE(*this, *otherB);
+    auto temp = subsetsForPredicateSLT(*this, *otherB);
     return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
         temp.second, temp.first);
   }
@@ -658,7 +658,7 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
     return subsetsForPredicateSLT(*this, *otherB);
   }
   if (pred == CmpInst::Predicate::ICMP_SGT) {
-    auto temp = subsetsForPredicateSLT(*this, *otherB);
+    auto temp = subsetsForPredicateSLE(*this, *otherB);
     return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
         temp.second, temp.first);
   }
@@ -666,7 +666,7 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
     return subsetsForPredicateULE(*this, *otherB);
   }
   if (pred == CmpInst::Predicate::ICMP_UGE) {
-    auto temp = subsetsForPredicateULE(*this, *otherB);
+    auto temp = subsetsForPredicateULT(*this, *otherB);
     return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
         temp.second, temp.first);
   }
@@ -674,7 +674,7 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
     return subsetsForPredicateULT(*this, *otherB);
   }
   if (pred == CmpInst::Predicate::ICMP_UGT) {
-    auto temp = subsetsForPredicateULT(*this, *otherB);
+    auto temp = subsetsForPredicateULE(*this, *otherB);
     return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
         temp.second, temp.first);
   }
