@@ -44,7 +44,6 @@ public:
   /// Comparison Operators
   bool operator==(const StridedInterval &other);
   bool operator!=(const StridedInterval &other) {return !(operator==(other));}
-  //bool lessOrEqual(AbstractDomain &other);
   bool operator<=(AbstractDomain &other);
 
   /// Binary Arithmetic Operations
@@ -109,7 +108,7 @@ public:
   std::set<APInt, Comparator> gamma();
 
   /// Member functions for API
-  APInt getValueAt(uint64_t i) const { return APInt(/*TODO*/); }
+  APInt getValueAt(uint64_t i) const { return begin + stride*i; }
   APInt getUMin() const { return umin(); }
   APSInt getSMin() const { return APSInt(smin(),false); }
   APInt getUMax() const { return umax(); }
