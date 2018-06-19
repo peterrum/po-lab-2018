@@ -1,7 +1,7 @@
 int gcd() {
-    int a = 7387;
-    int b = 8633;
-    int r;
+    unsigned a = 7387;
+    unsigned b = 8633;
+    unsigned r;
     while (b > 0) {
         r = a % b;
         a = b;
