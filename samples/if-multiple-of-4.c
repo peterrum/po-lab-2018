@@ -4,15 +4,13 @@
 // testing with multiple of 4
 
 int main(int argc, char const *argv[]) {
-    unsigned x = 0;
+    unsigned x = rand();
     unsigned y = 5;
-
-    while (x <= 5){
-        if(4*x==3){
-            y = 6;
-        }
-        x++;
+    x = 4 * x;
+    if (x == 3) {
+      y = 6;
     }
+    
 
     // at this point x={17}
     printf("%d\n", x);
