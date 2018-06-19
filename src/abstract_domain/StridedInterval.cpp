@@ -719,10 +719,10 @@ StridedInterval::subsetsForPredicateSLE(StridedInterval &A,
 
   // the subset of A that can be less or equal to some element in B
   auto trueSet =
-      intersect(A, StridedInterval(minSigned, maxB, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minSigned, maxB, APInt(B.bitWidth, 1)));
   // the subset of A that can be greater than some element in B
   auto falseSet =
-      intersect(A, StridedInterval(minB + 1, maxSigned, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minB + 1, maxSigned, APInt(B.bitWidth, 1)));
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       trueSet, falseSet);
 }
@@ -739,10 +739,10 @@ StridedInterval::subsetsForPredicateSLT(StridedInterval &A,
 
   // the subset of A that can be less to some element in B
   auto trueSet =
-      intersect(A, StridedInterval(minSigned + 1, maxB - 1, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minSigned + 1, maxB - 1, APInt(B.bitWidth, 1)));
   // the subset of A that can be greater or equal to some element in B
   auto falseSet =
-      intersect(A, StridedInterval(minB, maxSigned, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minB, maxSigned, APInt(B.bitWidth, 1)));
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       trueSet, falseSet);
 }
@@ -759,10 +759,10 @@ StridedInterval::subsetsForPredicateULE(StridedInterval &A,
 
   // the subset of A that can be less or equal to some element in B
   auto trueSet =
-      intersect(A, StridedInterval(minUnsigned, maxB, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minUnsigned, maxB, APInt(B.bitWidth, 1)));
   // the subset of A that can be greater than some element in B
   auto falseSet =
-      intersect(A, StridedInterval(minB + 1, maxUnsigned, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minB + 1, maxUnsigned, APInt(B.bitWidth, 1)));
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       trueSet, falseSet);
 }
@@ -779,10 +779,10 @@ StridedInterval::subsetsForPredicateULT(StridedInterval &A,
 
   // the subset of A that can be less to some element in B
   auto trueSet =
-      intersect(A, StridedInterval(minUnsigned + 1, maxB - 1, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minUnsigned + 1, maxB - 1, APInt(B.bitWidth, 1)));
   // the subset of A that can be greater or equal to some element in B
   auto falseSet =
-      intersect(A, StridedInterval(minB, maxUnsigned, APInt(B.bitWidth, 1)));
+      intersectWithBounds(A, StridedInterval(minB, maxUnsigned, APInt(B.bitWidth, 1)));
   return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
       trueSet, falseSet);
 }
@@ -820,6 +820,90 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &fir
     } else {
       return shared_ptr<AbstractDomain>(
           new StridedInterval(beginMax, endMin, APInt(A.bitWidth, 1)));
+    }
+  }
+
+  // Case 2: both are wrap around
+  if (A.isWrapAround() && B.isWrapAround()) {
+    // If both are wrap around, we always have an overlap
+    auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
+    auto endMin = A.end.ule(B.end) ? A.end : B.end;
+    return shared_ptr<AbstractDomain>(
+        new StridedInterval(beginMax, endMin, APInt(A.bitWidth, 1)));
+  }
+
+  // Case 3: B is wrap around, A is not
+  // will be reduced to case 4
+  if (B.isWrapAround()) {
+    std::swap(A, B);
+  }
+
+  // Case 4: A is wrap around, B is not
+  // Check if and where we have an overlap
+  if (B.end.ult(A.begin) && B.begin.ugt(A.end)) {
+    // We have no overlap
+    return create_bottom(A.bitWidth);
+  }
+  if (B.begin.ule(A.end) && B.end.uge(A.begin)) {
+    // We have an overlap at both ends
+    // We return the interval that has fewer elements
+    if (A.size() < B.size()) {
+      return shared_ptr<AbstractDomain>(new StridedInterval(A));
+    } else {
+      return shared_ptr<AbstractDomain>(new StridedInterval(B));
+    }
+  }
+  if (B.begin.ule(A.end)) {
+    // We have an overlap at the left side
+    auto endMin = A.end.ule(B.end) ? A.end : B.end;
+    return shared_ptr<AbstractDomain>(
+        new StridedInterval(B.begin, endMin, APInt(A.bitWidth, 1)));
+  }
+  // We have an overlap the the right side
+  auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
+  return shared_ptr<AbstractDomain>(
+      new StridedInterval(beginMax, B.end, APInt(A.bitWidth, 1)));
+}
+
+// A possibly overapproximated intersection of two StridedIntervals
+shared_ptr<AbstractDomain> StridedInterval::intersectWithBounds(const StridedInterval &first,
+                                                      const StridedInterval &second) {
+  assert(first.bitWidth == second.bitWidth);
+  assert(second.stride == 1);
+
+  StridedInterval A(first);
+  StridedInterval B(second);
+
+  // if one of the SIs is bottom, the intersection is bottom, too
+  if (A.isBottom() || B.isBottom()) {
+    return create_bottom(A.bitWidth);
+  }
+
+  // if one the SIs is top, we return the other, so we don't overapproximate
+  if (A.isTop()) {
+    return shared_ptr<AbstractDomain>(new StridedInterval(B));
+  }
+  if (B.isTop()) {
+    return shared_ptr<AbstractDomain>(new StridedInterval(A));
+  }
+
+  // We do a case distinction on the kind of intervals
+  // Case 1: both aren't wrap around
+  if (!A.isWrapAround() && !B.isWrapAround()) {
+    auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
+    auto endMin = A.end.ule(B.end) ? A.end : B.end;
+    auto offset = beginMax;
+    offset -= A.begin;
+    offset = offset.urem(stride);
+    offset += stride;
+    offset = offset.urem(stride);
+    beginMax += offset;
+
+    if (beginMax.ugt(endMin)) {
+      // We have no overlap in this case
+      return create_bottom(A.bitWidth);
+    } else {
+      return StridedInterval(beginMax, endMin, A.stride).normalize();
     }
   }
 

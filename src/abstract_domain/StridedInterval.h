@@ -92,7 +92,8 @@ public:
   bool isWrapAround() const;
   // Conduct an overapproximated intersection of two intervals.
   shared_ptr<AbstractDomain> intersect(const StridedInterval &A, const StridedInterval &B);
-
+  shared_ptr<AbstractDomain> intersectWithBounds(const StridedInterval &first,
+                                                 const StridedInterval &second);
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
 
   /// Member functions
