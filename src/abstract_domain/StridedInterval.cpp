@@ -903,9 +903,11 @@ shared_ptr<AbstractDomain> StridedInterval::intersectWithBounds(const StridedInt
     auto offset = beginMax;
     offset -= A.begin;
     offset = offset.urem(A.stride);
-    offset += A.stride;
-    offset = offset.urem(A.stride);
-    beginMax += offset;
+
+    auto resultingOffset = stride;
+    resultingOffset -= offset;
+    resultingOffset = resultingOffset.urem(A.stride);
+    beginMax += resultingOffset;
 
     if (beginMax.ugt(endMin)) {
       // We have no overlap in this case
