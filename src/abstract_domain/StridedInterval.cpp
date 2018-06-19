@@ -887,6 +887,14 @@ shared_ptr<AbstractDomain> StridedInterval::intersectWithBounds(const StridedInt
     return shared_ptr<AbstractDomain>(new StridedInterval(A));
   }
 
+  if (A.size()==1){
+    if(B.contains(A.begin)){
+      return shared_ptr<AbstractDomain>(new StridedInterval(A));
+    } else{
+      return create_bottom(A.bitWidth);
+    }
+  }
+
   // We do a case distinction on the kind of intervals
   // Case 1: both aren't wrap around
   if (!A.isWrapAround() && !B.isWrapAround()) {
@@ -894,9 +902,9 @@ shared_ptr<AbstractDomain> StridedInterval::intersectWithBounds(const StridedInt
     auto endMin = A.end.ule(B.end) ? A.end : B.end;
     auto offset = beginMax;
     offset -= A.begin;
-    offset = offset.urem(stride);
-    offset += stride;
-    offset = offset.urem(stride);
+    offset = offset.urem(A.stride);
+    offset += A.stride;
+    offset = offset.urem(A.stride);
     beginMax += offset;
 
     if (beginMax.ugt(endMin)) {
