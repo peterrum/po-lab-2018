@@ -686,25 +686,27 @@ StridedInterval::subsetsForPredicate(AbstractDomain &other,
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
-StridedInterval::subsetsForPredicateEQ(
-    StridedInterval &A, StridedInterval &B) {
-  APInt maxBegin = A.begin.uge(B.begin) ?
-            A.begin : B.begin;
+StridedInterval::subsetsForPredicateEQ(StridedInterval &A, StridedInterval &B) {
+  assert(A.bitWidth == B.bitWidth);
 
-        APInt minEnd = A.end.ule(B.end) ?
-            A.end : B.end;
+  shared_ptr<AbstractDomain> falseSet;
+  shared_ptr<AbstractDomain> trueSet;
 
-        if(maxBegin.ugt(minEnd)){
-            // no intersection
-            return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-                  StridedInterval::create_bottom(A.bitWidth),
-                  shared_ptr<AbstractDomain>(new StridedInterval(A)));
-        } // else
+  if (B.size() == 1) {
+    // In case B == {x}, we can exclude x from A in the false branch 
 
-        return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-              shared_ptr<AbstractDomain>(new StridedInterval(maxBegin, minEnd,
-                        APInt(A.bitWidth, 1))),
-              shared_ptr<AbstractDomain>(new StridedInterval(A)));
+    // The set in the false branch thus is the intersection of A with the complement of B
+    StridedInterval bComplement(B.begin + 1, B.begin - 1, APInt(B.bitWidth, 1));
+    falseSet = intersectWithBounds(A, bComplement);
+  } else {
+    // if |B| > 1, we cannot exclue anything from the false branch
+    falseSet = shared_ptr<AbstractDomain>(new StridedInterval(A));
+  }
+  // The values in A that can make a == b (a in A, b in B) true
+  // are those in the intersection of A and B.
+  trueSet = intersect(A, B);
+  return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
+      trueSet, falseSet);
 }
 
 std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
@@ -807,6 +809,22 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &fir
   if (B.isTop()) {
     return shared_ptr<AbstractDomain>(new StridedInterval(A));
   }
+
+  if(A.size() == 1){
+    if(B.contains(A.begin)){
+      return shared_ptr<AbstractDomain>(new StridedInterval(A));
+    } else {
+      return create_bottom(A.bitWidth);
+    }
+  } 
+
+  if(B.size() == 1){
+    if(A.contains(B.begin)){
+      return shared_ptr<AbstractDomain>(new StridedInterval(B));
+    } else {
+      return create_bottom(A.bitWidth);
+    }
+  } 
 
   // We do a case distinction on the kind of intervals
   // Case 1: both aren't wrap around
