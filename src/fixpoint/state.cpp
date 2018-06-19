@@ -19,7 +19,7 @@ bool State::put(Value &v, std::shared_ptr<AbstractDomain> ad) {
   DEBUG_OUTPUT("State::put for " << v.getName());
   // ad->printOut();
   if (vars.find(&v) != vars.end()) {
-    if (ad->lessOrEqual(*vars[&v]))
+    if (*ad<=(*vars[&v]))
       return false;
     vars[&v] = vars[&v]->leastUpperBound(*ad);
   } else
@@ -88,13 +88,37 @@ bool State::lessOrEqual(State &other){
   /// other
   for (const auto &var : other.vars){
     if (vars.find(var.first) != vars.end()) {
-      if (!vars[var.first]->lessOrEqual(*var.second))
+      if (!(*vars[var.first]<=(*var.second)))
         return false;
     } else
       return false;
   }
   return true;
 }
+
+/*/// is other less or equal to this  other <= this
+/// is this <= other
+bool State::operator<=(State &other) {
+
+  /// bot <= x
+  if (isBottom())
+    return other.isBottom();
+
+  ///
+  if (other.isBottom())
+    return true;
+
+  /// other
+  for (const auto &var : other.vars){
+    auto find = vars.find(var.first);
+    if (find != vars.end()) {
+      if (!(*find->second<=(*var.second)))
+        return false;
+    } else
+      return false;
+  }
+  return true;
+}*/
 
 bool State::copyState(State &other) {
   /// basic block has been visited

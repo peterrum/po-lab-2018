@@ -477,7 +477,28 @@ shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
 }
 
 // is this boundedSet less or equal to the other?
-bool BoundedSet::lessOrEqual(AbstractDomain &other) {
+/*bool BoundedSet::lessOrEqual(AbstractDomain &other) {
+  if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
+    if (otherB->isTop()) {
+      return true;
+    }
+    if (isTop()) {
+      return otherB->isTop();
+    }
+    auto end = otherB->values.end();
+    for (auto &val : values) {
+      if (otherB->values.find(val) == end) {
+        // val is not contained int otherB->values
+        return false;
+      }
+    }
+    return true;
+  }
+  // TODO: throw exception if comparison is not implemented
+  return false;
+}*/
+
+bool BoundedSet::operator<=(pcpo::AbstractDomain &other) {
   if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
     if (otherB->isTop()) {
       return true;

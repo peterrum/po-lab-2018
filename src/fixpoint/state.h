@@ -37,6 +37,7 @@ public:
 
   /// is other less or equal to this
   bool lessOrEqual(State &other);
+  //bool operator<=(State &other);
 
   /// make deep copy of state
   bool copyState(State &other);

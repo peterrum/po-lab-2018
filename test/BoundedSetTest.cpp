@@ -279,12 +279,12 @@ void testContainsRandomBs() {
           break;
       }
 
-      if(thisIteration->lessOrEqual(*previousIteration)) {
+      if(*thisIteration<=(*previousIteration)) {
         errs() << *thisIteration << " " << *previousIteration << "Less or equal failed";
         return;
       }
 
-      if(!previousIteration->lessOrEqual(*thisIteration)) {
+      if(!(*previousIteration<=(*thisIteration))) {
         errs() << "Less or equal failed";
         return;
       }
@@ -297,7 +297,6 @@ void testContainsRandomBs() {
 }
 void runBoundedSet() {
   testContainsRandomBs();
-  /**
   testConstructor();
   testLeastUpperBound();
   testLeastUpperBoundWithAdd();
@@ -310,6 +309,6 @@ void runBoundedSet() {
   testIsBottom();
   testSDiv();
   testSRem();
-  testAdd2(); */
+  testAdd2();
 }
 } // namespace pcpo

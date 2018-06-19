@@ -34,6 +34,8 @@ public:
   /// Comparison Operators
   bool operator==(const BoundedSet &other);
   bool operator!=(const BoundedSet &other);
+  //bool lessOrEqual(AbstractDomain &other);
+  bool operator<=(AbstractDomain &other);
 
   /// Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw);
@@ -57,7 +59,6 @@ public:
   icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
 
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
-  bool lessOrEqual(AbstractDomain &other);
 
   /// Member functions
   bool contains(APInt &value) const;

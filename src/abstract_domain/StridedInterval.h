@@ -44,6 +44,8 @@ public:
   /// Comparison Operators
   bool operator==(const StridedInterval &other);
   bool operator!=(const StridedInterval &other) {return !(operator==(other));}
+  //bool lessOrEqual(AbstractDomain &other);
+  bool operator<=(AbstractDomain &other);
 
   /// Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw);
@@ -92,7 +94,6 @@ public:
   shared_ptr<AbstractDomain> intersect(const StridedInterval &A, const StridedInterval &B);
 
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
-  bool lessOrEqual(AbstractDomain &other);
 
   /// Member functions
   unsigned getBitWidth() const { return bitWidth; }

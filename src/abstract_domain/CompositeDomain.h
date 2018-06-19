@@ -64,6 +64,7 @@ public:
   bool lessOrEqual(AbstractDomain &other);
 
   bool operator==(const BoundedSet &other);
+  bool operator<=(AbstractDomain &other) { return true; }
 
   friend std::ostream &operator<<(std::ostream &os, const BoundedSet &bs);
   bool contains(APInt &value) const;

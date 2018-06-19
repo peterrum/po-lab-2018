@@ -267,14 +267,14 @@ bool CompositeDomain::lessOrEqual(AbstractDomain &other) {
   if (delegateType == stridedInterval && otherD.getDelegateType() == boundedSet) {
       BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
       StridedInterval otherDelegate(otherBs);
-      return delegate->lessOrEqual(otherDelegate);
+      return *delegate<=(otherDelegate);
   }
   if (getDelegateType() == boundedSet && otherD.getDelegateType() == stridedInterval) {
       BoundedSet thisBs = *static_cast<BoundedSet *>(this->delegate.get());
       StridedInterval thisDelegate{thisBs};
-      return thisDelegate.lessOrEqual(*otherD.delegate.get());
+      return thisDelegate<=(*otherD.delegate.get());
   }
-  return delegate->lessOrEqual(*otherD.delegate.get());
+  return *delegate<=(*otherD.delegate.get());
 }
 
 unsigned CompositeDomain::getBitWidth() const { return bitWidth; }

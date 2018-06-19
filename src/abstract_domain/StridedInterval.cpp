@@ -992,7 +992,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   return StridedInterval(c_.ule(d_) ? a : c, d_.ule(b_) ? b : d, u).normalize();
 }
 
-bool StridedInterval::lessOrEqual(AbstractDomain &other) {
+bool StridedInterval::operator<=(AbstractDomain &other) {
   StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
 
   /// shortcut for both abstract domains are equal

@@ -20,6 +20,9 @@ public:
   ///Destructor
   virtual ~AbstractDomain() = default;
 
+  //virtual bool lessOrEqual(AbstractDomain &other) = 0;
+  virtual bool operator<=(AbstractDomain &other) = 0;
+
   /// Binary Arithmetic Operations
   virtual shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
   virtual shared_ptr<AbstractDomain> sub(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
@@ -43,7 +46,6 @@ public:
 
   /// Lattice interface
   virtual shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other) = 0;
-  virtual bool lessOrEqual(AbstractDomain &other) = 0;
 
   /// Member functions
   virtual bool contains(APInt &value) const = 0;
