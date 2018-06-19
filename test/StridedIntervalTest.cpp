@@ -830,6 +830,16 @@ void testFromBoundedSetDiffStrides() {
   }
 }
 
+void testFromBoundedSetWrap() { 
+  BoundedSet bs(4, {6, 9, 12, 15, 2});
+  StridedInterval si(bs);
+
+  StridedInterval expected(APInt(4, 6), APInt(4, 2), APInt(4, 3));
+  if(si!=expected){
+    errs() << "Si " << si << " should be " << expected << "\n";
+  }
+}
+
 void testContainsRandomNeg() {
   const std::string testName = "[containsRandom] ";
   unsigned bitWidth = 32;
@@ -962,6 +972,7 @@ void runStridedInterval() {
   testFromBoundedSet();
   testFromBoundedSetNeg();
   testFromBoundedSetDiffStrides();
+  testFromBoundedSetWrap();
   testStridedIntervalLessOrEqual();
   // testStridedIntervalLeastUpperBound();
   testStridedIntervalIsNormal();

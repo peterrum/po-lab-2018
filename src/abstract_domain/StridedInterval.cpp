@@ -100,31 +100,20 @@ StridedInterval::StridedInterval(BoundedSet &set)
         // Stride will be gcd of all differences between points next to each other
         APInt diff;
         APInt gcd;
-        if (second.uge(b)) {
-          diff = second;
-          diff -= b;
-        }
-        else {
-          diff = b;
-          diff -= second;
-        }
+        diff = second;
+        diff -= b;
+
         gcd = diff;
 
         // calculate stride
-        for (size_t j = (i + 1) % size; (j + 1) % size != lastIndex;
+        for (size_t j = i % size; j % size != lastIndex;
              j = (j + 1) % size) {
           auto current = values.at(j);
           auto next = values.at((j + 1) % size);
 
-          if (next.uge(current)) {
-            diff = next;
-            diff -= current;
-            gcd = GreatestCommonDivisor(gcd, diff);
-          } else {
-            diff = current;
-            diff -= next;
-            gcd = GreatestCommonDivisor(gcd, diff);
-          }
+          diff = next;
+          diff -= current;
+          gcd = GreatestCommonDivisor(gcd, diff);
         }
 
         // check whether interval starting at b has minimum number of elements
@@ -811,7 +800,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &fir
   }
 
   if(A.size() == 1){
-    if(B.contains(A.begin)){
+    if (B.contains(A.begin)) {
       return shared_ptr<AbstractDomain>(new StridedInterval(A));
     } else {
       return create_bottom(A.bitWidth);
