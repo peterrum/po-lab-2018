@@ -74,51 +74,32 @@ bool State::leastUpperBound(State &other) {
   return change;
 }
 
-/// is other less or equal to this  other <= this
-bool State::lessOrEqual(State &other){
-
-  /// bot <= x
-  if (isBottom())
-    return other.isBottom();
-
-  ///
-  if (other.isBottom())
-    return true;
-
-  /// other
-  for (const auto &var : other.vars){
-    if (vars.find(var.first) != vars.end()) {
-      if (!(*vars[var.first]<=(*var.second)))
-        return false;
-    } else
-      return false;
-  }
-  return true;
-}
-
-/*/// is other less or equal to this  other <= this
 /// is this <= other
 bool State::operator<=(State &other) {
 
-  /// bot <= x
+  /// bottom <= x
   if (isBottom())
-    return other.isBottom();
-
-  ///
-  if (other.isBottom())
     return true;
 
-  /// other
-  for (const auto &var : other.vars){
-    auto find = vars.find(var.first);
-    if (find != vars.end()) {
-      if (!(*find->second<=(*var.second)))
+  /// x <= bottom
+  if (other.isBottom())
+    return isBottom();
+
+  /// x <= y
+  for (const auto &var : vars){
+    auto find = other.vars.find(var.first);
+    if (find != other.vars.end()) {
+      if (!(*var.second<=(*find->second))){
+        ///!x<=y
         return false;
-    } else
-      return false;
+      }
+    } else{
+        ///x not in y TODO possible continue
+        return false;
+    }
   }
   return true;
-}*/
+}
 
 bool State::copyState(State &other) {
   /// basic block has been visited

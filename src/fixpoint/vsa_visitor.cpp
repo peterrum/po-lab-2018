@@ -73,7 +73,7 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
     newState.prune(oldState->second);
 
     /// compute lub in place after this old state is updated
-    if (newState.lessOrEqual(oldState->second)) {
+    if (newState<=(oldState->second)) {
       /// new state was old state: do not push successors
       DEBUG_OUTPUT("visitTerminationInst: state has not been changed");
       DEBUG_OUTPUT("visitTerminationInst: new state equals old state in "
