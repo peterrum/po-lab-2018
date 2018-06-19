@@ -53,7 +53,7 @@ public:
 
     programPoints.clear();
     VsaVisitor vis(worklist,
-            getAnalysis<DominatorTreeWrapperPass>().getDomTree());
+            getAnalysis<DominatorTreeWrapperPass>().getDomTree(),programPoints);
 
     /// get the first basic block and push it into the worklist
     worklist.push(&function.front());
@@ -76,10 +76,6 @@ public:
 #endif
       visits++;
     }
-
-
-    programPoints.insert(vis.getProgramPoints().begin(),
-                               vis.getProgramPoints().end());
 
 #ifndef DEBUG
     print_local(vis, visits - 1);
