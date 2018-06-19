@@ -85,17 +85,16 @@ bool State::operator<=(State &other) {
   if (other.isBottom())
     return isBottom();
 
-  /// x <= y
+  /// this.x <= other.x
   for (const auto &var : vars){
     auto find = other.vars.find(var.first);
     if (find != other.vars.end()) {
       if (!(*var.second<=(*find->second))){
-        ///!x<=y
+        /// ! this.x <= other.x
         return false;
       }
-    } else{
-        ///x not in y TODO possible continue
-        return false;
+    } else {
+        /// x not in other (T in other)
     }
   }
   return true;
