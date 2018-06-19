@@ -228,23 +228,23 @@ void VsaVisitor::visitPHINode(PHINode &I) {
     /// create initial condition for lubs
     auto newValue = AD_TYPE::create_bottom(I.getType()->getIntegerBitWidth());
 
+    /// if the basic block where a value comes from is bottom,
+    /// the corresponding alternative in the phi node is never taken
+    /// we handle this here
+
+    /// get incoming block
+    const auto incomingBlock = *blocks_iterator;
+
+    /// block has not been visited yet -> implicit bottom -> continue
+    if (programPoints.find(incomingBlock) == programPoints.end())
+      continue;
+
+    /// explicit bottom -> continue
+    if (programPoints[incomingBlock].isBottom())
+      continue;
+
     /// Check if this is an instruction
     if (Instruction::classof(val)) {
-      /// if the basic block where a value comes from is bottom,
-      /// the corresponding alternative in the phi node is never taken
-      /// we handle this here
-
-      /// get incoming block
-      const auto incomingBlock = *blocks_iterator;
-
-      /// block has not been visited yet -> implicit bottom -> continue
-      if (programPoints.find(incomingBlock) == programPoints.end())
-        continue;
-
-      /// explicit bottom -> continue
-      if (programPoints[incomingBlock].isBottom())
-        continue;
-
       /// apply the conditions that we have for reaching this basic block
       /// from the basic block containing the instruction
       bcs.applyCondition(incomingBlock, I.getParent());

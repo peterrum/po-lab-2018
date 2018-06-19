@@ -97,10 +97,10 @@ Visiting a basic block is a two-step process:
 {\color{blue}check for change} of the local state and save it in $\mathcal{D}$:
 \begin{algorithm}[H]
 \caption{Visit terminator}
-\begin{algorithmic}[1] %MS: the first LUB is  not necessary and would destroy narrwoing in a real world situation
+\begin{algorithmic}[1]
 \Procedure{Visit}{Terminator}%\Comment{T: syntax tree}
-\State $\mathcal{N}_{BB} \gets \mathcal{D}_{BB} \,{\color{red}\sqcup}\, \mathcal{N}_{BB}$\Comment {\color{red}red: delegated to abstract domain\color{black}}
-\State \textbf{if} $\mathcal{N}_{BB} \,{\color{red}\sqsubseteq}\, \mathcal{D}_{BB}$ \textbf{then}:
+%\State $\mathcal{N}_{BB} \gets \mathcal{D}_{BB} \,{\color{red}\sqcup}\, \mathcal{N}_{BB}$
+\State \textbf{if} $\mathcal{N}_{BB} \,{\color{red}\sqsubseteq}\, \mathcal{D}_{BB}$ \textbf{then}:\Comment {\color{red}red: delegated to abstract domain\color{black}}
 \State \qquad \textbf{return}
 \Comment state has not changed
 \State $\mathcal{D}_{BB} \gets \mathcal{N}_{BB}$
@@ -160,10 +160,11 @@ considered comparisons:
 
 
 \begin{frame}[fragile]{\textcolor{blue}{Visitor: Switch}}
-
+{\Large UPDATE }
 
 \begin{algorithm}[H]
 \caption{Visit switch (terminator)}
+
 \begin{algorithmic}[1]
 \Procedure{Visit}{$\textsc{jmp}\,[x=a\,:\,XX][x=b\,:\,YY][default\,:\,ZZ]$}%\Comment{T: syntax tree}
 %\State $\mathcal{C}_{BB} \gets \emptyset$

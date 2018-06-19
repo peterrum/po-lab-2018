@@ -28,7 +28,7 @@ Part 0:
 %\begin{itemize}
 %\item
 \begin{align*}
-Var \,\rightarrow\,\{a,\,b,\,c,\,...\}
+Var \,\rightarrow\,\{a,\,b,\,c,\,...\}_n
 \end{align*}
 %\end{itemize}
 
@@ -36,7 +36,7 @@ Var \,\rightarrow\,\{a,\,b,\,c,\,...\}
 %\begin{itemize}
 %\item
 \begin{align*}
-Var \,\rightarrow\, [a:b]_b
+Var \,\rightarrow\, [a:b]_n
 \end{align*}
 %\end{itemize}
 
@@ -44,7 +44,7 @@ Var \,\rightarrow\, [a:b]_b
 %\begin{itemize}
 %\item
 \begin{align*}
-Var \,\rightarrow\,s[a:b]_b
+Var \,\rightarrow\,s[a:b]_n
 \end{align*}
 %\end{itemize}
 \end{minipage}
@@ -61,7 +61,7 @@ Figure\\
 
 SSA: sufficient to store the {\color{blue}abstract value for each variable once per basic block}:\footnote{The need to store it not just once only arises to preserve information at conditional branches.}
 \begin{align*}
-\mathcal{N}\,:\, BB \,\rightarrow\, Var \, \rightarrow\, Val
+\mathcal{D}\,:\, BB \,\rightarrow\, Var \, \rightarrow\, Val
 \end{align*}
 
 \end{frame}
@@ -152,7 +152,7 @@ ThisResult& ThisPass::getResult(){ return result; }
 
 \vspace{1cm}
 
-\underline{\smash{Out of scope:}}
+\underline{\smash{Future work:}}
 \begin{itemize}
 \item widening and narrowing
 \item inter-procedural analysis
