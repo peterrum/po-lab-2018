@@ -1303,8 +1303,6 @@ bool StridedInterval::isTop() const {
 
 shared_ptr<AbstractDomain> StridedInterval::widen() {
   /// This is where we should look at smarter ways to do this...
-  /// E.g. try to preserve the stride at first, and only change the stride to 1
-  /// after a fruther iteration
   return create_top(bitWidth);
 }
 
