@@ -244,6 +244,14 @@ CompositeDomain::icmp(CmpInst::Predicate pred, unsigned numBits,
               );
 }
 
+shared_ptr<AbstractDomain> CompositeDomain::widen() {
+  return delegate->widen();
+}
+
+bool CompositeDomain::requiresWidening() {
+  return delegate->requiresWidening();
+}
+
 
 llvm::raw_ostream &CompositeDomain::print(llvm::raw_ostream &os) {
   return delegate->print(os);

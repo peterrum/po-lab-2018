@@ -61,6 +61,11 @@ public:
   size_t size() const;
 
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
+
+  // Widening
+  virtual shared_ptr<AbstractDomain> widen();
+  virtual bool requiresWidening();
+
   bool lessOrEqual(AbstractDomain &other);
 
   bool operator==(const BoundedSet &other);
