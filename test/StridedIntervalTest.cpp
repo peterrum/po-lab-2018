@@ -966,6 +966,1621 @@ void testFromBoundedSetNeg() {
     }
 }
 
+void testStridedIntervalSrem() {
+  StridedInterval lhs;
+  StridedInterval rhs;
+  StridedInterval ref;
+  shared_ptr<AbstractDomain> res_p;
+  StridedInterval res;
+  // Below are test cases with full path coverage, automatically generated using
+  // the jupyer notebook.
+  // One case is commented out, because in this case, the rhs is the constant
+  // zero and therefore would terminate the programm.
+  lhs = {1, 0, 0, 0}; rhs = {1, 1, 1, 0}; ref = {1, 0, 0, 0};
+  res_p = lhs.srem(1, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 1, 0}; rhs = {2, 3, 3, 0}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 1, 0}; rhs = {2, 2, 3, 1}; ref = {2, 0, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 1, 0}; rhs = {3, 5, 7, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 2, 2, 0}; ref = {2, 0, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 2, 3, 1}; rhs = {3, 6, 6, 0}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 7, 7, 0}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 3, 3, 0}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 5, 7, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 2, 1}; rhs = {3, 4, 6, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 2, 3, 1}; ref = {2, 0, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 5, 7, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 3, 3, 0}; rhs = {2, 2, 2, 0}; ref = {2, 3, 3, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {1, 1, 1, 0}; rhs = {1, 1, 1, 0}; ref = {1, 0, 0, 0};
+  res_p = lhs.srem(1, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 3, 3, 0}; rhs = {2, 2, 3, 1}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 2, 2, 0}; rhs = {2, 2, 3, 1}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 3, 3}; rhs = {2, 2, 2, 0}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 6, 1}; rhs = {3, 6, 6, 0}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 2, 1}; rhs = {2, 3, 3, 0}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 5, 5, 0}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {1, 0, 1, 1}; rhs = {1, 1, 1, 0}; ref = {1, 0, 0, 0};
+  res_p = lhs.srem(1, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 3, 2}; rhs = {2, 2, 3, 1}; ref = {2, 3, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 5, 7, 1}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 3, 3}; rhs = {2, 2, 3, 1}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 2, 1}; rhs = {2, 2, 3, 1}; ref = {2, 3, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 5, 7, 1}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 2, 0, 1}; rhs = {2, 2, 3, 1}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 4, 4, 0}; ref = {3, 6, 3, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 5, 5, 0}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 7, 7, 0}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 5, 7, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 2, 1}; rhs = {3, 4, 6, 1}; ref = {3, 7, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 6, 7, 1}; ref = {3, 7, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 0, 0}; rhs = {2, 3, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 1, 0}; rhs = {2, 3, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 5, 3, 3}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 2, 3, 1}; rhs = {3, 6, 2, 2}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 7, 1, 1}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 3, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 5, 3, 3}; ref = {3, 7, 7, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 3, 3, 0}; rhs = {2, 3, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 5, 3, 3}; ref = {3, 1, 6, 5};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 6, 1}; rhs = {3, 6, 2, 2}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 2, 1}; rhs = {2, 3, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 5, 3, 3}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 3, 3}; rhs = {2, 3, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 2, 1}; rhs = {3, 5, 3, 3}; ref = {3, 7, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 5, 3, 3}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 7, 1, 1}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 0, 0}; rhs = {3, 5, 3, 1}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 3, 3, 0}; rhs = {3, 5, 3, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 1, 0}; rhs = {3, 5, 3, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 0, 2, 1}; rhs = {4, 10, 6, 3}; ref = {4, 0, 2, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 5, 3, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 9, 7, 1}; ref = {4, 0, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 3, 1}; rhs = {3, 5, 3, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 5, 3, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 14, 14, 0}; rhs = {4, 10, 6, 3}; ref = {4, 14, 14, 0};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 5, 3, 1}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 6, 0}; rhs = {3, 7, 2, 1}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 14, 13}; rhs = {4, 10, 6, 3}; ref = {4, 1, 14, 13};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 2, 1}; rhs = {3, 5, 3, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 5, 3, 1}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 6, 6}; rhs = {3, 5, 3, 1}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 5, 1}; rhs = {3, 5, 3, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 5, 3, 1}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 7, 1}; rhs = {3, 5, 3, 1}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 15, 2, 1}; rhs = {4, 10, 6, 3}; ref = {4, 15, 2, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 5, 3, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 3, 15, 12}; rhs = {4, 9, 7, 1}; ref = {4, 15, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 7, 2, 1}; ref = {3, 7, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 0, 0}; rhs = {2, 1, 3, 2}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 1, 0}; rhs = {2, 1, 3, 2}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 1, 0}; rhs = {3, 3, 7, 2}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 2, 6, 4}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 3, 7, 2}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 1, 15, 2}; ref = {4, 0, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 1, 3, 2}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 3, 7, 2}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 2, 6, 4}; ref = {3, 7, 7, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 3, 7, 2}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 3, 3, 0}; rhs = {2, 1, 3, 2}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 1, 1}; rhs = {3, 2, 6, 4}; ref = {3, 7, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 2, 1}; rhs = {3, 3, 7, 2}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 3, 7, 2}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 6, 6}; rhs = {3, 3, 7, 2}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 2, 1}; rhs = {2, 1, 3, 2}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 3, 7, 2}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 3, 3}; rhs = {2, 1, 3, 2}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 3, 15, 12}; rhs = {4, 4, 12, 8}; ref = {4, 3, 15, 12};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 3, 7, 2}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 3, 15, 12}; rhs = {4, 1, 15, 2}; ref = {4, 15, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 1, 7, 6}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {1, 0, 0, 0}; rhs = {1, 0, 1, 1}; ref = {1, 0, 0, 0};
+  res_p = lhs.srem(1, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 1, 0}; rhs = {2, 0, 3, 3}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 0, 2, 2}; ref = {2, 0, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 2, 3, 1}; rhs = {3, 0, 6, 6}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 0, 6, 6}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 0, 3, 3}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 3, 3, 0}; rhs = {2, 0, 2, 2}; ref = {2, 3, 3, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {1, 1, 1, 0}; rhs = {1, 0, 1, 1}; ref = {1, 0, 0, 0};
+  res_p = lhs.srem(1, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 3, 3}; rhs = {2, 0, 2, 2}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 6, 1}; rhs = {3, 0, 6, 6}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 2, 1}; rhs = {2, 0, 3, 3}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 2, 4, 2}; rhs = {3, 0, 4, 4}; ref = {3, 6, 2, 2};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {1, 0, 1, 1}; rhs = {1, 0, 1, 1}; ref = {1, 0, 0, 0};
+  res_p = lhs.srem(1, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 0, 4, 4}; ref = {3, 6, 3, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 3, 1}; rhs = {3, 0, 6, 6}; ref = {3, 7, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 0, 6, 6}; ref = {3, 7, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 0, 0}; rhs = {2, 0, 2, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 1, 0}; rhs = {2, 0, 2, 1}; ref = {2, 0, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 1, 0}; rhs = {3, 1, 5, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 2, 4, 2}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 1, 5, 1}; ref = {3, 0, 3, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 2, 1}; rhs = {3, 1, 5, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 0, 2, 1}; ref = {2, 0, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 1, 5, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 2, 4, 2}; ref = {3, 7, 7, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 3, 3, 0}; rhs = {2, 0, 2, 1}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 2, 2, 0}; rhs = {2, 0, 2, 1}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 1, 1}; rhs = {3, 2, 4, 2}; ref = {3, 7, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 3, 2}; rhs = {2, 0, 2, 1}; ref = {2, 3, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 1, 5, 1}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 3, 3}; rhs = {2, 0, 2, 1}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 2, 1}; rhs = {2, 0, 2, 1}; ref = {2, 3, 1, 1};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 2, 0, 3}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 2, 0, 1}; rhs = {2, 0, 2, 1}; ref = {2, 0, 3, 3};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 3, 15, 12}; rhs = {4, 4, 8, 4}; ref = {4, 3, 15, 12};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 1, 5, 1}; ref = {3, 6, 3, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 2, 1}; rhs = {3, 1, 5, 1}; ref = {3, 7, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 1, 6, 5}; ref = {3, 7, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 0, 0}; rhs = {3, 5, 1, 2}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 3, 3, 0}; rhs = {3, 5, 1, 2}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 1, 0}; rhs = {3, 5, 1, 2}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 0, 1, 1}; rhs = {4, 9, 3, 5}; ref = {4, 0, 1, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 5, 1, 2}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 2, 1}; rhs = {3, 4, 2, 3}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 3, 1}; rhs = {3, 5, 1, 2}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 5, 1, 2}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 15, 15, 0}; rhs = {4, 9, 3, 5}; ref = {4, 15, 15, 0};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 5, 1, 2}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 5, 0}; rhs = {3, 5, 1, 2}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 15, 14}; rhs = {4, 9, 3, 5}; ref = {4, 1, 15, 14};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 3, 1}; rhs = {3, 4, 2, 3}; ref = {3, 5, 3, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 5, 1, 2}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 7, 1}; rhs = {3, 4, 2, 3}; ref = {3, 5, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 5, 1}; rhs = {3, 5, 1, 2}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 5, 1, 2}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 7, 1}; rhs = {3, 5, 1, 2}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 5, 1, 2}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 2, 1}; rhs = {3, 4, 2, 3}; ref = {3, 7, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 11, 10, 3}; rhs = {4, 12, 2, 3}; ref = {4, 13, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 0, 0, 0}; rhs = {4, 11, 7, 6}; ref = {4, 0, 0, 0};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 7, 7, 0}; rhs = {4, 11, 7, 6}; ref = {4, 0, 6, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 5, 5, 0}; rhs = {4, 11, 7, 6}; ref = {4, 0, 5, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 0, 1, 1}; rhs = {4, 13, 7, 5}; ref = {4, 0, 1, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 14, 4, 3}; ref = {4, 0, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 11, 7, 6}; ref = {4, 0, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 0, 3, 3}; rhs = {4, 14, 4, 3}; ref = {4, 0, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 0, 2, 1}; rhs = {4, 11, 7, 6}; ref = {4, 0, 2, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 15, 15, 0}; rhs = {4, 13, 7, 5}; ref = {4, 15, 15, 0};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 14, 14, 0}; rhs = {4, 11, 7, 6}; ref = {4, 14, 0, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 8, 8, 0}; rhs = {4, 11, 7, 6}; ref = {4, 10, 0, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 15, 14}; rhs = {4, 13, 7, 5}; ref = {4, 1, 15, 14};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 10, 6, 1}; rhs = {4, 11, 7, 6}; ref = {4, 10, 6, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 12, 2, 3}; rhs = {4, 11, 7, 6}; ref = {4, 12, 2, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 10, 13, 3}; rhs = {4, 11, 7, 6}; ref = {4, 10, 0, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 11, 1}; rhs = {4, 11, 7, 6}; ref = {4, 10, 6, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 9, 1, 1}; rhs = {4, 11, 7, 6}; ref = {4, 10, 1, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 9, 11, 1}; rhs = {4, 11, 7, 6}; ref = {4, 10, 0, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 11, 10, 3}; rhs = {4, 11, 7, 6}; ref = {4, 10, 6, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 3, 15, 12}; rhs = {4, 11, 7, 6}; ref = {4, 15, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 11, 10, 3}; rhs = {4, 14, 4, 3}; ref = {4, 13, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 0, 0}; rhs = {3, 1, 5, 4}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 3, 3, 0}; rhs = {3, 1, 5, 4}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 1, 0}; rhs = {3, 1, 5, 4}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 0, 2, 1}; rhs = {4, 3, 11, 8}; ref = {4, 0, 2, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 1, 5, 4}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 5, 13, 4}; ref = {4, 0, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 3, 1}; rhs = {3, 1, 5, 4}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 1, 5, 4}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 14, 14, 0}; rhs = {4, 3, 11, 8}; ref = {4, 14, 14, 0};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 1, 5, 4}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 5, 0}; rhs = {3, 1, 5, 4}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 14, 13}; rhs = {4, 3, 11, 8}; ref = {4, 1, 14, 13};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 2, 1}; rhs = {3, 1, 5, 4}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 1, 5, 4}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 6, 6}; rhs = {3, 1, 5, 4}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 5, 1}; rhs = {3, 1, 5, 4}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 1, 5, 4}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 7, 1}; rhs = {3, 1, 5, 4}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 15, 2, 1}; rhs = {4, 3, 11, 8}; ref = {4, 15, 2, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 1, 5, 4}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 3, 15, 12}; rhs = {4, 5, 13, 4}; ref = {4, 15, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 11, 10, 3}; rhs = {4, 1, 13, 12}; ref = {4, 14, 2, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  // lhs = {1, 0, 1, 1}; rhs = {1, 0, 0, 0}; ref = {1, 0, 1, 1};
+  // res_p = lhs.srem(1, rhs);
+  // res = *(static_cast<StridedInterval *>(res_p.get()));
+  // if (res != ref) {
+  //   errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  // }
+  lhs = {2, 0, 0, 0}; rhs = {2, 0, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 1, 0}; rhs = {2, 0, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 0, 3, 3}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 2, 3, 1}; rhs = {3, 0, 2, 2}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 0, 1, 1}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 0, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 0, 3, 3}; ref = {3, 7, 7, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 3, 3, 0}; rhs = {2, 0, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 0, 3, 3}; ref = {3, 1, 6, 5};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 6, 1}; rhs = {3, 0, 2, 2}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 2, 1}; rhs = {2, 0, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 0, 3, 3}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 3, 3}; rhs = {2, 0, 1, 1}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 2, 1}; rhs = {3, 0, 3, 3}; ref = {3, 7, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 0, 3, 3}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 0, 1, 1}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 0, 0}; rhs = {3, 0, 3, 1}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 3, 3, 0}; rhs = {3, 0, 3, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 1, 0}; rhs = {3, 0, 3, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 0, 2, 1}; rhs = {4, 0, 6, 3}; ref = {4, 0, 2, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 0, 3, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 0, 5, 1}; ref = {4, 0, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 3, 1}; rhs = {3, 0, 3, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 0, 3, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 14, 14, 0}; rhs = {4, 0, 6, 3}; ref = {4, 14, 14, 0};
+  res_p = lhs.srem(4, rhs);
+
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 0, 3, 1}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 6, 0}; rhs = {3, 0, 2, 1}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 14, 13}; rhs = {4, 0, 6, 3}; ref = {4, 1, 14, 13};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 2, 1}; rhs = {3, 0, 3, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 0, 3, 1}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 6, 6}; rhs = {3, 0, 3, 1}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 5, 1}; rhs = {3, 0, 3, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 0, 3, 1}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 7, 1}; rhs = {3, 0, 3, 1}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 15, 2, 1}; rhs = {4, 0, 6, 3}; ref = {4, 15, 2, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 0, 3, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 3, 15, 12}; rhs = {4, 0, 5, 1}; ref = {4, 15, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 0, 2, 1}; ref = {3, 7, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 0, 0}; rhs = {2, 1, 1, 0}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 1, 1, 0}; rhs = {2, 1, 1, 0}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 3, 3, 0}; rhs = {3, 1, 3, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 1, 0}; rhs = {3, 1, 3, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 2, 3, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 2, 3, 1}; rhs = {3, 2, 2, 0}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 3, 3, 0}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 1, 1}; rhs = {2, 1, 1, 0}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 3, 1}; rhs = {3, 1, 3, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 1, 3, 1}; rhs = {4, 2, 7, 1}; ref = {4, 0, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 3, 1}; rhs = {3, 1, 3, 1}; ref = {3, 0, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 1, 1}; rhs = {3, 1, 3, 1}; ref = {3, 0, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 2, 3, 1}; ref = {3, 7, 7, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 3, 3, 0}; rhs = {2, 1, 1, 0}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 7, 0}; rhs = {3, 1, 3, 1}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 6, 0}; rhs = {3, 1, 2, 1}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 3, 3, 0}; ref = {3, 1, 6, 5};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 6, 1}; rhs = {3, 2, 2, 0}; ref = {3, 0, 7, 7};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 2, 1}; rhs = {2, 1, 1, 0}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 3, 3, 0}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {2, 0, 3, 3}; rhs = {2, 1, 1, 0}; ref = {2, 0, 0, 0};
+  res_p = lhs.srem(2, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 2, 1}; rhs = {3, 1, 3, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 6, 5}; rhs = {3, 1, 3, 1}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 0, 6, 6}; rhs = {3, 1, 3, 1}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 1, 5, 1}; rhs = {3, 1, 3, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 1, 2}; rhs = {3, 1, 3, 1}; ref = {3, 6, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 5, 7, 1}; rhs = {3, 1, 3, 1}; ref = {3, 6, 0, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 7, 2, 1}; rhs = {3, 3, 3, 0}; ref = {3, 7, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 3, 3, 0}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 1, 1, 0}; ref = {3, 0, 0, 0};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 1, 3, 1}; ref = {3, 6, 2, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {4, 3, 15, 12}; rhs = {4, 2, 7, 1}; ref = {4, 15, 3, 1};
+  res_p = lhs.srem(4, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+  lhs = {3, 6, 3, 1}; rhs = {3, 1, 2, 1}; ref = {3, 7, 1, 1};
+  res_p = lhs.srem(3, rhs);
+  res = *(static_cast<StridedInterval *>(res_p.get()));
+  if (res != ref) {
+    errs() << "[testSrem] failed with operands " << lhs << ", " << rhs << ": got " << res << ", expected " << ref << "\n";
+  }
+}
+
 void runStridedInterval() {
   // testStridedIntervalSrem();
   testContainsRandom();
