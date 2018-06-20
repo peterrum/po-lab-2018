@@ -2,6 +2,7 @@
 
 #include "BoundedSet.h"
 #include "AbstractDomain.h"
+#include "StridedInterval.h"
 #include "Util.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/Support/raw_os_ostream.h"
@@ -499,13 +500,29 @@ shared_ptr<AbstractDomain> BoundedSet::leastUpperBound(AbstractDomain &other) {
 }*/
 
 bool BoundedSet::operator<=(pcpo::AbstractDomain &other) {
-  if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
-    if (otherB->isTop()) {
+  assert(this->getBitWidth() == other.getBitWidth());
+
+  if (other.isTop()) {
       return true;
+  }
+  if (isTop()) {
+      return other.isTop();
+  }
+  if(other.getDomainType() == stridedInterval){
+    StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
+    if(this->size()>otherSI->size()){
+      return false;
     }
-    if (isTop()) {
-      return otherB->isTop();
+    for(auto val : values){
+      if(!otherSI->contains(val)){
+        return false;
+      }
     }
+    return true;
+  }
+
+  if (BoundedSet *otherB = static_cast<BoundedSet *>(&other)) {
+
     auto end = otherB->values.end();
     for (auto &val : values) {
       if (otherB->values.find(val) == end) {
