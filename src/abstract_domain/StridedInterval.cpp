@@ -596,7 +596,7 @@ shared_ptr<AbstractDomain> StridedInterval::urem(unsigned numBits,
     }
   } else { // general case
     APInt u = GreatestCommonDivisor(GreatestCommonDivisor(c, t), s);
-    res = StridedInterval(mod(a, u), APIntOps::umin(b, d), u);
+    res = StridedInterval(mod(a, u), APIntOps::umin(b, d-1), u);
   }
   return res.normalize();
 }
@@ -1022,8 +1022,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersectWithBounds(const StridedInt
     // If both are wrap around, we always have an overlap
     auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
     auto endMin = A.end.ule(B.end) ? A.end : B.end;
-    return shared_ptr<AbstractDomain>(
-        new StridedInterval(beginMax, endMin, APInt(A.bitWidth, 1)));
+    return StridedInterval(beginMax, endMin, APInt(A.bitWidth, 1)).normalize();
   }
 
   // Case 3: B is wrap around, A is not
@@ -1050,13 +1049,11 @@ shared_ptr<AbstractDomain> StridedInterval::intersectWithBounds(const StridedInt
   if (B.begin.ule(A.end)) {
     // We have an overlap at the left side
     auto endMin = A.end.ule(B.end) ? A.end : B.end;
-    return shared_ptr<AbstractDomain>(
-        new StridedInterval(B.begin, endMin, APInt(A.bitWidth, 1)));
+    return StridedInterval(B.begin, endMin, APInt(A.bitWidth, 1)).normalize();
   }
   // We have an overlap the the right side
   auto beginMax = A.begin.uge(B.begin) ? A.begin : B.begin;
-  return shared_ptr<AbstractDomain>(
-      new StridedInterval(beginMax, B.end, APInt(A.bitWidth, 1)));
+  return StridedInterval(beginMax, B.end, APInt(A.bitWidth, 1)).normalize();
 }
 
 bool StridedInterval::isWrapAround() const{
@@ -1322,8 +1319,6 @@ bool StridedInterval::isTop() const {
 
 shared_ptr<AbstractDomain> StridedInterval::widen() {
   /// This is where we should look at smarter ways to do this...
-  /// E.g. try to preserve the stride at first, and only change the stride to 1
-  /// after a fruther iteration
   return create_top(bitWidth);
 }
 
