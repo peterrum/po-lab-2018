@@ -93,7 +93,15 @@ Bitwise Operations:
 
 \end{frame}
 
+\begin{frame}[fragile]{\textcolor{blue}{Bounded Set}}
+\begin{itemize}
+\item A bounded set represents sets of values upto a given cardinality $k$ or $\top$: \\
+$\mathrm{BS}_{N} \coloneqq \{M\in \mathcal{P}(\texttt{i}N)\mid |M| \leq k\} \dot\cup \{ \top \}$ \\
+\item $\sqcup$ and $\sqsubseteq$ on bounded sets essentially reduce to $\cup$ and $\subseteq$ on sets.
+\item Any set with more elements than $k$ are represented by $\top$.
+\end{itemize}
 
+\end{frame}
 
 \begin{frame}
 
