@@ -53,7 +53,8 @@ is\_constant() : bool \\
 
 \begin{frame}[fragile]{\textcolor{blue}{Background to LLVM Integer Types}}
 \begin{itemize}
-\item In LLVM the type of $N$-bit integers is the set $\{0,1\}^N, \text{for~} N \in \{1,\dots, 2^{23}-1\}$.
+\item In LLVM the type of $N$-bit integers is the set $\texttt{i}N \coloneqq \{0,1\}^N, \text{for~} N \in \{1,\dots, 2^{23}-1\}$.
+\item "$\texttt{i}N \cong \mathbb{Z}/2^N$~" 
 \item In the in-memory-representation, these types are represented by the LLVM class APInt.
 \item This type is used for both signed and unsigned integers.
  
@@ -98,13 +99,62 @@ Bitwise Operations:
 \item A bounded set represents sets of values upto a given cardinality $k$ or $\top$: \\
 $\mathrm{BS}_{N} \coloneqq \{M\in \mathcal{P}(\texttt{i}N)\mid |M| \leq k\} \dot\cup \{ \top \}$ \\
 \item $\sqcup$ and $\sqsubseteq$ on bounded sets essentially reduce to $\cup$ and $\subseteq$ on sets.
-\item Any set with more elements than $k$ are represented by $\top$.
+\item Any set with more elements than $k$ is represented by $\top$.
+\item $\gamma_{BS_N} \colon \mathrm{BS}_N \rightarrow \mathcal{P}(\texttt{i}N),
+b \mapsto
+\begin{cases}
+\texttt{i}N,  & \text{if }b=\top \\
+b, & \text{otherwise}
+\end{cases}
+$ 
+
 \end{itemize}
 
 \end{frame}
 
-\begin{frame}
 
+\begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval}}
+\begin{itemize}
+
+\item Intervals:
+\begin{itemize}
+\item $\mathrm{I} \coloneqq [a,b], \text{for } a,b \in \mathbb{Z}$
+\end{itemize}
+\item Strided Intervals:
+\begin{itemize}
+\item $\mathrm{SI} \coloneqq s[a,b], \text{for } a,b \in \mathbb{Z}, s \in \mathbb{N}$
+\item $\gamma_{\mathrm{SI}}, s[a,b] \mapsto \{k \in \mathbb{Z} \mid
+a \leq k \leq b, k \equiv a \mod s \}$
+\end{itemize}
+\item Modular Strided Intervals:
+\begin{itemize}
+\item $\mathrm{MSI}_{N} \coloneqq \{\overline{s}[\overline{a},\overline{b}]_N \mid \overline{a}, \overline{b}, \overline{s} \in \mathbb{Z}/2^N \} \dot\cup \{\bot\}$
+\item $\gamma_{\mathrm{MSI}_N}, s[a,b]_N \mapsto \{k + 2^N\mathbb{Z} \mid
+k \in \mathbb{Z}, a \leq k \leq z, k \equiv a \mod s \}$, \\ where $z = \min\{l \in \mathbb{Z} \mid l \geq a, l \equiv b \mod 2^N \}$
+\item Examples:
+\begin{itemize}
+\item $12[15,63]_8 \stackrel{\gamma~}{\rightarrow}\{15,27,39,51,63\} \subseteq \mathbb{Z}/2^8$
+\item $4[10,6]_4 \stackrel{\gamma~}{\rightarrow}\{10,14,2,6\} \subseteq \mathbb{Z}/2^4$
+
+\end{itemize}
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval, Continued}}
+\begin{flalign*}
+& \rlap{\(\mathrm{normal}_N(\overline{s}[\overline{a}, \overline{b}]_N) \leftrightarrow (\)} &
+\end{flalign*}
+\begin{flalign*}
+\quad & \overline{s} = 0 \leftrightarrow \overline{a} = \overline{b} & \\
+\quad \land\ & \overline{b} \in \gamma_N(\overline{s}[\overline{a}, \overline{b}]_N) & \\
+\quad \land\; & \overline{a} = \min\{a' \in \{0 \ldots 2^N-1\} \ldotp \gamma_N(\overline{s}[\overline{a'}, \overline{b}]_N) = \gamma_N(\overline{s}[\overline{a}, \overline{b}]_N)\} + 2^N \mathbb{Z} &
+\end{flalign*}
+\begin{flalign*}
+& ) &
+\end{flalign*}
 \end{frame}
 
 \begin{frame}[fragile]{\textcolor{blue}{Abstract Domain Class Structure}}
