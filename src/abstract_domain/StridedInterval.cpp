@@ -596,7 +596,7 @@ shared_ptr<AbstractDomain> StridedInterval::urem(unsigned numBits,
     }
   } else { // general case
     APInt u = GreatestCommonDivisor(GreatestCommonDivisor(c, t), s);
-    res = StridedInterval(mod(a, u), APIntOps::umin(b, d), u);
+    res = StridedInterval(mod(a, u), APIntOps::umin(b, d-1), u);
   }
   return res.normalize();
 }
