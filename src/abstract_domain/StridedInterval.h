@@ -97,6 +97,8 @@ public:
 
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
 
+  DomainType getDomainType() const { return stridedInterval; };
+
   // Widening
   virtual shared_ptr<AbstractDomain> widen();
   virtual bool requiresWidening();

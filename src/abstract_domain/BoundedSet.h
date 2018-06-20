@@ -37,6 +37,9 @@ public:
   //bool lessOrEqual(AbstractDomain &other);
   bool operator<=(AbstractDomain &other);
 
+  /// Domain Type
+  DomainType getDomainType() const { return boundedSet; };
+
   /// Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw);
   shared_ptr<AbstractDomain> sub(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw);

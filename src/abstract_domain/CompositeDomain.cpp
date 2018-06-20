@@ -18,8 +18,8 @@ CompositeDomain::CompositeDomain(unsigned bitWidth, bool isTop) : bitWidth{bitWi
 }
 
 CompositeDomain::CompositeDomain(const CompositeDomain &old)
-    : bitWidth{bitWidth}, delegateType{old.delegateType} {
-  if (old.delegateType == boundedSet) {
+    : bitWidth{bitWidth}, delegateType{old.getDelegateType()} {
+  if (old.getDelegateType() == boundedSet) {
     BoundedSet *oldBs = static_cast<BoundedSet *>(old.delegate.get());
     delegate = shared_ptr<AbstractDomain>{new BoundedSet{*oldBs}};
   } else {
@@ -29,7 +29,7 @@ CompositeDomain::CompositeDomain(const CompositeDomain &old)
 }
 
 CompositeDomain::CompositeDomain(shared_ptr<AbstractDomain> del,
-                                 DelegateType delType)
+                                 DomainType delType)
     : bitWidth(del->getBitWidth()), delegateType{delType}, delegate{del} {}
 
 // computeOperation expects a CompositeDomain (CD) and a binary function to be
@@ -320,5 +320,7 @@ APSInt CompositeDomain::getSMax() const {
 // Debugging methodes
 void CompositeDomain::printOut() const { delegate->printOut(); }
 
-DelegateType CompositeDomain::getDelegateType() { return delegateType; }
+DomainType CompositeDomain::getDelegateType() {
+  return delegate->getDomainType();
+}
 } // namespace pcpo

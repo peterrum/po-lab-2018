@@ -12,25 +12,28 @@ using llvm::APInt;
 using std::function;
 using std::shared_ptr;
 
-enum DelegateType { stridedInterval, boundedSet };
+
 
 class CompositeDomain : public AbstractDomain {
 private:
   unsigned bitWidth;
-  DelegateType delegateType;
+  DomainType delegateType;
   shared_ptr<AbstractDomain> delegate;
-  DelegateType getDelegateType();
+  DomainType getDelegateType();
   shared_ptr<AbstractDomain> computeOperation(
       AbstractDomain &other,
       function<shared_ptr<AbstractDomain>(AbstractDomain &, AbstractDomain &)>
           op);
-  CompositeDomain(shared_ptr<AbstractDomain> del, DelegateType delType);
+  CompositeDomain(shared_ptr<AbstractDomain> del, DomainType delType);
 
 public:
   // Constructors
   CompositeDomain(APInt value);
   CompositeDomain(unsigned bitWidth, bool isTop);
   CompositeDomain(const CompositeDomain &old);
+
+  // Domain Type
+  DomainType getDomainType() const { return compositeDomain; };
 
   // Binary Arithmetic Operations
   shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other,

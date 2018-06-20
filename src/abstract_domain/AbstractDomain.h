@@ -14,11 +14,16 @@ using std::shared_ptr;
 const int OUTPUT_BASE = 10;
 const int OUTPUT_SIGNED = false;
 
+enum DomainType { stridedInterval, boundedSet, compositeDomain };
+
 class AbstractDomain {
 public:
 
   ///Destructor
   virtual ~AbstractDomain() = default;
+
+  /// Class info
+  virtual DomainType getDomainType() const = 0;
 
   /// Lattice interface
   virtual bool operator<=(AbstractDomain &other) = 0;
