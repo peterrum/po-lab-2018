@@ -17,14 +17,13 @@ using std::shared_ptr;
 class CompositeDomain : public AbstractDomain {
 private:
   unsigned bitWidth;
-  DomainType delegateType;
   shared_ptr<AbstractDomain> delegate;
-  DomainType getDelegateType();
+  DomainType getDelegateType() const;
   shared_ptr<AbstractDomain> computeOperation(
       AbstractDomain &other,
       function<shared_ptr<AbstractDomain>(AbstractDomain &, AbstractDomain &)>
           op);
-  CompositeDomain(shared_ptr<AbstractDomain> del, DomainType delType);
+  CompositeDomain(shared_ptr<AbstractDomain> del);
 
 public:
   // Constructors

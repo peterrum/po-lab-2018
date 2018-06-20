@@ -7,18 +7,18 @@ namespace pcpo {
 using std::function;
 using std::shared_ptr;
 
-CompositeDomain::CompositeDomain(APInt value) : bitWidth{value.getBitWidth()}, delegateType{boundedSet} {
+CompositeDomain::CompositeDomain(APInt value) : bitWidth{value.getBitWidth()} {
   delegate = shared_ptr<AbstractDomain>{new BoundedSet(value)};
 }
 
 // if isTop==true then we create a top delegate
 // if isTop==false then we create a bottom delegate
-CompositeDomain::CompositeDomain(unsigned bitWidth, bool isTop) : bitWidth{bitWidth}, delegateType{boundedSet} {
+CompositeDomain::CompositeDomain(unsigned bitWidth, bool isTop) : bitWidth{bitWidth} {
   delegate = shared_ptr<AbstractDomain>{new BoundedSet{bitWidth, isTop}};
 }
 
 CompositeDomain::CompositeDomain(const CompositeDomain &old)
-    : bitWidth{bitWidth}, delegateType{old.getDelegateType()} {
+    : bitWidth{bitWidth} {
   if (old.getDelegateType() == boundedSet) {
     BoundedSet *oldBs = static_cast<BoundedSet *>(old.delegate.get());
     delegate = shared_ptr<AbstractDomain>{new BoundedSet{*oldBs}};
@@ -28,9 +28,8 @@ CompositeDomain::CompositeDomain(const CompositeDomain &old)
   }
 }
 
-CompositeDomain::CompositeDomain(shared_ptr<AbstractDomain> del,
-                                 DomainType delType)
-    : bitWidth(del->getBitWidth()), delegateType{delType}, delegate{del} {}
+CompositeDomain::CompositeDomain(shared_ptr<AbstractDomain> del)
+    : bitWidth(del->getBitWidth()), delegate{del} {}
 
 // computeOperation expects a CompositeDomain (CD) and a binary function to be
 // evaluated on these. In case both (this and the argument) CompositeDomains
@@ -59,10 +58,10 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
         StridedInterval thisDelegate{thisBs};
         resultOp = op(thisDelegate, otherDelegate);
         return shared_ptr<AbstractDomain>{
-            new CompositeDomain{resultOp, stridedInterval}};
+            new CompositeDomain{resultOp}};
       } else {
         return shared_ptr<AbstractDomain>{
-            new CompositeDomain{resultOp, boundedSet}};
+            new CompositeDomain{resultOp}};
       }
     } else {
 
@@ -71,7 +70,7 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
       BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
       StridedInterval otherDelegate{otherBs};
       return shared_ptr<AbstractDomain>{new CompositeDomain{
-          op(*delegate.get(), otherDelegate), stridedInterval}};
+          op(*delegate.get(), otherDelegate)}};
     }
   } else {
     // other is a strided interval
@@ -81,11 +80,11 @@ shared_ptr<AbstractDomain> CompositeDomain::computeOperation(
       BoundedSet thisBs = *static_cast<BoundedSet *>(this->delegate.get());
       StridedInterval thisDelegate{thisBs};
       return shared_ptr<AbstractDomain>{new CompositeDomain{
-          op(thisDelegate, *otherD.delegate.get()), stridedInterval}};
+          op(thisDelegate, *otherD.delegate.get())}};
     } else {
       // both are strided intervals already
       return shared_ptr<AbstractDomain>{new CompositeDomain{
-          op(*delegate.get(), *otherD.delegate.get()), stridedInterval}};
+          op(*delegate.get(), *otherD.delegate.get())}};
     }
   }
 }
@@ -222,8 +221,8 @@ CompositeDomain::icmp(CmpInst::Predicate pred, unsigned numBits,
       StridedInterval otherDelegate(otherBs);
       auto temp = delegate->icmp(pred, numBits, otherDelegate);
       return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-              shared_ptr<AbstractDomain>(new CompositeDomain(temp.first, stridedInterval)),
-              shared_ptr<AbstractDomain>(new CompositeDomain(temp.second, stridedInterval))
+              shared_ptr<AbstractDomain>(new CompositeDomain(temp.first)),
+              shared_ptr<AbstractDomain>(new CompositeDomain(temp.second))
               );
   }
   if (getDelegateType() == boundedSet && otherD.getDelegateType() == stridedInterval) {
@@ -233,14 +232,14 @@ CompositeDomain::icmp(CmpInst::Predicate pred, unsigned numBits,
       StridedInterval thisDelegate{thisBs};
       auto temp = thisDelegate.icmp(pred, numBits, *otherD.delegate.get());
       return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-              shared_ptr<AbstractDomain>(new CompositeDomain(temp.first, stridedInterval)),
-              shared_ptr<AbstractDomain>(new CompositeDomain(temp.second, stridedInterval))
+              shared_ptr<AbstractDomain>(new CompositeDomain(temp.first)),
+              shared_ptr<AbstractDomain>(new CompositeDomain(temp.second))
               );
   }
       auto temp_ = delegate->icmp(pred, numBits, *otherD.delegate.get());
       return std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>(
-              shared_ptr<AbstractDomain>(new CompositeDomain(temp_.first, delegateType)),
-              shared_ptr<AbstractDomain>(new CompositeDomain(temp_.second, delegateType))
+              shared_ptr<AbstractDomain>(new CompositeDomain(temp_.first)),
+              shared_ptr<AbstractDomain>(new CompositeDomain(temp_.second))
               );
 }
 
@@ -272,7 +271,7 @@ bool CompositeDomain::lessOrEqual(AbstractDomain &other) {
   // TODO: Implement lessOrEqual for both BoundedSet and StridedInterval in
   // these classes
   //return delegate->lessOrEqual(*otherD.delegate.get());
-  if (delegateType == stridedInterval && otherD.getDelegateType() == boundedSet) {
+  if (getDelegateType() == stridedInterval && otherD.getDelegateType() == boundedSet) {
       BoundedSet otherBs = *static_cast<BoundedSet *>(otherD.delegate.get());
       StridedInterval otherDelegate(otherBs);
       return *delegate<=(otherDelegate);
@@ -320,7 +319,7 @@ APSInt CompositeDomain::getSMax() const {
 // Debugging methodes
 void CompositeDomain::printOut() const { delegate->printOut(); }
 
-DomainType CompositeDomain::getDelegateType() {
+DomainType CompositeDomain::getDelegateType() const {
   return delegate->getDomainType();
 }
 } // namespace pcpo

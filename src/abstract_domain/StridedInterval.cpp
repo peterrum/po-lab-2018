@@ -1187,12 +1187,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
 }
 
 bool StridedInterval::operator<=(AbstractDomain &other) {
-  StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
-
-  /// shortcut for both abstract domains are equal
-  if(*this == *otherMSI){
-      return true;
-  }
+  assert(this->getBitWidth() == other.getBitWidth());
 
   /// check for topness
   if(isTop()){
@@ -1201,14 +1196,38 @@ bool StridedInterval::operator<=(AbstractDomain &other) {
       return false;
   }
 
-  if (isBot) {
+  if (isBottom()) {
     return true;
-  } else if (otherMSI->isBot) {
+  } else if (other.isBottom()) {
     return false;
   }
-  if (otherMSI->bitWidth != bitWidth) {
+
+  // Now we do a case discinction whether other is a BoundedSet or a StridedInterval
+  if (other.getDomainType() == boundedSet) {
+    BoundedSet *otherB = static_cast<BoundedSet *>(&other);
+
+    if(otherB->size()<this->size()){
+      return false;
+    }
+
+    uint64_t size = this->size();
+    APInt value;
+    for (uint64_t i = 0; i < size; i++) {
+      value = getValueAt(i);
+      if (!otherB->contains(value)) {
+        return false;
+      }
+    }
+    return true;
   }
-  assert(otherMSI->bitWidth == bitWidth);
+
+  StridedInterval *otherMSI = static_cast<StridedInterval *>(&other);
+
+  /// shortcut for both abstract domains are equal
+  if(*this == *otherMSI){
+      return true;
+  }
+
   APInt a(begin);
   APInt b(end);
   APInt s(stride);
