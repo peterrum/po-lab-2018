@@ -51,6 +51,95 @@ is\_constant() : bool \\
 
 \end{frame}
 
+\begin{frame}[fragile]{\textcolor{blue}{Background to LLVM Integer Types}}
+\begin{itemize}
+\item In LLVM the type of $N$-bit integers is the set $\{0,1\}^N, \text{for~} N \in \{1,\dots, 2^{23}-1\}$.
+\item In the in-memory-representation, these types are represented by the LLVM class APInt.
+\item This type is used for both signed and unsigned integers.
+ 
+\item We use APInt 	 in our implementation of abstract domains.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{\textcolor{blue}{LLVM Integer Operations}}
+\begin{large}Arithmetic Operations:\end{large} \\
+In LLVM there are separate $\texttt{div}$ and $\texttt{rem}$ operations for signed and unsigned integers. 
+For $\texttt{add}$, $\texttt{sub}$ and $\texttt{mul}$, there is no such distinction needed.
+\begin{itemize}
+\item $\texttt{<result> = add [nuw] [nsw] <bitWidth> <op1> <op2>}$
+\item $\texttt{<result> = sub [nuw] [nsw] <bitWidth> <op1> <op2>}$
+\item $\texttt{<result> = mul [nuw] [nsw] <bitWidth> <op1> <op2>}$
+\item $\texttt{<result> = udiv [exact] <bitWidth> <op1> <op2>}$ 
+\footnote{\label{not-impl} $\texttt{exact}$-flag not used in our implementation.}
+\item $\texttt{<result> = sdiv [exact] <bitWidth> <op1> <op2>} ^{~\ref{not-impl}}$
+\item $\texttt{<result> = urem <bitWidth> <op1> <op2>}$
+\item $\texttt{<result> = srem <bitWidth> <op1> <op2>}$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{\textcolor{blue}{LLVM Integer Operations, Continued}}
+Bitwise Operations:
+\begin{itemize}
+\item $\texttt{<result> = shl [nuw] [nsw] <bitWidth> <op1> <op2>}$
+\item $\texttt{<result> = lshr [exact] <bitWidth> <op1> <op2>}$ \footnote{\label{not-impl2} $\texttt{exact}$-flag not used in our implementation.}
+\item $\texttt{<result> = ashr [exact] <bitWidth> <op1> <op2>}^{~\ref{not-impl2}}$
+\item $\texttt{<result> = and <bitWidth> <op1> <op2>}$
+\item $\texttt{<result> = or <bitWidth> <op1> <op2>}$
+\item $\texttt{<result> = xor <bitWidth> <op1> <op2>}$
+\end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}
+
+\end{frame}
+
+\begin{frame}[fragile]{\textcolor{blue}{Abstract Domain Class Structure}}
+
+\begin{center}
+\begin{tikzpicture}[thick,scale=0.8, every node/.style={transform shape}]
+
+\umlinterface[]{AbstractDomain}{
+}{ 
+add(other) : AbstractDomain \\ /* other arithmetic and logical operations */ \\ \\
+
+icmp(other, predicate) : (AbstractDomain, AbstractDomain) \\ \\
+leastUpperBound(other) : AbstractDomain \\ 
+lessOrEqual(other) : bool \\
+}
+
+\umlclass[x=-3.5,y=-4.0]{CompositeDomain}{}{upgrade() : void}
+\umlclass[x=+2.5,y=-4.0]{BoundedSet}{
+values : set$<$APInt$>$
+isTop : bool}{}
+\umlclass[x=+3.0,y=-6.0]{StridedInterval}{
+min, max, stride : APInt \\
+isBottom : bool}{}
+
+
+%\umlclass[x=-3,y=-6.5]{OperationNDim$<$vec$>$}{}{}
+
+%\umlclass[x=3,y=-6.5]{OperationNDim$<$novec$>$}{}{}
+
+\umlinherit[geometry=|-]{CompositeDomain}{AbstractDomain}
+\umlinherit[anchor1=north,anchor2=-41]{BoundedSet}{AbstractDomain}
+\umlinherit[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
+%\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationMass}
+%\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationConvection}
+\umlaggreg[]{CompositeDomain}{BoundedSet}
+\umlaggreg[geometry=-|-,anchors=east and west]{CompositeDomain}{StridedInterval}
+
+
+\end{tikzpicture}
+\end{center}
+
+\end{frame}
+
 \begin{frame}[fragile]{\textcolor{blue}{Connection of the Results to the Internal Abstract Domain}}
 
 \begin{center}
