@@ -1301,6 +1301,19 @@ bool StridedInterval::isTop() const {
   }
 }
 
+shared_ptr<AbstractDomain> StridedInterval::widen() {
+  /// This is where we should look at smarter ways to do this...
+  /// E.g. try to preserve the stride at first, and only change the stride to 1
+  /// after a fruther iteration
+  return create_top(bitWidth);
+}
+
+bool StridedInterval::requiresWidening() {
+  // This AD requires widening to ensure speedy termination
+  return true;
+}
+
+
 llvm::raw_ostream &StridedInterval::print(llvm::raw_ostream &os) {
   if (isBot) {
     os << "[]" << "_" << bitWidth;

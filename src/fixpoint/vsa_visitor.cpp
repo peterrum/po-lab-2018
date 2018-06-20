@@ -73,15 +73,17 @@ void VsaVisitor::visitTerminatorInst(TerminatorInst &I) {
     newState.prune(oldState->second);
 
     /// compute lub in place after this old state is updated
-    if (newState<=(oldState->second)) {
+    if (!oldState->second.leastUpperBound(newState)) {
       /// new state was old state: do not push successors
       DEBUG_OUTPUT("visitTerminationInst: state has not been changed");
       DEBUG_OUTPUT("visitTerminationInst: new state equals old state in "
                    << currentBB->getName());
       return;
     } /// else: state has changed
+  } else {
+    DEBUG_OUTPUT("visitTerminationInst: old state not found");
+    programPoints[currentBB] = newState;
   }
-  programPoints[currentBB] = newState;
 
   DEBUG_OUTPUT(
       "visitTerminationInst: state has been changed -> push successors");

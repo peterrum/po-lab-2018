@@ -20,8 +20,19 @@ public:
   ///Destructor
   virtual ~AbstractDomain() = default;
 
-  //virtual bool lessOrEqual(AbstractDomain &other) = 0;
+  /// Lattice interface
   virtual bool operator<=(AbstractDomain &other) = 0;
+  virtual shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other) = 0;
+
+  virtual shared_ptr<AbstractDomain> widen() {
+    // The default implementation simply returns a new shared_ptr to this
+    return shared_ptr<AbstractDomain>(this);
+  }
+
+  virtual bool requiresWidening() {
+    // The default is that widening is neither supported nor required
+    return false;
+  }
 
   /// Binary Arithmetic Operations
   virtual shared_ptr<AbstractDomain> add(unsigned numBits, AbstractDomain &other, bool nuw, bool nsw) = 0;
@@ -43,9 +54,6 @@ public:
   /// Other operations
   virtual std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other) = 0;
-
-  /// Lattice interface
-  virtual shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other) = 0;
 
   /// Member functions
   virtual bool contains(APInt &value) const = 0;

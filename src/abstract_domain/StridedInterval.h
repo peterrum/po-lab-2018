@@ -87,13 +87,20 @@ public:
   std::pair<shared_ptr<AbstractDomain>, shared_ptr<AbstractDomain>>
   icmp(CmpInst::Predicate pred, unsigned numBits, AbstractDomain &other);
 
-  // Check whether this is an wrap around interval
+  // Check whether this is a wrap around interval
   bool isWrapAround() const;
+
   // Conduct an overapproximated intersection of two intervals.
   shared_ptr<AbstractDomain> intersect(const StridedInterval &A, const StridedInterval &B);
   shared_ptr<AbstractDomain> intersectWithBounds(const StridedInterval &first,
                                                  const StridedInterval &second);
+
   shared_ptr<AbstractDomain> leastUpperBound(AbstractDomain &other);
+
+  // Widening
+  virtual shared_ptr<AbstractDomain> widen();
+  virtual bool requiresWidening();
+
 
   /// Member functions
   unsigned getBitWidth() const { return bitWidth; }

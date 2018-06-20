@@ -36,7 +36,6 @@ public:
   bool leastUpperBound(State &other);
 
   /// is other less or equal to this
-  //bool lessOrEqual(State &other);
   bool operator<=(State &other);
 
   /// make deep copy of state
@@ -57,6 +56,11 @@ public:
 
 private:
   std::map<Value *, std::shared_ptr<AbstractDomain>> vars;
+
+  /// How often has this value been updated (needed for widening)
+  /// zero if AD currenly used for this value does not use widening
+  std::map<Value *, int> changeCounts;
+
   bool bottom;
 };
 

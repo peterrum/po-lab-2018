@@ -16,6 +16,9 @@
 #define AD_TYPE StridedInterval
 //#define AD_TYPE CompositeDomain
 
+/// how many chnages do we allow before we apply widening (for ADs in which it is reuired)
+#define WIDENING_AFTER 5000
+
 /// do not to touch anything beneath here (useful functions)
 
 #ifdef DEBUG

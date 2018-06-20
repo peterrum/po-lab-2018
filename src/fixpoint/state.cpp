@@ -17,13 +17,24 @@ bool State::put(Value &v, std::shared_ptr<AbstractDomain> ad) {
   }
 
   DEBUG_OUTPUT("State::put for " << v.getName());
-  // ad->printOut();
   if (vars.find(&v) != vars.end()) {
-    if (*ad<=(*vars[&v]))
+    if (*ad<=(*vars[&v])) {
       return false;
+    }
+
     vars[&v] = vars[&v]->leastUpperBound(*ad);
-  } else
+
+    if(vars[&v]->requiresWidening()) {
+      if(changeCounts[&v] > WIDENING_AFTER) {
+          vars[&v] = vars[&v]->widen();
+      }
+      changeCounts[&v]++;
+    }
+  } else {
     vars[&v] = ad;
+    changeCounts[&v] = 0;
+  }
+
   return true;
 }
 
@@ -103,10 +114,15 @@ bool State::operator<=(State &other) {
 bool State::copyState(State &other) {
   /// basic block has been visited
   bottom = other.bottom;
+
   /// copy map
   vars.clear();
-  for (auto &var : other.vars)
+  changeCounts.clear();
+  for (auto &var : other.vars) {
     vars[var.first] = var.second;
+    changeCounts[var.first] = 0;
+  }
+
   return bottom;
 }
 
