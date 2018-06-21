@@ -212,7 +212,7 @@ isBottom : bool}{}
 
 %\umlclass[x=3,y=-6.5]{OperationNDim$<$novec$>$}{}{}
 
-\umlinherit[geometry=|-]{CompositeDomain}{AbstractDomain}
+\umlinherit[anchor1=north,anchor2=-148]{CompositeDomain}{AbstractDomain}
 \umlinherit[anchor1=north,anchor2=-41]{BoundedSet}{AbstractDomain}
 \umlinherit[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationMass}
@@ -274,12 +274,12 @@ is\_constant() : bool \\
 \begin{center}
 \begin{tikzpicture}[thick,scale=0.8, every node/.style={transform shape}]
 
-\umlinterface[rectangle split parts=1, x=1.0]{AbstractDomain}{
+\umlinterface[rectangle split parts=1, x=1.0, y=-1.0]{AbstractDomain}{
 }{}
 
-\umlclass[x=-3.5,y=-3.5, rectangle split parts=1]{CompositeDomain}{}{}
-\umlclass[x=+1.0,y=-3.5, rectangle split parts=1]{BoundedSet}{}{}
-\umlclass[x=+2.0,y=-5.5, rectangle split parts=1]{StridedInterval}{}{}
+\umlclass[x=-3.5,y=-2.5, rectangle split parts=1]{CompositeDomain}{}{}
+\umlclass[x=+1.0,y=-2.5, rectangle split parts=1]{BoundedSet}{}{}
+\umlclass[x=+2.0,y=-3.5, rectangle split parts=1]{StridedInterval}{}{}
 
 \umlclass[fill=red!20
 %,y=+3

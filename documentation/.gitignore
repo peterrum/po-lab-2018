@@ -8,3 +8,4 @@
 *.vrb
 *.dvi
 !graphics/*.pdf
+*.pdf
