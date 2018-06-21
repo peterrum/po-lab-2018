@@ -24,28 +24,34 @@ StridedInterval::StridedInterval(const StridedInterval& other)
       isBot(other.isBot) {}
 
 StridedInterval::StridedInterval(APInt begin, APInt end, APInt stride)
-    : bitWidth(begin.getBitWidth()), begin(begin), end(end), stride(stride),
+    : bitWidth(begin.getBitWidth()),
+      begin(begin), end(end),
+      stride(stride),
       isBot(false) {
   assert(end.getBitWidth() == bitWidth);
   assert(stride.getBitWidth() == bitWidth);
 }
 
 StridedInterval::StridedInterval(APInt value)
-    : bitWidth(value.getBitWidth()), begin(value), end(value),
-      stride({value.getBitWidth(), 0}), isBot{false} {}
+    : bitWidth(value.getBitWidth()),
+      begin(value), end(value),
+      stride({value.getBitWidth(), 0}),
+      isBot{false} {}
 
-StridedInterval::StridedInterval(bool isTop, unsigned bitWidth): bitWidth(bitWidth)
-  ,begin(APInt(bitWidth, 0)),
-  end(APInt::getMaxValue(bitWidth)),
-  stride(APInt(bitWidth, 1)),
-  isBot(!isTop) {
-}
+StridedInterval::StridedInterval(bool isTop, unsigned bitWidth)
+    : bitWidth(bitWidth),
+      begin(APInt(bitWidth, 0)),
+      end(APInt::getMaxValue(bitWidth)),
+      stride(APInt(bitWidth, 1)),
+      isBot(!isTop) {}
 
 StridedInterval::StridedInterval(unsigned bitWidth, uint64_t begin,
-                                 uint64_t end, uint64_t stride)
-    : bitWidth(bitWidth), begin(APInt(bitWidth, begin)),
-      end(APInt(bitWidth, end)), stride(APInt(bitWidth, stride)), isBot(false) {
-}
+    uint64_t end, uint64_t stride)
+    : bitWidth(bitWidth),
+      begin(APInt(bitWidth, begin)),
+      end(APInt(bitWidth, end)),
+      stride(APInt(bitWidth, stride)),
+      isBot(false) {}
 
 StridedInterval::StridedInterval(BoundedSet &set)
     : bitWidth(set.getBitWidth()) {
@@ -144,28 +150,27 @@ bool StridedInterval::operator==(const StridedInterval &other) {
   if (this->isBot) {
     return other.isBot;
   } else {
-    return this->begin == other.begin && this->end == other.end &&
-           this->stride == other.stride;
+    return this->begin == other.begin
+        && this->end == other.end
+        && this->stride == other.stride;
   }
 }
 
+// Some utility functions for arithmetics with APInts
 APInt add_(const APInt &a, const APInt &b) {
-  APInt c = APInt(a.getBitWidth(), 0);
-  c += a;
+  APInt c = a;
   c += b;
   return c;
 }
 
 APInt sub_(const APInt &a, const APInt &b) {
-  APInt c = APInt(a.getBitWidth(), 0);
-  c += a;
+  APInt c = a;
   c -= b;
   return c;
 }
 
 APInt mul_(const APInt &a, const APInt &b) {
-  APInt c = APInt(a.getBitWidth(), 0);
-  c += a;
+  APInt c = a;
   c *= b;
   return c;
 }
@@ -181,7 +186,7 @@ APInt neg(const APInt a) {
 
 APInt pow2(unsigned n, unsigned bitWidth) {
   assert(n <= bitWidth);
-  APInt b{bitWidth, 0};
+  APInt b {bitWidth, 0};
   b.setBit(n);
   return b;
 }
@@ -228,7 +233,7 @@ std::shared_ptr<AbstractDomain> StridedInterval::normalize() {
     }
   }
   return std::shared_ptr<AbstractDomain>(new StridedInterval(
-      a.zextOrTrunc(n), b.zextOrTrunc(n), s.zextOrTrunc(n)));
+      a.trunc(n), b.trunc(n), s.trunc(n)));
 }
 
 bool StridedInterval::isNormal() {
@@ -240,7 +245,7 @@ std::set<APInt, Comparator> StridedInterval::gamma() {
   unsigned n = bitWidth;
   std::set<APInt, Comparator> res {};
   APInt s(stride.zext(n+1));
-  if (s.isNullValue()) {
+  if (s == 0) {
     res.insert(begin);
     return res;
   } else {
@@ -297,9 +302,10 @@ APInt StridedInterval::smin() const{
   if (a.sle(b)) {
     return a;
   } else {
-    return sub_(mod(add_(b, pow2(bitWidth-1, bitWidth)), s), pow2(bitWidth-1, bitWidth));
-    // APInt m = APInt::getSignedMinValue(bitWidth);
-    // return add_(mod(sub_(b, m), s), m);
+    return sub_(
+      mod(add_(b, pow2(bitWidth-1, bitWidth)), s),
+      pow2(bitWidth-1, bitWidth)
+    );
   }
 }
 
@@ -360,13 +366,13 @@ shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
       return StridedInterval::create_top(bitWidth);
     }
   }
-  APInt N(pow2(numBits, numBits + 1));
-  APInt a(begin.zext(numBits + 1));
-  APInt b(end.zext(numBits + 1));
-  APInt s(stride.zext(numBits + 1));
-  APInt c(otherSI->begin.zext(numBits + 1));
-  APInt d(otherSI->end.zext(numBits + 1));
-  APInt t(otherSI->stride.zext(numBits + 1));
+  APInt N(pow2(numBits, numBits+1));
+  APInt a(begin.zext(numBits+1));
+  APInt b(end.zext(numBits+1));
+  APInt s(stride.zext(numBits+1));
+  APInt c(otherSI->begin.zext(numBits+1));
+  APInt d(otherSI->end.zext(numBits+1));
+  APInt t(otherSI->stride.zext(numBits+1));
   APInt u(GreatestCommonDivisor(s, t));
   APInt b_(a.ule(b) ? b : add_(b, N));
   APInt d_(c.ule(d) ? d : add_(d, N));
@@ -382,9 +388,9 @@ shared_ptr<AbstractDomain> StridedInterval::add(unsigned numBits,
     e_ = mod(e, N);
     f_ = mod(sub_(e_, u_), N);
   }
-  return StridedInterval(e_.zextOrTrunc(numBits), f_.zextOrTrunc(numBits),
-                         u_.zextOrTrunc(numBits))
-      .normalize();
+  return StridedInterval(
+    e_.trunc(numBits), f_.trunc(numBits), u_.trunc(numBits)
+  ).normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::sub(unsigned numBits,
@@ -429,13 +435,13 @@ shared_ptr<AbstractDomain> StridedInterval::sub(unsigned numBits,
       return StridedInterval::create_top(bitWidth);
     }
   }
-  APInt N(pow2(numBits, numBits + 1));
-  APInt a(begin.zext(numBits + 1));
-  APInt b(end.zext(numBits + 1));
-  APInt s(stride.zext(numBits + 1));
-  APInt c(otherSI->begin.zext(numBits + 1));
-  APInt d(otherSI->end.zext(numBits + 1));
-  APInt t(otherSI->stride.zext(numBits + 1));
+  APInt N(pow2(numBits, numBits+1));
+  APInt a(begin.zext(numBits+1));
+  APInt b(end.zext(numBits+1));
+  APInt s(stride.zext(numBits+1));
+  APInt c(otherSI->begin.zext(numBits+1));
+  APInt d(otherSI->end.zext(numBits+1));
+  APInt t(otherSI->stride.zext(numBits+1));
   APInt u(GreatestCommonDivisor(s, t));
   APInt b_(a.ule(b) ? b : add_(b, N));
   APInt d_(c.ule(d) ? d : add_(d, N));
@@ -451,14 +457,13 @@ shared_ptr<AbstractDomain> StridedInterval::sub(unsigned numBits,
     e_ = e.trunc(numBits);
     f_ = sub_(e_, u_);
   }
-  return StridedInterval(e_.zextOrTrunc(numBits), f_.zextOrTrunc(numBits),
-                         u_.zextOrTrunc(numBits))
-      .normalize();
+  return StridedInterval(
+    e_.zextOrTrunc(numBits), f_.zextOrTrunc(numBits), u_.zextOrTrunc(numBits)
+  ).normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::mul(unsigned numBits,
-                                                AbstractDomain &other, bool nuw,
-                                                bool nsw) {
+    AbstractDomain &other, bool nuw, bool nsw) {
   StridedInterval *otherSI = static_cast<StridedInterval *>(&other);
   assert(numBits == bitWidth);
   assert(numBits == otherSI->bitWidth);
@@ -583,22 +588,20 @@ shared_ptr<AbstractDomain> StridedInterval::urem(unsigned numBits,
       c = t; // exclude 0 from rhs
     }
   }
-  StridedInterval res;
   if (b.ult(c)) { // urem has no effect
-    res = *this;
+    return std::shared_ptr<AbstractDomain>(new StridedInterval(*this));
   } else if (t == 0) { // division by constant
     if (a.udiv(c) == b.udiv(c)) { // all remainders are obtained by subtracting
                                   // the same value from lhs
-      res = StridedInterval(mod(a, c), mod(b, c), s);
+      return StridedInterval(mod(a, c), mod(b, c), s).normalize();
     } else {
       APInt u = GreatestCommonDivisor(s, c);
-      res = StridedInterval(mod(a, u), c-1, u);
+      return StridedInterval(mod(a, u), c-1, u).normalize();
     }
   } else { // general case
     APInt u = GreatestCommonDivisor(GreatestCommonDivisor(c, t), s);
-    res = StridedInterval(mod(a, u), APIntOps::umin(b, d-1), u);
+    return StridedInterval(mod(a, u), APIntOps::umin(b, d-1), u).normalize();
   }
-  return res.normalize();
 }
 
 shared_ptr<AbstractDomain> StridedInterval::srem(unsigned numBits,
@@ -609,9 +612,12 @@ shared_ptr<AbstractDomain> StridedInterval::srem(unsigned numBits,
   if (this->isBottom() || otherSI->isBottom()) {
     return StridedInterval::create_bottom(bitWidth);
   }
-  APInt zero = APInt(bitWidth+1, 0); APInt one = APInt(bitWidth+1, 1);
-  APInt a = this->smin().sext(bitWidth+1); APInt  b = this->smax().sext(bitWidth+1);
-  APInt c = otherSI->smin().sext(bitWidth+1); APInt  d = otherSI->smax().sext(bitWidth+1);
+  APInt zero = APInt(bitWidth+1, 0);
+  APInt one = APInt(bitWidth+1, 1);
+  APInt a = this->smin().sext(bitWidth+1);
+  APInt  b = this->smax().sext(bitWidth+1);
+  APInt c = otherSI->smin().sext(bitWidth+1);
+  APInt  d = otherSI->smax().sext(bitWidth+1);
   APInt s = this->sstride().sext(bitWidth+1);
   APInt t = otherSI->sstride().sext(bitWidth+1);
   // check for remainder by zero and reduce remainder by negative rhs to
@@ -644,8 +650,7 @@ shared_ptr<AbstractDomain> StridedInterval::srem(unsigned numBits,
   } else if (t == 0) {                 // remainder by constant
     if (a.sdiv(c) == b.sdiv(c)) {      // E x. x*rhs <= lhs < (x+1)*rhs
       return StridedInterval(
-        a.srem(c).trunc(bitWidth), b.srem(c).trunc(bitWidth),
-        s.trunc(bitWidth)
+        a.srem(c).trunc(bitWidth), b.srem(c).trunc(bitWidth), s.trunc(bitWidth)
       ).normalize();
     }
   }
@@ -662,8 +667,7 @@ shared_ptr<AbstractDomain> StridedInterval::srem(unsigned numBits,
     f = add_(mod(sub_(e, one), u), sub_(one, u));
   }
   return StridedInterval(
-    e.trunc(bitWidth), f.trunc(bitWidth),
-    u.trunc(bitWidth)
+    e.trunc(bitWidth), f.trunc(bitWidth), u.trunc(bitWidth)
   ).normalize();
 }
 
