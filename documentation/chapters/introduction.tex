@@ -9,17 +9,59 @@
                 commentstyle=\color{gray}\ttfamily,
                 morecomment=[l][\color{magenta}]{\#}
 }
+%--------------------------------------------------------------------------------------------------
+%--------------------------------------------------------------------------------------------------
+%\begin{frame}
 
-\begin{frame}
+%Part 0:
+%\vspace{0.2cm}
 
-Part 0:
-\vspace{0.2cm}
+%{\LARGE \textbf{\textcolor{blue}{Introduction}}}
 
-{\LARGE \textbf{\textcolor{blue}{Introduction}}}
-
+%\end{frame}
+%--------------------------------------------------------------------------------------------------
+\begin{frame}[fragile]{\textcolor{blue}{Program}}
+\includegraphics[scale=0.45]{src/example_c.pdf}
 \end{frame}
+%--------------------------------------------------------------------------------------------------
+\begin{frame}[fragile]{\textcolor{blue}{Program}}
+%\includegraphics[scale=0.6]{src/example_c.pdf}
+\begin{footnotesize}
+\begin{lstlisting}[language=C++]
+int main(int argc, char const *argv[]) {
+    unsigned a = 0;
+    unsigned b = 12;
 
+    while (a < b) {
+        a+=4;
+        b-=2;
+    }
 
+    unsigned c = rand();
+    if(a>6 && b<6){
+        switch (a) {
+            case 6:
+                b = 99;
+                break;
+            case 12:
+            case 13:
+                b = a*2;
+                break;
+            default:
+                c = c%18;
+        }
+    } else {
+        a = 88;
+    }
+
+    printf("%d\n", a);
+    printf("%d\n", b);
+    printf("%d\n", c);
+}
+\end{lstlisting}
+\end{footnotesize}
+\end{frame}
+%--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Value Set Analysis}}
 
 \begin{minipage}{0.49\textwidth}
@@ -48,14 +90,6 @@ Var \,\rightarrow\,s[a:b]_n
 \end{align*}
 %\end{itemize}
 \end{minipage}
-\begin{minipage}{0.49\textwidth}
-Figure\\
--SSA\\
--Control Flow Graph (CFG)\\
--program points\\
--basic blocks
-
-\end{minipage}
 
 \vspace{1.5cm}
 
@@ -65,7 +99,7 @@ SSA: sufficient to store the {\color{blue}abstract value for each variable once 
 \end{align*}
 
 \end{frame}
-
+%--------------------------------------------------------------------------------------------------
 
 \begin{frame}[fragile]{\textcolor{blue}{Passes in LLVM}}
 LLVM's analysis and optimization framework {\color{blue} opt}:
@@ -92,7 +126,7 @@ opt -load llvm/lib/llvm-vsa.so -vsapass -o hello.bc < hello.bc
 \end{footnotesize}
 
 \end{frame}
-
+%--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Passes in LLVM (cont.)}}
 \underline{\smash{Creating user passes:}}
 \begin{itemize}
@@ -137,8 +171,11 @@ ThisResult& ThisPass::getResult(){ return result; }
 \end{itemize}
 
 \end{frame}
-
-
+%--------------------------------------------------------------------------------------------------
+\begin{frame}[fragile]{\textcolor{blue}{LLVM's intermediate representation}}
+\includegraphics[scale=0.45]{src/example_ll.pdf} 
+\end{frame}
+%--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Content of the Lab}}
 
 \underline{Tasks:}
@@ -161,3 +198,4 @@ ThisResult& ThisPass::getResult(){ return result; }
 \hfill unknowns (ops, return values and arguments of functions) treated as: {\color{blue} $\top$}
 
 \end{frame}
+%--------------------------------------------------------------------------------------------------

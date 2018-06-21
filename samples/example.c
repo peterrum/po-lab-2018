@@ -6,8 +6,8 @@
 // function call -> top
 // if constraint with two constraints
 // switch
-// switch with case 3: bottom
-// switch with case 6: fallthrough
+// switch with case 6: bottom
+// switch with case 12: fallthrough
 // switch with default
 // modulo on top
 
