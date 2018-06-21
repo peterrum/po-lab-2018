@@ -62,7 +62,7 @@ opt -mem2reg < hello.bc > hello-opt.bc
 opt -load llvm/lib/llvm-vsa.so -vsapass < hello.bc > /dev/null
 ```
 
-## Useful methods in LLVM
+## Useful classes and methods in LLVM
 
 * Write output: errs() << "Hello World!\n"
 
@@ -83,3 +83,7 @@ opt -load llvm/lib/llvm-vsa.so -vsapass < hello.bc > /dev/null
 
 ### llvm::InstVisitor<U, V>
 * V visit(...)
+
+### llvm::APInt
+* Arbitrary precision integer
+
