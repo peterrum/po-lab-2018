@@ -16,6 +16,26 @@ namespace pcpo {
 //   }
 // }
 
+void testStridedIntervalRealSize() {
+  StridedInterval i;
+  i = {4, 3, 3, 0};
+  if (!(i.realSize() == 1)) {
+    errs() << "[testRealSize] failed with operand: " << i << '\n';
+  }
+  i = {4, 1, 5, 1};
+  if (!(i.realSize() == 5)) {
+    errs() << "[testRealSize] failed with operand: " << i << '\n';
+  }
+  i = {4, 2, 8, 2};
+  if (!(i.realSize() == 4)) {
+    errs() << "[testRealSize] failed with operand: " << i << '\n';
+  }
+  i = {4, 12, 5, 3};
+  if (!(i.realSize() == 4)) {
+    errs() << "[testRealSize] failed with operand: " << i << '\n';
+  }
+}
+
 void testStridedIntervalLessOrEqual() {
   StridedInterval lhs, rhs;
   lhs = {1, 1, 1, 0}; rhs = {1, 0, 1, 1};
@@ -2582,6 +2602,7 @@ void testStridedIntervalSrem() {
 }
 
 void runStridedInterval() {
+  testStridedIntervalRealSize();
   // testStridedIntervalSrem();
   testContainsRandom();
   testContainsRandomNeg();

@@ -892,7 +892,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &fir
     return shared_ptr<AbstractDomain>(new StridedInterval(A));
   }
 
-  if(A.size() == 1){
+  if(A.realSize() == 1){
     if (B.contains(A.begin)) {
       return shared_ptr<AbstractDomain>(new StridedInterval(A));
     } else {
@@ -900,7 +900,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &fir
     }
   } 
 
-  if(B.size() == 1){
+  if(B.realSize() == 1){
     if(A.contains(B.begin)){
       return shared_ptr<AbstractDomain>(new StridedInterval(B));
     } else {
@@ -947,7 +947,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersect(const StridedInterval &fir
   if (B.begin.ule(A.end) && B.end.uge(A.begin)) {
     // We have an overlap at both ends
     // We return the interval that has fewer elements
-    if (A.size() < B.size()) {
+    if (A.realSize().ult(B.realSize())) {
       return shared_ptr<AbstractDomain>(new StridedInterval(A));
     } else {
       return shared_ptr<AbstractDomain>(new StridedInterval(B));
@@ -987,7 +987,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersectWithBounds(const StridedInt
     return shared_ptr<AbstractDomain>(new StridedInterval(A));
   }
 
-  if (A.size()==1){
+  if (A.realSize()==1){
     if(B.contains(A.begin)){
       return shared_ptr<AbstractDomain>(new StridedInterval(A));
     } else{
@@ -1040,7 +1040,7 @@ shared_ptr<AbstractDomain> StridedInterval::intersectWithBounds(const StridedInt
   if (B.begin.ule(A.end) && B.end.uge(A.begin)) {
     // We have an overlap at both ends
     // We return the interval that has fewer elements
-    if (A.size() < B.size()) {
+    if (A.realSize().ult(B.realSize())) {
       return shared_ptr<AbstractDomain>(new StridedInterval(A));
     } else {
       return shared_ptr<AbstractDomain>(new StridedInterval(B));
@@ -1077,17 +1077,20 @@ StridedInterval::icmp(CmpInst::Predicate pred, unsigned numBits,
       shared_ptr<AbstractDomain>(StridedInterval::create_top(this->bitWidth)));
 }
 
-size_t StridedInterval::size() const {
+APInt StridedInterval::realSize() const {
   if (isBottom()) {
-    return 0;
+    return APInt(bitWidth+1, 0);
   } else if (stride == 0) {
-    return 1;
+    return APInt(bitWidth+1, 1);
   } else {
     APInt d = sub_(this->end, this->begin);
-    APInt res = d.udiv(this->stride).zext(bitWidth+1);
-    res += 1;
-    return res.getZExtValue();
+    APInt q = d.udiv(this->stride).zext(bitWidth+1);
+    return add_(q, APInt(bitWidth+1, 1));
   }
+}
+
+size_t StridedInterval::size() const {
+  return realSize().getZExtValue();
 }
 
 shared_ptr<AbstractDomain>
@@ -1120,7 +1123,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
   }
 
   /// To simplify cases we assume that |other| >= |this|
-  if(otherMSI->size() < size()) {
+  if(otherMSI->realSize().ult(realSize())) {
     return otherMSI->leastUpperBound(*this);
   }
 
@@ -1159,7 +1162,7 @@ StridedInterval::leastUpperBound(AbstractDomain &other) {
     StridedInterval opt2 (e2, f2, u2);
 
     // choose the option representing the smallest set
-    StridedInterval smaller = opt1.size() < opt2.size()?opt1:opt2;
+    StridedInterval smaller = opt1.realSize().ult(opt2.realSize()) ? opt1 : opt2;
     return smaller.normalize();
   }
 

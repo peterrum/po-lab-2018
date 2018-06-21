@@ -110,6 +110,7 @@ public:
   bool isBottom() const { return isBot; }
   bool contains(APInt &value) const;
   size_t size() const;
+  APInt realSize() const;
 
   /// TODO comment
   std::shared_ptr<AbstractDomain> normalize();
