@@ -11,42 +11,33 @@
 }
 %--------------------------------------------------------------------------------------------------
 %--------------------------------------------------------------------------------------------------
-%\begin{frame}
+\begin{frame}
 
-%Part 0:
-%\vspace{0.2cm}
+Part 0:
+\vspace{0.2cm}
 
-%{\LARGE \textbf{\textcolor{blue}{Introduction}}}
+{\LARGE \textbf{\textcolor{blue}{Introduction}}}
 
-%\end{frame}
-%--------------------------------------------------------------------------------------------------
-\begin{frame}[fragile]{\textcolor{blue}{Program}}
-\includegraphics[scale=0.45]{src/example_c.pdf}
 \end{frame}
 %--------------------------------------------------------------------------------------------------
-\begin{frame}[fragile]{\textcolor{blue}{Program}}
+%\begin{frame}[fragile]{\textcolor{blue}{Program}}
+%\includegraphics[scale=0.45]{src/example_c.pdf}
+%\end{frame}
+%--------------------------------------------------------------------------------------------------
+\begin{frame}[fragile]{\textcolor{blue}{Motivation}}
 %\includegraphics[scale=0.6]{src/example_c.pdf}
 \begin{footnotesize}
 \begin{lstlisting}[language=C++]
 int main(int argc, char const *argv[]) {
-    unsigned a = 0;
-    unsigned b = 12;
+    unsigned a = 0, b = 12, c = rand();
 
-    while (a < b) {
-        a+=4;
-        b-=2;
-    }
+    while (a < b) { a+=4; b-=2; }
 
-    unsigned c = rand();
     if(a>6 && b<6){
         switch (a) {
-            case 6:
-                b = 99;
-                break;
+            case  6: b = 99;  break;                 // reachable? 
             case 12:
-            case 13:
-                b = a*2;
-                break;
+            case 13: b = a*2; break;
             default:
                 c = c%18;
         }
@@ -54,7 +45,7 @@ int main(int argc, char const *argv[]) {
         a = 88;
     }
 
-    printf("%d\n", a);
+    printf("%d\n", a);		// what will/might be printed out?
     printf("%d\n", b);
     printf("%d\n", c);
 }
@@ -64,7 +55,7 @@ int main(int argc, char const *argv[]) {
 %--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Value Set Analysis}}
 
-\begin{minipage}{0.49\textwidth}
+%\begin{minipage}{0.49\textwidth}
 
 \underline{\smash{Bounded Set Analysis:}}
 %\begin{itemize}
@@ -89,9 +80,9 @@ Var \,\rightarrow\, [a:b]_n
 Var \,\rightarrow\,s[a:b]_n
 \end{align*}
 %\end{itemize}
-\end{minipage}
+%\end{minipage}
 
-\vspace{1.5cm}
+\vspace{1.0cm}
 
 SSA: sufficient to store the {\color{blue}abstract value for each variable once per basic block}:\footnote{The need to store it not just once only arises to preserve information at conditional branches.}
 \begin{align*}
@@ -104,13 +95,27 @@ SSA: sufficient to store the {\color{blue}abstract value for each variable once 
 \begin{frame}[fragile]{\textcolor{blue}{Passes in LLVM}}
 LLVM's analysis and optimization framework {\color{blue} opt}:
 
-
-\vspace{2cm}
 \begin{center}
-Figure: stages of clang and LLVM
+C  
+\tikzfancyarrow{Clang} 
+IR
+\tikzfancyarrow{opt}
+IR
+\tikzfancyarrow{codegen}
+machine code
 \end{center}
-\vspace{2cm}
 
+\vspace{-0.3cm}
+
+\hspace{4.0cm}
+\begin{tikzpicture}[scale=1]
+%\draw[thick] (-1,0) rectangle +(6,7.5);
+\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+(3.5,0.0) -- (8.5,0.0) node [black,midway,yshift=-0.8cm] {\footnotesize
+LLVM Core};
+\end{tikzpicture}
+
+\vspace{0.9cm}
 
 using existing passes (from command line):
 \begin{footnotesize}
@@ -172,8 +177,12 @@ ThisResult& ThisPass::getResult(){ return result; }
 
 \end{frame}
 %--------------------------------------------------------------------------------------------------
-\begin{frame}[fragile]{\textcolor{blue}{LLVM's intermediate representation}}
-\includegraphics[scale=0.45]{src/example_ll.pdf} 
+\begin{frame}[fragile]{\textcolor{blue}{LLVM's Intermediate Representation IR}}
+\begin{center}
+\includegraphics[width=0.7\textwidth, trim={0.1cm 12cm 4.5cm 2.5cm},clip]{src/example_ll.pdf} 
+\end{center}
+
+\hfill ... and many more lines of code
 \end{frame}
 %--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Content of the Lab}}
