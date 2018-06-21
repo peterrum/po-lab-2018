@@ -259,14 +259,13 @@ llvm::raw_ostream &CompositeDomain::print(llvm::raw_ostream &os) {
 // Lattice interface
 shared_ptr<AbstractDomain>
 CompositeDomain::leastUpperBound(AbstractDomain &other) {
-  errs() << "in lub cd\n";
   auto operation = [](AbstractDomain &lhs, AbstractDomain &rhs) {
     return lhs.leastUpperBound(rhs);
   };
   return computeOperation(other, operation);
 }
 
-bool CompositeDomain::lessOrEqual(AbstractDomain &other) {
+bool CompositeDomain::operator<=(AbstractDomain &other) {
   CompositeDomain &otherD = *static_cast<CompositeDomain *>(&other);
   // TODO: Implement lessOrEqual for both BoundedSet and StridedInterval in
   // these classes

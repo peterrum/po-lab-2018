@@ -15,7 +15,7 @@ int main(void)
   for (i = 1; i < N; i++) {
     unsigned long long r = 1;
     unsigned j;
-    for (j = 0; j < i; j++) {
+    for (j = 0; j < 15; j++) {
       r = (r * i) % Q;
     }
     rem = (rem + r) % Q;

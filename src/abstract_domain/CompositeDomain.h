@@ -68,10 +68,8 @@ public:
   virtual shared_ptr<AbstractDomain> widen();
   virtual bool requiresWidening();
 
-  bool lessOrEqual(AbstractDomain &other);
-
   bool operator==(const BoundedSet &other);
-  bool operator<=(AbstractDomain &other) { return true; }
+  bool operator<=(AbstractDomain &other);
 
   friend std::ostream &operator<<(std::ostream &os, const BoundedSet &bs);
   bool contains(APInt &value) const;
