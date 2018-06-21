@@ -160,19 +160,18 @@ considered comparisons:
 
 
 \begin{frame}[fragile]{\textcolor{blue}{Visitor: Switch}}
-{\Large UPDATE }
 
 \begin{algorithm}[H]
 \caption{Visit switch (terminator)}
-
+\small
 \begin{algorithmic}[1]
-\Procedure{Visit}{$\textsc{jmp}\,[x=a\,:\,XX][x=b\,:\,YY][default\,:\,ZZ]$}%\Comment{T: syntax tree}
+\Procedure{Visit}{$\textsc{switch}\,[x=a\,:\,XX][x=b\,:\,YY][x=c\,:\,YY][default\,:\,ZZ]$}%\Comment{T: syntax tree}
 %\State $\mathcal{C}_{BB} \gets \emptyset$
 \State $\mathcal{C}_{BB\rightarrow XX} \gets \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,{\color{red}=^\#}\,a
 \right\rbrace$
-\State $\mathcal{C}_{BB\rightarrow YY} \gets \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,{\color{red}=^\#}\,b
+\State $\mathcal{C}_{BB\rightarrow YY} \gets \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,{\color{red}=^\#}\,b\,\sqcup\,c
 \right\rbrace$
-\State $\mathcal{C}_{BB\rightarrow ZZ} \,\gets \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,{\color{red}\backslash}\,\{a,\,b\}
+\State $\mathcal{C}_{BB\rightarrow ZZ} \,\gets \left\lbrace  x\,\rightarrow\, \mathcal{N}_{BB}[x]\,{\color{red}\backslash}\,\{a,\,b,\,c\}
 \right\rbrace$
 \State \textsc{VisitTerminator}()
 \EndProcedure
