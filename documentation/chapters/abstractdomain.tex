@@ -84,16 +84,16 @@ $
 \item Strided Intervals:
 \begin{itemize}
 \item $\mathsf{SI} \coloneqq s[a,b], \text{for } a,b \in \mathbb{Z}, s \in \mathbb{N}$
-\item $\gamma_{\mathsf{SI}}(s[a,b]) = \{k \in \mathbb{Z} \mid
+\item $\gamma_{\mathsf{SI}} \colon \textsf{SI}_N \rightarrow \mathcal{P}(\texttt{i}N), s[a,b] \mapsto \{k \in \mathbb{Z} \mid
 a \leq k \leq b, k \equiv a \mod s \}$
 \end{itemize}
 \item Modular Strided Intervals:
 \begin{itemize}
-\item $\mathsf{MSI}_{N} \coloneqq \{s[\overline{a},\overline{b}]_N \mid \overline{a}, \overline{b} \in \mathbb{Z}/2^N, s \in \{0, \dots, 2^N\} \} \dot\cup \{\bot\}$
+\item $\mathsf{MSI}_{N} \coloneqq \{s[\overline{a},\overline{b}]_N \mid \overline{a}, \overline{b} \in \mathbb{Z}/2^N, s \in \{0, \dots, 2^N\} \}\;\dot\cup\;\{\bot\}$
 \item {\setlength{\abovedisplayskip}{-10pt}\begin{flalign*}
 \gamma_{\mathsf{MSI}_N} \colon & \textsf{MSI}_N \rightarrow \mathcal{P}(\texttt{i}N), \\
 & i \mapsto \begin{cases}
-\texttt{i}N, & \text{if }i = \top \\
+\emptyset, & \text{if }i = \bot \\
 \parbox[t]{.53\textwidth}{$\{k + 2^N\mathbb{Z} \mid
 k \in \mathbb{Z}, a \leq k \leq c, k \equiv a \mod s \}$, \\
 $\text{\quad where }c = \min\{x \in \mathbb{Z} \mid x \geq a,$ \\
@@ -102,8 +102,8 @@ $\text{\quad\quad} x \equiv b \mod 2^N \}$}, & \text{if }i = s[\overline{a},\ove
 \end{flalign*}}
 \item Examples:
 \begin{itemize}
-\item $12[15,63]_8 \stackrel{\gamma~}{\rightarrow}\{15,27,39,51,63\} \subseteq \mathbb{Z}/2^8$
-\item $4[10,6]_4 \stackrel{\gamma~}{\rightarrow}\{10,14,2,6\} \subseteq \mathbb{Z}/2^4$
+\item $12[15,63]_8 \stackrel{\gamma\;}{\rightarrow}\{15,27,39,51,63\} \subseteq \mathbb{Z}/2^8$
+\item $4[10,6]_4 \stackrel{\gamma\;}{\rightarrow}\{10,14,2,6\} \subseteq \mathbb{Z}/2^4$
 
 \end{itemize}
 \end{itemize}
@@ -153,12 +153,12 @@ $4[2, 14]_4$}} &
 \begin{flalign*}
 & \rlap{\(\mathsf{normal}_N(s[\overline{a}, \overline{b}]_N) \leftrightarrow (\)} &
 \end{flalign*}
-{\setlength{\abovedisplayskip}{-8pt}\begin{flalign*}
+{\setlength{\abovedisplayskip}{-6pt}\begin{flalign*}
 \quad & \overline{a} = \overline{b} \rightarrow s = 0 & \\
 \quad \land\ & \overline{b} \in \gamma_N(s[\overline{a}, \overline{b}]_N) & \\
 \quad \land\; & \overline{a} = \min\{a' \in \{0 \ldots 2^N-1\} \ldotp \gamma_N(s[\overline{a'}, \overline{b}]_N) = \gamma_N(s[\overline{a}, \overline{b}]_N)\} + 2^N \mathbb{Z} &
 \end{flalign*}}
-{\setlength{\abovedisplayskip}{-14pt}\begin{flalign*}
+{\setlength{\abovedisplayskip}{-18pt}\begin{flalign*}
 & ) &
 \end{flalign*}}
 \end{frame}
@@ -220,7 +220,7 @@ isBottom : bool}{}
 
 %\umlclass[x=3,y=-6.5]{OperationNDim$<$novec$>$}{}{}
 
-\umlinherit[anchor1=north,anchor2=-148]{CompositeDomain}{AbstractDomain}
+\umlinherit[geometry=|-]{CompositeDomain}{AbstractDomain}
 \umlinherit[anchor1=north,anchor2=-41]{BoundedSet}{AbstractDomain}
 \umlinherit[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationMass}
@@ -256,10 +256,10 @@ get\_abstract\_value() : VSAResultValue \\
 ]{VSAResultValue}{
 }{ 
 test(predicate, constant) : tristate \\
-min() : APInt \\
-max() : APInt \\
-size() : APInt \\
-constant() : APInt \\
+min() : int \\
+max() : int \\
+size() : int \\
+constant() : int \\
 is\_constant() : bool \\
 }
 
@@ -282,12 +282,12 @@ is\_constant() : bool \\
 \begin{center}
 \begin{tikzpicture}[thick,scale=0.8, every node/.style={transform shape}]
 
-\umlinterface[rectangle split parts=1, x=1.0, y=-1.0]{AbstractDomain}{
+\umlinterface[rectangle split parts=1, x=1.0]{AbstractDomain}{
 }{}
 
-\umlclass[x=-3.5,y=-2.5, rectangle split parts=1]{CompositeDomain}{}{}
-\umlclass[x=+1.0,y=-2.5, rectangle split parts=1]{BoundedSet}{}{}
-\umlclass[x=+2.0,y=-3.5, rectangle split parts=1]{StridedInterval}{}{}
+\umlclass[x=-3.5,y=-3.5, rectangle split parts=1]{CompositeDomain}{}{}
+\umlclass[x=+1.0,y=-3.5, rectangle split parts=1]{BoundedSet}{}{}
+\umlclass[x=+2.0,y=-5.5, rectangle split parts=1]{StridedInterval}{}{}
 
 \umlclass[fill=red!20
 %,y=+3
@@ -295,10 +295,10 @@ is\_constant() : bool \\
 ]{VSAResultValue}{
 }{ 
 test(predicate, constant) : bool \\
-min() : APInt \\
-max() : APInt \\
-size() : APInt \\
-constant() : APInt \\
+min() : int \\
+max() : int \\
+size() : int \\
+constant() : int \\
 is\_constant() : bool \\
 }
 
