@@ -42,7 +42,7 @@ $\texttt{nuw}$ : "no unsigned wrap", $\texttt{nsw}$ : "no signed wrap"
 
 \end{frame}
 
-\begin{frame}[fragile]{\textcolor{blue}{LLVM Integer Operations, Continued}}
+\begin{frame}[fragile]{\textcolor{blue}{LLVM Integer Operations (cont.)}}
 Bitwise Operations:
 \begin{itemize}
 \item $\texttt{<result> = shl [nuw] [nsw] <bitWidth> <op1> <op2>}$
@@ -74,24 +74,24 @@ $
 \end{frame}
 
 
-\begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval}}
+\begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval (MSI)}}
 \begin{itemize}
 
 \item Intervals:
 \begin{itemize}
-\item $\mathrm{I} \coloneqq [a,b], \text{for } a,b \in \mathbb{Z}$
+\item $\mathsf{I} \coloneqq [a,b], \text{for } a,b \in \mathbb{Z}$
 \end{itemize}
 \item Strided Intervals:
 \begin{itemize}
-\item $\mathrm{SI} \coloneqq s[a,b], \text{for } a,b \in \mathbb{Z}, s \in \mathbb{N}$
-\item $\gamma_{\mathrm{SI}}, s[a,b] \mapsto \{k \in \mathbb{Z} \mid
+\item $\mathsf{SI} \coloneqq s[a,b], \text{for } a,b \in \mathbb{Z}, s \in \mathbb{N}$
+\item $\gamma_{\mathsf{SI}}(s[a,b]) = \{k \in \mathbb{Z} \mid
 a \leq k \leq b, k \equiv a \mod s \}$
 \end{itemize}
 \item Modular Strided Intervals:
 \begin{itemize}
-\item $\mathrm{MSI}_{N} \coloneqq \{\overline{s}[\overline{a},\overline{b}]_N \mid \overline{a}, \overline{b}, \overline{s} \in \mathbb{Z}/2^N \} \dot\cup \{\bot\}$
-\item $\gamma_{\mathrm{MSI}_N}, s[a,b]_N \mapsto \{k + 2^N\mathbb{Z} \mid
-k \in \mathbb{Z}, a \leq k \leq z, k \equiv a \mod s \}$, \\ where $z = \min\{l \in \mathbb{Z} \mid l \geq a, l \equiv b \mod 2^N \}$
+\item $\mathsf{MSI}_{N} \coloneqq \{\overline{s}[\overline{a},\overline{b}]_N \mid \overline{a}, \overline{b}, \overline{s} \in \mathbb{Z}/2^N \} \dot\cup \{\bot\}$
+\item $\gamma_{\mathsf{MSI}_N}(s[a,b]_N) = \{k + 2^N\mathbb{Z} \mid
+k \in \mathbb{Z}, a \leq k \leq c, k \equiv a \mod s \}$, \\ where $c = \min\{x \in \mathbb{Z} \mid x \geq a, x \equiv b \mod 2^N \}$
 \item Examples:
 \begin{itemize}
 \item $12[15,63]_8 \stackrel{\gamma~}{\rightarrow}\{15,27,39,51,63\} \subseteq \mathbb{Z}/2^8$
@@ -105,10 +105,45 @@ k \in \mathbb{Z}, a \leq k \leq z, k \equiv a \mod s \}$, \\ where $z = \min\{l 
 
 
 \begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval: Normalization}}
-Note that the representation of a set by a modular strided interval may not be unique. Thus, we introduce a predicate \textit{normal}, such that there is always a unique \textit{normalized} representation.
-Example:
+Note that some sets can be represented by muliple MSIs. Thus, we introduce a predicate \textit{normal}, such that there is at most one \textit{normalized} representation.
+Examples: \\
+\def\arraystretch{6}
+\begin{tabular}{ l l l l }
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$3[2, 10]_4$ \\
+$\downarrow$ \\
+$3[2, 8]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-1.pdf} 
+\end{minipage}
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$4[3, 3]_4$ \\
+$\downarrow$ \\
+$0[3, 3]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-2.pdf} 
+\end{minipage} \\
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$6[12, 2]_4$ \\
+$\downarrow$ \\
+$10[2, 12]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-3.pdf} 
+\end{minipage}
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$4[10, 6]_4$ \\
+$\downarrow$ \\
+$4[2, 14]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-4.pdf} 
+\end{minipage}
+\end{tabular}
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval: Normalization (cont.)}}
 \begin{flalign*}
-& \rlap{\(\mathrm{normal}_N(\overline{s}[\overline{a}, \overline{b}]_N) \leftrightarrow (\)} &
+& \rlap{\(\mathsf{normal}_N(\overline{s}[\overline{a}, \overline{b}]_N) \leftrightarrow (\)} &
 \end{flalign*}
 \begin{flalign*}
 \quad & \overline{s} = 0 \leftrightarrow \overline{a} = \overline{b} & \\
@@ -121,9 +156,35 @@ Example:
 \end{frame}
 
 \begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval: Union}}
-Modular strided intervals do not form a lattice, as, in general, there is no least upper bound of two elements. \\
-Example: 
+MSIs do not form a lattice, as, in general, there is no \textit{least} upper bound of two elements. \\
+Example:
+\begin{tabular}{ l l l l l }
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$1[1, 5]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-1.pdf} 
+\end{minipage} & $\sqcup$ &
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$1[9, 12]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-2.pdf} 
+\end{minipage} \\
+&& $=$ && \\
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$1[1, 12]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-3.pdf}
+\end{minipage} & or &
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$1[9, 5]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-4.pdf} 
+\end{minipage}
+\end{tabular} \\
+Therefore we try to find a \textit{minimal} upper bound wrt. $|\gamma(\cdot)|$.
 \end{frame}
+
+
 \begin{frame}[fragile]{\textcolor{blue}{Abstract Domain Class Structure}}
 
 \begin{center}
