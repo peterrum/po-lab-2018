@@ -671,7 +671,7 @@ shared_ptr<AbstractDomain> StridedInterval::srem(unsigned numBits,
 
 shared_ptr<AbstractDomain> StridedInterval::sdiv(unsigned numBits,
     AbstractDomain &other) {
-  return StridedInterval(this->bitWidth, 0, 0, 0).normalize();
+  return StridedInterval::create_top(numBits);
 }
 
 shared_ptr<AbstractDomain> StridedInterval::shl(unsigned numBits,
