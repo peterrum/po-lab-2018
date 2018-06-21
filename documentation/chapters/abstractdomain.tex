@@ -200,10 +200,10 @@ lessOrEqual(other) : bool \\
 }
 
 \umlclass[x=-3.5,y=-4.0]{CompositeDomain}{delegate : AbstractDomain}{}
-\umlclass[x=+2.5,y=-4.0]{BoundedSet}{
-values : set$<$APInt$>$
+\umlclass[x=+3.0,y=-3.9]{BoundedSet}{
+values : set$<$APInt$>$ \\
 isTop : bool}{}
-\umlclass[x=+3.0,y=-6.0]{StridedInterval}{
+\umlclass[x=+3.0,y=-6.3]{StridedInterval}{
 min, max, stride : APInt \\
 isBottom : bool}{}
 
@@ -212,9 +212,9 @@ isBottom : bool}{}
 
 %\umlclass[x=3,y=-6.5]{OperationNDim$<$novec$>$}{}{}
 
-\umlinherit[anchor1=north,anchor2=-148]{CompositeDomain}{AbstractDomain}
-\umlinherit[anchor1=north,anchor2=-41]{BoundedSet}{AbstractDomain}
-\umlinherit[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
+\umlimpl[anchor1=north,anchor2=-148]{CompositeDomain}{AbstractDomain}
+\umlimpl[anchor1=north,anchor2=-36]{BoundedSet}{AbstractDomain}
+\umlimpl[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationMass}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationConvection}
 \umlaggreg[]{CompositeDomain}{BoundedSet}
@@ -298,9 +298,9 @@ is\_constant() : bool \\
 
 %\umlclass[x=3,y=-6.5]{OperationNDim$<$novec$>$}{}{}
 
-\umlinherit[geometry=|-]{CompositeDomain}{AbstractDomain}
-\umlinherit[anchor1=north,anchor2=south]{BoundedSet}{AbstractDomain}
-\umlinherit[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
+\umlimpl[geometry=|-]{CompositeDomain}{AbstractDomain}
+\umlimpl[anchor1=north,anchor2=south]{BoundedSet}{AbstractDomain}
+\umlimpl[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationMass}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationConvection}
 \umlaggreg[]{CompositeDomain}{BoundedSet}
