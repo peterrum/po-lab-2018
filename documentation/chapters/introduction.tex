@@ -11,14 +11,14 @@
 }
 %--------------------------------------------------------------------------------------------------
 %--------------------------------------------------------------------------------------------------
-\begin{frame}
-
-Part 0:
-\vspace{0.2cm}
-
-{\LARGE \textbf{\textcolor{blue}{Introduction}}}
-
-\end{frame}
+%\begin{frame}
+%
+%Part 0:
+%\vspace{0.2cm}
+%
+%{\LARGE \textbf{\textcolor{blue}{Introduction}}}
+%
+%\end{frame}
 %--------------------------------------------------------------------------------------------------
 %\begin{frame}[fragile]{\textcolor{blue}{Program}}
 %\includegraphics[scale=0.45]{src/example_c.pdf}
@@ -131,6 +131,57 @@ opt -load llvm/lib/llvm-vsa.so -vsapass -o hello.bc < hello.bc
 \end{footnotesize}
 
 \end{frame}
+
+\begin{frame}[fragile]{\textcolor{blue}{LLVM's Intermediate Representation IR}}
+
+\newcommand{\keyword}[1]{\textbf{\color{red} #1}}
+\newcommand{\labele}[1]{\textbf{\underline{\smash{#1}}}}
+
+\begin{scriptsize}
+\begingroup
+  \fontfamily{pcr}\selectfont
+\keyword{define} dso\_local i32 @main(i31 \%argc, i8** \%argv) \#0 \{  \\
+\labele{entry:} \\
+\qquad \keyword{br} label \%while.cond \\ 
+
+\vspace{0.2cm}
+  
+\labele{while.cond:} \\
+\qquad   \%a.0 \keyword{= phi} i32 [ 0, \%entry ], [ \%add, \%while.body ] \\
+\qquad   \%b.0 \keyword{= phi} i32 [ 12, \%entry ], [ \%sub, \%while.body ] \\
+\qquad   \%cmp \keyword{= icmp} ult i32 \%a.0, \%b.0 \\
+\qquad   \keyword{br} i1 \%cmp, label \%while.body, label \%while.end \\
+
+\vspace{0.2cm}
+  
+\labele{while.body:} \\
+\qquad     \%add \keyword{= add} i32 \%a.0, 4 \\
+\qquad     \%sub \keyword{= sub} i32 \%b.0, 2 \\
+\qquad     \keyword{br} label \%while.cond \\
+
+\vspace{0.2cm}
+  
+\labele{while.end:} \\
+\qquad     \%call = \keyword{call} i32 @rand() \#3 \\
+\qquad     \%cmp1 = \keyword{icmp ugt} i32 \%a.0, 6 \\
+\qquad     \keyword{br} i1 \%cmp1, label \%land.lhs.true, label \%if.else \\
+
+\vspace{0.2cm}
+  
+\labele{land.lhs.true:} \\
+\qquad     \%cmp2 \keyword{= icmp ult} i32 \%b.0, 6 \\
+\qquad     \keyword{br} i1 \%cmp2, label \%if.then, label \%if.else
+
+
+\endgroup
+
+\end{scriptsize}
+
+\vfill
+
+\hfill ... and many more lines of code
+\end{frame}
+
 %--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Passes in LLVM (cont.)}}
 \underline{\smash{Creating user passes:}}
@@ -177,13 +228,16 @@ ThisResult& ThisPass::getResult(){ return result; }
 
 \end{frame}
 %--------------------------------------------------------------------------------------------------
-\begin{frame}[fragile]{\textcolor{blue}{LLVM's Intermediate Representation IR}}
-\begin{center}
-\includegraphics[width=0.7\textwidth, trim={0.1cm 12cm 4.5cm 2.5cm},clip]{src/example_ll.pdf} 
-\end{center}
+%\begin{frame}[fragile]{\textcolor{blue}{LLVM's Intermediate Representation IR}}
+%\begin{center}
+%\includegraphics[width=0.7\textwidth, trim={0.1cm 12cm 4.5cm 2.5cm},clip]{src/example_ll.pdf} 
+%\end{center}
+%
+%\hfill ... and many more lines of code
+%\end{frame}
 
-\hfill ... and many more lines of code
-\end{frame}
+
+
 %--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Content of the Lab}}
 
