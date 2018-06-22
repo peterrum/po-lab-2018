@@ -112,7 +112,7 @@ public:
     AU.setPreservesAll();
     AU.addRequired<DominatorTreeWrapperPass>();
   }
-  
+
   VsaResult& getResult(){
       return result;
   }

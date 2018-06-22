@@ -57,7 +57,7 @@ Bitwise Operations:
 
 \begin{frame}[fragile]{\textcolor{blue}{Bounded Set}}
 \begin{itemize}
-\item A bounded set represents a set of values upto a given cardinality $k$, or $\top$: \\
+\item A bounded set represents a set of values up to a given cardinality $k$, or $\top$: \\
 $\mathrm{BS}_{N} \coloneqq \{M\in \mathcal{P}(\texttt{i}N)\mid |M| \leq k\} \dot\cup \{ \top \}$ \\
 \item $\sqcup$ and $\sqsubseteq$ on bounded sets essentially reduce to $\cup$ and $\subseteq$ on sets.
 \item Any set with more elements than $k$ is over-approximated by $\top$.
@@ -140,7 +140,7 @@ lessOrEqual(other) : bool \\
 
 \umlclass[x=-3.5,y=-4.0]{CompositeDomain}{delegate : AbstractDomain}{}
 \umlclass[x=+2.5,y=-4.0]{BoundedSet}{
-values : set$<$APInt$>$
+values : set$<$APInt$>$ \\
 isTop : bool}{}
 \umlclass[x=+3.0,y=-6.0]{StridedInterval}{
 min, max, stride : APInt \\
