@@ -2,7 +2,9 @@
 
 Aim of the [Program Optimization Lab 2018](http://www2.in.tum.de/hp/Main?nid=366) 
 is to explore the LLVM opt tool and extend it with an advanced Value-Set Analysis
-according to [Reps et al.](http://research.cs.wisc.edu/wpis/papers/pepm06.invited.pdf)
+according to [Reps et al.](http://research.cs.wisc.edu/wpis/papers/pepm06.invited.pdf).
+
+A PDF version of the presentation we gave at the end of the course is available [here](https://github.com/peterrum/po-lab-2018/raw/master/documentation/document.pdf).
 
 ## Authors (in alphabetic order)
 
@@ -10,7 +12,7 @@ according to [Reps et al.](http://research.cs.wisc.edu/wpis/papers/pepm06.invite
 * Jakob Gottfriedsen
 * Peter Munch
 * Alexander Roschlaub
-* Michael Schwarz
+* Michael B. Schwarz
 
 ## Installation
 
