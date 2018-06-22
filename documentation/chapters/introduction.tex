@@ -171,43 +171,45 @@ int main(int argc, char const *argv[]) {
 %-----------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{LLVM's Intermediate Representation IR}}
 
+\newcommand{\constword}[1]{\textit{#1}}
 \newcommand{\keyword}[1]{\textbf{\color{red} #1}}
+\newcommand{\typesize}[1]{\textbf{\color{orange} #1}}
 \newcommand{\labele}[1]{\textbf{\underline{\smash{#1}}}}
 
 \begin{scriptsize}
 \begingroup
   \fontfamily{pcr}\selectfont
-\keyword{define} dso\_local i32 @main(i31 \%argc, i8** \%argv) \#0 \{  \\
+\keyword{define} dso\_local \typesize{i32} @main(\typesize{i31} \%argc, \typesize{i8**} \%argv) \#0 \{  \\
 \labele{entry:} \\
-\qquad \keyword{br} label \%while.cond \\
+\qquad \keyword{br label} \%while.cond \\
 
 \vspace{0.2cm}
 
 \labele{while.cond:} \\
-\qquad   \%a.0 \keyword{= phi} i32 [ 0, \%entry ], [ \%add, \%while.body ] \\
-\qquad   \%b.0 \keyword{= phi} i32 [ 12, \%entry ], [ \%sub, \%while.body ] \\
-\qquad   \%cmp \keyword{= icmp} ult i32 \%a.0, \%b.0 \\
-\qquad   \keyword{br} i1 \%cmp, label \%while.body, label \%while.end \\
+\qquad   \%a.0 = \keyword{phi} \typesize{i32} [\,\,\,\, \constword{0}, \%entry ], [ \%add, \%while.body ] \\
+\qquad   \%b.0 = \keyword{phi} \typesize{i32} [ \constword{12}, \%entry ], [ \%sub, \%while.body ] \\
+\qquad   \%cmp = \keyword{icmp ult} \typesize{i32} \%a.0, \%b.0 \\
+\qquad   \keyword{br} \typesize{i1} \%cmp, \keyword{label} \%while.body, \keyword{label} \%while.end \\
 
 \vspace{0.2cm}
 
 \labele{while.body:} \\
-\qquad     \%add \keyword{= add} i32 \%a.0, 4 \\
-\qquad     \%sub \keyword{= sub} i32 \%b.0, 2 \\
-\qquad     \keyword{br} label \%while.cond \\
+\qquad     \%add = \keyword{add} \typesize{i32} \%a.0, \constword{4} \\
+\qquad     \%sub = \keyword{sub} \typesize{i32} \%b.0, \constword{2} \\
+\qquad     \keyword{br label} \%while.cond \\
 
 \vspace{0.2cm}
 
 \labele{while.end:} \\
-\qquad     \%call = \keyword{call} i32 @rand() \#3 \\
-\qquad     \%cmp1 = \keyword{icmp ugt} i32 \%a.0, 6 \\
-\qquad     \keyword{br} i1 \%cmp1, label \%land.lhs.true, label \%if.else \\
+\qquad     \%call = \keyword{call} \typesize{i32} @rand() \#3 \\
+\qquad     \%cmp1 = \keyword{icmp ugt} \typesize{i32} \%a.0, \constword{6} \\
+\qquad     \keyword{br} \typesize{i1} \%cmp1, \keyword{label} \%land.lhs.true, \keyword{label} \%if.else \\
 
 \vspace{0.2cm}
 
 \labele{land.lhs.true:} \\
-\qquad     \%cmp2 \keyword{= icmp ult} i32 \%b.0, 6 \\
-\qquad     \keyword{br} i1 \%cmp2, label \%if.then, label \%if.else
+\qquad     \%cmp2 = \keyword{icmp ult} \typesize{i32} \%b.0, \constword{6} \\
+\qquad     \keyword{br} \typesize{i1} \%cmp2, \keyword{label} \%if.then, \keyword{label} \%if.else
 
 
 \endgroup
