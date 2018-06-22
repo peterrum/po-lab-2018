@@ -14,7 +14,7 @@ int main(int argc, char const *argv[]) {
       y = x;
       break;
     case 5:
-      y = x<<1;
+      y = x+1;
   }
 
   int z = y+7;
