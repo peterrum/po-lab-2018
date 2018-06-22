@@ -13,10 +13,10 @@ Part 1:
 \begin{frame}[fragile]{\textcolor{blue}{Background to LLVM Integer Types}}
 \begin{itemize}
 \item In LLVM the type of $N$-bit integers is the set $\texttt{i}N \coloneqq \{0,1\}^N, \text{for~} N \in \{1,\dots, 2^{23}-1\}$.
-\item "$\texttt{i}N \cong \mathbb{Z}/2^N$~" 
+\item "$\texttt{i}N \cong \mathbb{Z}/2^N$~"
 \item In the in-memory-representation, these types are represented by the LLVM class APInt.
 \item This type is used for both signed and unsigned integers.
- 
+
 \item We use APInt 	 in our implementation of abstract domains.
 
 \end{itemize}
@@ -25,13 +25,13 @@ Part 1:
 
 \begin{frame}[fragile]{\textcolor{blue}{LLVM Integer Operations}}
 \begin{large}Arithmetic Operations:\end{large} \\
-In LLVM there are separate $\texttt{div}$ and $\texttt{rem}$ operations for signed and unsigned integers. 
+In LLVM there are separate $\texttt{div}$ and $\texttt{rem}$ operations for signed and unsigned integers.
 For $\texttt{add}$, $\texttt{sub}$ and $\texttt{mul}$, there is no such distinction needed.
 \begin{itemize}
 \item $\texttt{<result> = add [nuw] [nsw] <bitWidth> <op1> <op2>}$
 \item $\texttt{<result> = sub [nuw] [nsw] <bitWidth> <op1> <op2>}$
 \item $\texttt{<result> = mul [nuw] [nsw] <bitWidth> <op1> <op2>}$
-\item $\texttt{<result> = udiv [exact] <bitWidth> <op1> <op2>}$ 
+\item $\texttt{<result> = udiv [exact] <bitWidth> <op1> <op2>}$
 \footnote{\label{not-impl} $\texttt{exact}$-flag not used in our implementation.}
 \item $\texttt{<result> = sdiv [exact] <bitWidth> <op1> <op2>} ^{~\ref{not-impl}}$
 \item $\texttt{<result> = urem <bitWidth> <op1> <op2>}$
@@ -67,7 +67,7 @@ b \mapsto
 \texttt{i}N,  & \text{if }b=\top \\
 b, & \text{otherwise}
 \end{cases}
-$ 
+$
 
 \end{itemize}
 
@@ -122,28 +122,28 @@ $3[2, 10]_4$ \\
 $\downarrow$ \\
 $3[2, 8]_4$}} &
 \begin{minipage}{0.3\textwidth}
-\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-1.pdf} 
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-1.pdf}
 \end{minipage}
 \adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
 $4[3, 3]_4$ \\
 $\downarrow$ \\
 $0[3, 3]_4$}} &
 \begin{minipage}{0.3\textwidth}
-\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-2.pdf} 
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-2.pdf}
 \end{minipage} \\
 \adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
 $6[12, 2]_4$ \\
 $\downarrow$ \\
 $10[2, 12]_4$}} &
 \begin{minipage}{0.3\textwidth}
-\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-3.pdf} 
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-3.pdf}
 \end{minipage}
 \adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
 $4[10, 6]_4$ \\
 $\downarrow$ \\
 $4[2, 14]_4$}} &
 \begin{minipage}{0.3\textwidth}
-\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-4.pdf} 
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-4.pdf}
 \end{minipage}
 \end{tabular}
 \end{frame}
@@ -170,12 +170,12 @@ Example:
 \adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
 $1[1, 5]_4$}} &
 \begin{minipage}{0.3\textwidth}
-\includegraphics[width=0.75\textwidth]{graphics/msi-union-1.pdf} 
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-1.pdf}
 \end{minipage} & $\sqcup$ &
 \adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
 $1[9, 12]_4$}} &
 \begin{minipage}{0.3\textwidth}
-\includegraphics[width=0.75\textwidth]{graphics/msi-union-2.pdf} 
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-2.pdf}
 \end{minipage} \\
 && $=$ && \\
 \adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
@@ -186,7 +186,7 @@ $1[1, 12]_4$}} &
 \adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
 $1[9, 5]_4$}} &
 \begin{minipage}{0.3\textwidth}
-\includegraphics[width=0.75\textwidth]{graphics/msi-union-4.pdf} 
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-4.pdf}
 \end{minipage}
 \end{tabular} \\
 Therefore we try to find a \textit{minimal} upper bound wrt. $|\gamma(\cdot)|$.
@@ -199,20 +199,16 @@ Therefore we try to find a \textit{minimal} upper bound wrt. $|\gamma(\cdot)|$.
 \begin{tikzpicture}[thick,scale=0.8, every node/.style={transform shape}]
 
 \umlinterface[]{AbstractDomain}{
-}{ 
+}{
 add(other) : AbstractDomain \\ /* other arithmetic and logical operations */ \\ \\
 
 icmp(other, predicate) : (AbstractDomain, AbstractDomain) \\ \\
-leastUpperBound(other) : AbstractDomain \\ 
+leastUpperBound(other) : AbstractDomain \\
 lessOrEqual(other) : bool \\
 }
 
 \umlclass[x=-3.5,y=-4.0]{CompositeDomain}{delegate : AbstractDomain}{}
-<<<<<<< HEAD
-\umlclass[x=+2.5,y=-4.0]{BoundedSet}{
-=======
 \umlclass[x=+3.0,y=-3.9]{BoundedSet}{
->>>>>>> d9ed4e138025801fd3a8614bb8aee66ac524132e
 values : set$<$APInt$>$ \\
 isTop : bool}{}
 \umlclass[x=+3.0,y=-6.3]{StridedInterval}{
@@ -244,21 +240,15 @@ isBottom : bool}{}
 \begin{center}
 \begin{tikzpicture}[thick,scale=0.8, every node/.style={transform shape}]
 
-\umlclass[fill=red!20
-%,y=+3
-,y=+5, x=-6.5
-]{VSAResult}{
-}{ 
+\umlclass[fill=red!20,y=+5, x=-6.5
+]{VSAResult}{}{
 is\_reachable(basic\_block) : bool \\
 is\_resultat\_available(bb, value) : bool \\
 get\_abstract\_value() : VSAResultValue \\
 }
 
-\umlclass[fill=red!20
-%,y=+3
-,y=1.5, x=-6.5
-]{VSAResultValue}{
-}{ 
+\umlclass[fill=red!20,y=1.5, x=-6.5]{VSAResultValue}{
+}{
 test(predicate, constant) : tristate \\
 min() : APInt \\
 max() : APInt \\
@@ -297,7 +287,7 @@ is\_constant() : bool \\
 %,y=+3
 ,y=0.5, x=-6.5
 ]{VSAResultValue}{
-}{ 
+}{
 test(predicate, constant) : tristate \\
 min() : APInt \\
 max() : APInt \\
@@ -324,4 +314,3 @@ is\_constant() : bool \\
 \end{center}
 
 \end{frame}
-
