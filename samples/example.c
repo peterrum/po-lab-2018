@@ -1,16 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-// test program:
-// unsigned
-// simple loop
-// function call -> top
-// if constraint with two constraints
-// switch
-// switch with case 6: bottom
-// switch with case 12: fallthrough
-// switch with default
-// modulo on top
-
 
 int main(int argc, char const *argv[]) {
     unsigned a = 0;
