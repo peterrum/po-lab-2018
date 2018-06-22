@@ -7,3 +7,5 @@
 *.toc
 *.vrb
 *.dvi
+!graphics/*.pdf
+*.pdf

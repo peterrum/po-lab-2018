@@ -57,7 +57,7 @@ bool VsaBenchmarkPass::runOnModule(Module &M) {
 
                 /// Comparing set sizes
                 const auto vsa_size = abstractValue->getNumValues().getZExtValue();
-                const auto lvi_size = lvi_const_range.getSetSize().getZExtValue();
+                const auto lvi_size = lvi_const_range.getSetSize().getLimitedValue();
 
                 /// both same size
                 if(vsa_size == lvi_size) eq_count++;

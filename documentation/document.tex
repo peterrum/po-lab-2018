@@ -20,11 +20,26 @@
 \usepackage{fancyvrb}
 \usepackage{pgfplots}
 \usepackage{stmaryrd}
+\usepackage{array}
+\usepackage{booktabs,adjustbox}
 
 \usepackage{amsmath}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage{mathtools}
+\usepackage{xcolor}
+
+\usetikzlibrary{fadings,shapes.arrows,shadows}
+
+\usepackage{xparse}
+\tikzfading[name=arrowfading, top color=transparent!0, bottom color=transparent!95]
+\tikzset{arrowfill/.style={#1,general shadow={fill=black, shadow yshift=-0.8ex, path fading=arrowfading}}}
+\tikzset{arrowstyle/.style n args={3}{draw=#2,arrowfill={#3}, single arrow,minimum height=#1, single arrow,
+single arrow head extend=.3cm,}}
+
+\NewDocumentCommand{\tikzfancyarrow}{O{2cm} O{red} O{top color=red!20, bottom color=red} m}{
+\tikz[baseline=-0.5ex]\node [arrowstyle={#1}{#2}{#3}] {#4};
+}
 
 \lstset { %
     language=C++,

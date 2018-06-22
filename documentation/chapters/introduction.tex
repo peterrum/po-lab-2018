@@ -9,17 +9,8 @@
                 commentstyle=\color{gray}\ttfamily,
                 morecomment=[l][\color{magenta}]{\#}
 }
-
-\begin{frame}
-
-Part 0:
-\vspace{0.2cm}
-
-{\LARGE \textbf{\textcolor{blue}{Introduction}}}
-
-\end{frame}
-
-
+%--------------------------------------------------------------------------------------------------
+%--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Value Set Analysis}}
 
 \underline{\smash{Bounded Set Analysis:}}
@@ -54,7 +45,7 @@ SSA: sufficient to store the {\color{blue}abstract value for each variable once 
 \end{align*}
 
 \end{frame}
-
+%--------------------------------------------------------------------------------------------------
 
 \begin{frame}[fragile]{\textcolor{blue}{Passes in LLVM}}
 LLVM's analysis and optimization framework {\color{blue} opt}:
@@ -81,7 +72,7 @@ opt -load llvm/lib/llvm-vsa.so -vsapass -o hello.bc < hello.bc
 \end{footnotesize}
 
 \end{frame}
-
+%--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Passes in LLVM (cont.)}}
 \underline{\smash{Creating user passes:}}
 \begin{itemize}
@@ -106,19 +97,19 @@ void ThisPass::getAnalysisUsage(AnalysisUsage &AU) override {
 \begin{footnotesize}
 \begin{lstlisting}[language=C++]
 bool ThisPass::runOnModule(Module &M) override {
-  auto& other_result =  
+  auto& other_result =
     getAnalysis<OtherPass>(function).getResult();
   /* ... perform analysis and fill result ... */
-  
+
   // Return if the pass modified the bitcode (no)
   return false;
 }
 \end{lstlisting}
 \end{footnotesize}
 
-\item make results available for other pass (optional): 
+\item make results available for other pass (optional):
 \begin{footnotesize}
-\begin{lstlisting}[language=C++]  
+\begin{lstlisting}[language=C++]
 ThisResult& ThisPass::getResult(){ return result; }
 \end{lstlisting}
 \end{footnotesize}
@@ -126,8 +117,62 @@ ThisResult& ThisPass::getResult(){ return result; }
 \end{itemize}
 
 \end{frame}
+%--------------------------------------------------------------------------------------------------
+%\begin{frame}
 
+%Part 0:
+%\vspace{0.2cm}
 
+%{\LARGE \textbf{\textcolor{blue}{Introduction}}}
+
+%\end{frame}
+%--------------------------------------------------------------------------------------------------
+\begin{frame}[fragile]{\textcolor{blue}{Program}}
+\includegraphics[scale=0.45]{src/example_c.pdf}
+\end{frame}
+%--------------------------------------------------------------------------------------------------
+\begin{frame}[fragile]{\textcolor{blue}{Program}}
+%\includegraphics[scale=0.6]{src/example_c.pdf}
+\begin{footnotesize}
+\begin{lstlisting}[language=C++]
+int main(int argc, char const *argv[]) {
+    unsigned a = 0;
+    unsigned b = 12;
+
+    while (a < b) {
+        a+=4;
+        b-=2;
+    }
+
+    unsigned c = rand();
+    if(a>6 && b<6){
+        switch (a) {
+            case 6:
+                b = 99;
+                break;
+            case 12:
+            case 13:
+                b = a*2;
+                break;
+            default:
+                c = c%18;
+        }
+    } else {
+        a = 88;
+    }
+
+    printf("%d\n", a);
+    printf("%d\n", b);
+    printf("%d\n", c);
+}
+\end{lstlisting}
+\end{footnotesize}
+\end{frame}
+%--------------------------------------------------------------------------------------------------
+\begin{frame}[fragile]{\textcolor{blue}{LLVM's Intermediate Representation}}
+\includegraphics[scale=0.45]{src/example_ll.pdf}
+\end{frame}
+%--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Content of the Lab}}
 
 \underline{Tasks:}
@@ -145,8 +190,9 @@ ThisResult& ThisPass::getResult(){ return result; }
 \begin{itemize}
 \item widening and narrowing
 \item inter-procedural analysis
-\item memory access 
+\item memory access
 \end{itemize}
 \hfill unknowns (ops, return values and arguments of functions) treated as: {\color{blue} $\top$}
 
 \end{frame}
+%--------------------------------------------------------------------------------------------------

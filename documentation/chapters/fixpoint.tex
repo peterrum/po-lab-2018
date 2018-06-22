@@ -220,7 +220,7 @@ Data in memory is considered unknown.
 \begin{algorithm}[H]
 \caption{Load in basic block BB}
 \begin{algorithmic}[1]
-\Procedure{Binary}{$x\gets \textsc{load}(...)$}%\Comment{T: syntax tree}
+\Procedure{Visit}{$x\gets \textsc{load}(...)$}%\Comment{T: syntax tree}
 \State $\mathcal{N}_{BB}\gets\mathcal{N}_{BB}\oplus\left\lbrace x\,\rightarrow\, \top \right\rbrace$
 \EndProcedure
 \end{algorithmic}

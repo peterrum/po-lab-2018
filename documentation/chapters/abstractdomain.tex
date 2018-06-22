@@ -42,7 +42,7 @@ $\texttt{nuw}$ : "no unsigned wrap", $\texttt{nsw}$ : "no signed wrap"
 
 \end{frame}
 
-\begin{frame}[fragile]{\textcolor{blue}{LLVM Integer Operations, Continued}}
+\begin{frame}[fragile]{\textcolor{blue}{LLVM Integer Operations (cont.)}}
 Bitwise Operations:
 \begin{itemize}
 \item $\texttt{<result> = shl [nuw] [nsw] <bitWidth> <op1> <op2>}$
@@ -74,28 +74,36 @@ $
 \end{frame}
 
 
-\begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval}}
+\begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval (MSI)}}
 \begin{itemize}
 
 \item Intervals:
 \begin{itemize}
-\item $\mathrm{I} \coloneqq [a,b], \text{for } a,b \in \mathbb{Z}$
+\item $\mathsf{I} \coloneqq [a,b], \text{for } a,b \in \mathbb{Z}$
 \end{itemize}
 \item Strided Intervals:
 \begin{itemize}
-\item $\mathrm{SI} \coloneqq s[a,b], \text{for } a,b \in \mathbb{Z}, s \in \mathbb{N}$
-\item $\gamma_{\mathrm{SI}}, s[a,b] \mapsto \{k \in \mathbb{Z} \mid
+\item $\mathsf{SI} \coloneqq s[a,b], \text{for } a,b \in \mathbb{Z}, s \in \mathbb{N}$
+\item $\gamma_{\mathsf{SI}} \colon \textsf{SI}_N \rightarrow \mathcal{P}(\texttt{i}N), s[a,b] \mapsto \{k \in \mathbb{Z} \mid
 a \leq k \leq b, k \equiv a \mod s \}$
 \end{itemize}
 \item Modular Strided Intervals:
 \begin{itemize}
-\item $\mathrm{MSI}_{N} \coloneqq \{\overline{s}[\overline{a},\overline{b}]_N \mid \overline{a}, \overline{b}, \overline{s} \in \mathbb{Z}/2^N \} \dot\cup \{\bot\}$
-\item $\gamma_{\mathrm{MSI}_N}, s[a,b]_N \mapsto \{k + 2^N\mathbb{Z} \mid
-k \in \mathbb{Z}, a \leq k \leq z, k \equiv a \mod s \}$, \\ where $z = \min\{l \in \mathbb{Z} \mid l \geq a, l \equiv b \mod 2^N \}$
+\item $\mathsf{MSI}_{N} \coloneqq \{s[\overline{a},\overline{b}]_N \mid \overline{a}, \overline{b} \in \mathbb{Z}/2^N, s \in \{0, \dots, 2^N\} \}\;\dot\cup\;\{\bot\}$
+\item {\setlength{\abovedisplayskip}{-10pt}\begin{flalign*}
+\gamma_{\mathsf{MSI}_N} \colon & \textsf{MSI}_N \rightarrow \mathcal{P}(\texttt{i}N), \\
+& i \mapsto \begin{cases}
+\emptyset, & \text{if }i = \bot \\
+\parbox[t]{.53\textwidth}{$\{k + 2^N\mathbb{Z} \mid
+k \in \mathbb{Z}, a \leq k \leq c, k \equiv a \mod s \}$, \\
+$\text{\quad where }c = \min\{x \in \mathbb{Z} \mid x \geq a,$ \\
+$\text{\quad\quad} x \equiv b \mod 2^N \}$}, & \text{if }i = s[\overline{a},\overline{b}]_N
+\end{cases}
+\end{flalign*}}
 \item Examples:
 \begin{itemize}
-\item $12[15,63]_8 \stackrel{\gamma~}{\rightarrow}\{15,27,39,51,63\} \subseteq \mathbb{Z}/2^8$
-\item $4[10,6]_4 \stackrel{\gamma~}{\rightarrow}\{10,14,2,6\} \subseteq \mathbb{Z}/2^4$
+\item $12[15,63]_8 \stackrel{\gamma\;}{\rightarrow}\{15,27,39,51,63\} \subseteq \mathbb{Z}/2^8$
+\item $4[10,6]_4 \stackrel{\gamma\;}{\rightarrow}\{10,14,2,6\} \subseteq \mathbb{Z}/2^4$
 
 \end{itemize}
 \end{itemize}
@@ -105,25 +113,86 @@ k \in \mathbb{Z}, a \leq k \leq z, k \equiv a \mod s \}$, \\ where $z = \min\{l 
 
 
 \begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval: Normalization}}
-Note that the representation of a set by a modular strided interval may not be unique. Thus, we introduce a predicate \textit{normal}, such that there is always a unique \textit{normalized} representation.
-Example:
+Note that some sets can be represented by muliple MSIs. Thus, we introduce a predicate \textit{normal}, such that there is at most one \textit{normalized} representation.
+Examples: \\
+\def\arraystretch{6}
+\begin{tabular}{ l l l l }
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$3[2, 10]_4$ \\
+$\downarrow$ \\
+$3[2, 8]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-1.pdf} 
+\end{minipage}
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$4[3, 3]_4$ \\
+$\downarrow$ \\
+$0[3, 3]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-2.pdf} 
+\end{minipage} \\
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$6[12, 2]_4$ \\
+$\downarrow$ \\
+$10[2, 12]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-3.pdf} 
+\end{minipage}
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$4[10, 6]_4$ \\
+$\downarrow$ \\
+$4[2, 14]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-normalization-4.pdf} 
+\end{minipage}
+\end{tabular}
+\end{frame}
+
+
+\begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval: Normalization (cont.)}}
 \begin{flalign*}
-& \rlap{\(\mathrm{normal}_N(\overline{s}[\overline{a}, \overline{b}]_N) \leftrightarrow (\)} &
+& \rlap{\(\mathsf{normal}_N(s[\overline{a}, \overline{b}]_N) \leftrightarrow (\)} &
 \end{flalign*}
-\begin{flalign*}
-\quad & \overline{s} = 0 \leftrightarrow \overline{a} = \overline{b} & \\
-\quad \land\ & \overline{b} \in \gamma_N(\overline{s}[\overline{a}, \overline{b}]_N) & \\
-\quad \land\; & \overline{a} = \min\{a' \in \{0 \ldots 2^N-1\} \ldotp \gamma_N(\overline{s}[\overline{a'}, \overline{b}]_N) = \gamma_N(\overline{s}[\overline{a}, \overline{b}]_N)\} + 2^N \mathbb{Z} &
-\end{flalign*}
-\begin{flalign*}
+{\setlength{\abovedisplayskip}{-6pt}\begin{flalign*}
+\quad & \overline{a} = \overline{b} \rightarrow s = 0 & \\
+\quad \land\ & \overline{b} \in \gamma_N(s[\overline{a}, \overline{b}]_N) & \\
+\quad \land\; & \overline{a} = \min\{a' \in \{0 \ldots 2^N-1\} \ldotp \exists s', \overline{b}' \ldotp \gamma_N(s'[\overline{a'}, \overline{b}']_N) = \gamma_N(s[\overline{a}, \overline{b}]_N)\} + 2^N \mathbb{Z} &
+\end{flalign*}}
+{\setlength{\abovedisplayskip}{-18pt}\begin{flalign*}
 & ) &
-\end{flalign*}
+\end{flalign*}}
 \end{frame}
 
 \begin{frame}[fragile]{\textcolor{blue}{Modular Strided Interval: Union}}
-Modular strided intervals do not form a lattice, as, in general, there is no least upper bound of two elements. \\
-Example: 
+MSIs do not form a lattice, as, in general, there is no \textit{least} upper bound of two elements. \\
+Example:
+\begin{tabular}{ l l l l l }
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$1[1, 5]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-1.pdf} 
+\end{minipage} & $\sqcup$ &
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$1[9, 12]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-2.pdf} 
+\end{minipage} \\
+&& $=$ && \\
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$1[1, 12]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-3.pdf}
+\end{minipage} & or &
+\adjustbox{valign=c}{\parbox[t]{1.25cm}{\centering
+$1[9, 5]_4$}} &
+\begin{minipage}{0.3\textwidth}
+\includegraphics[width=0.75\textwidth]{graphics/msi-union-4.pdf} 
+\end{minipage}
+\end{tabular} \\
+Therefore we try to find a \textit{minimal} upper bound wrt. $|\gamma(\cdot)|$.
 \end{frame}
+
+
 \begin{frame}[fragile]{\textcolor{blue}{Abstract Domain Class Structure}}
 
 \begin{center}
@@ -139,10 +208,14 @@ lessOrEqual(other) : bool \\
 }
 
 \umlclass[x=-3.5,y=-4.0]{CompositeDomain}{delegate : AbstractDomain}{}
+<<<<<<< HEAD
 \umlclass[x=+2.5,y=-4.0]{BoundedSet}{
+=======
+\umlclass[x=+3.0,y=-3.9]{BoundedSet}{
+>>>>>>> d9ed4e138025801fd3a8614bb8aee66ac524132e
 values : set$<$APInt$>$ \\
 isTop : bool}{}
-\umlclass[x=+3.0,y=-6.0]{StridedInterval}{
+\umlclass[x=+3.0,y=-6.3]{StridedInterval}{
 min, max, stride : APInt \\
 isBottom : bool}{}
 
@@ -151,9 +224,9 @@ isBottom : bool}{}
 
 %\umlclass[x=3,y=-6.5]{OperationNDim$<$novec$>$}{}{}
 
-\umlinherit[geometry=|-]{CompositeDomain}{AbstractDomain}
-\umlinherit[anchor1=north,anchor2=-41]{BoundedSet}{AbstractDomain}
-\umlinherit[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
+\umlimpl[anchor1=north,anchor2=-148]{CompositeDomain}{AbstractDomain}
+\umlimpl[anchor1=north,anchor2=-36]{BoundedSet}{AbstractDomain}
+\umlimpl[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationMass}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationConvection}
 \umlaggreg[]{CompositeDomain}{BoundedSet}
@@ -187,10 +260,10 @@ get\_abstract\_value() : VSAResultValue \\
 ]{VSAResultValue}{
 }{ 
 test(predicate, constant) : tristate \\
-min() : int \\
-max() : int \\
-size() : int \\
-constant() : int \\
+min() : APInt \\
+max() : APInt \\
+size() : APInt \\
+constant() : APInt \\
 is\_constant() : bool \\
 }
 
@@ -213,7 +286,7 @@ is\_constant() : bool \\
 \begin{center}
 \begin{tikzpicture}[thick,scale=0.8, every node/.style={transform shape}]
 
-\umlinterface[rectangle split parts=1, x=1.0]{AbstractDomain}{
+\umlinterface[rectangle split parts=1, x=1.0, y=-1.0]{AbstractDomain}{
 }{}
 
 \umlclass[x=-3.5,y=-3.5, rectangle split parts=1]{CompositeDomain}{}{}
@@ -225,11 +298,11 @@ is\_constant() : bool \\
 ,y=0.5, x=-6.5
 ]{VSAResultValue}{
 }{ 
-test(predicate, constant) : bool \\
-min() : int \\
-max() : int \\
-size() : int \\
-constant() : int \\
+test(predicate, constant) : tristate \\
+min() : APInt \\
+max() : APInt \\
+size() : APInt \\
+constant() : APInt \\
 is\_constant() : bool \\
 }
 
@@ -237,9 +310,9 @@ is\_constant() : bool \\
 
 %\umlclass[x=3,y=-6.5]{OperationNDim$<$novec$>$}{}{}
 
-\umlinherit[geometry=|-]{CompositeDomain}{AbstractDomain}
-\umlinherit[anchor1=north,anchor2=south]{BoundedSet}{AbstractDomain}
-\umlinherit[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
+\umlimpl[geometry=|-]{CompositeDomain}{AbstractDomain}
+\umlimpl[anchor1=north,anchor2=south]{BoundedSet}{AbstractDomain}
+\umlimpl[geometry=-|-, arm1=0.5cm,anchors=east and east]{StridedInterval}{AbstractDomain}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationMass}
 %\umlaggreg[]{OperationNDim$<$T;U;V$>$}{OperationConvection}
 \umlaggreg[]{CompositeDomain}{BoundedSet}
