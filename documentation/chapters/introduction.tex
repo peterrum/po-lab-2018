@@ -50,13 +50,27 @@ SSA: sufficient to store the {\color{blue}abstract value for each variable once 
 \begin{frame}[fragile]{\textcolor{blue}{Passes in LLVM}}
 LLVM's analysis and optimization framework {\color{blue} opt}:
 
-
-\vspace{2cm}
 \begin{center}
-Figure: stages of clang and LLVM
+C/C++ 
+\tikzfancyarrow{Clang} 
+IR
+\tikzfancyarrow{opt}
+IR
+\tikzfancyarrow{codegen}
+machine code
 \end{center}
-\vspace{2cm}
 
+\vspace{-0.3cm}
+
+\hspace{4.4cm}
+\begin{tikzpicture}[scale=1]
+%\draw[thick] (-1,0) rectangle +(6,7.5);
+\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+(3.5,0.0) -- (8.5,0.0) node [black,midway,yshift=-0.8cm] {\footnotesize
+LLVM Core};
+\end{tikzpicture}
+
+\vspace{0.9cm}
 
 using existing passes (from command line):
 \begin{footnotesize}
@@ -125,35 +139,21 @@ ThisResult& ThisPass::getResult(){ return result; }
 
 %{\LARGE \textbf{\textcolor{blue}{Introduction}}}
 
-%\end{frame}
 %--------------------------------------------------------------------------------------------------
-\begin{frame}[fragile]{\textcolor{blue}{Program}}
-\includegraphics[scale=0.45]{src/example_c.pdf}
-\end{frame}
-%--------------------------------------------------------------------------------------------------
-\begin{frame}[fragile]{\textcolor{blue}{Program}}
+\begin{frame}[fragile]{\textcolor{blue}{Example}}
 %\includegraphics[scale=0.6]{src/example_c.pdf}
 \begin{footnotesize}
 \begin{lstlisting}[language=C++]
 int main(int argc, char const *argv[]) {
-    unsigned a = 0;
-    unsigned b = 12;
+    unsigned a = 0, b = 12, c = rand();
 
-    while (a < b) {
-        a+=4;
-        b-=2;
-    }
+    while (a < b) { a+=4; b-=2; }
 
-    unsigned c = rand();
     if(a>6 && b<6){
         switch (a) {
-            case 6:
-                b = 99;
-                break;
+            case  6: b = 99;  break;                 // reachable? 
             case 12:
-            case 13:
-                b = a*2;
-                break;
+            case 13: b = a*2; break;
             default:
                 c = c%18;
         }
@@ -161,16 +161,62 @@ int main(int argc, char const *argv[]) {
         a = 88;
     }
 
-    printf("%d\n", a);
+    printf("%d\n", a);		// what will/might be printed out?
     printf("%d\n", b);
     printf("%d\n", c);
 }
 \end{lstlisting}
 \end{footnotesize}
 \end{frame}
-%--------------------------------------------------------------------------------------------------
-\begin{frame}[fragile]{\textcolor{blue}{LLVM's Intermediate Representation}}
-\includegraphics[scale=0.45]{src/example_ll.pdf}
+%-----------------------------------------------------------------------------------
+\begin{frame}[fragile]{\textcolor{blue}{LLVM's Intermediate Representation IR}}
+
+\newcommand{\keyword}[1]{\textbf{\color{red} #1}}
+\newcommand{\labele}[1]{\textbf{\underline{\smash{#1}}}}
+
+\begin{scriptsize}
+\begingroup
+  \fontfamily{pcr}\selectfont
+\keyword{define} dso\_local i32 @main(i31 \%argc, i8** \%argv) \#0 \{  \\
+\labele{entry:} \\
+\qquad \keyword{br} label \%while.cond \\
+
+\vspace{0.2cm}
+
+\labele{while.cond:} \\
+\qquad   \%a.0 \keyword{= phi} i32 [ 0, \%entry ], [ \%add, \%while.body ] \\
+\qquad   \%b.0 \keyword{= phi} i32 [ 12, \%entry ], [ \%sub, \%while.body ] \\
+\qquad   \%cmp \keyword{= icmp} ult i32 \%a.0, \%b.0 \\
+\qquad   \keyword{br} i1 \%cmp, label \%while.body, label \%while.end \\
+
+\vspace{0.2cm}
+
+\labele{while.body:} \\
+\qquad     \%add \keyword{= add} i32 \%a.0, 4 \\
+\qquad     \%sub \keyword{= sub} i32 \%b.0, 2 \\
+\qquad     \keyword{br} label \%while.cond \\
+
+\vspace{0.2cm}
+
+\labele{while.end:} \\
+\qquad     \%call = \keyword{call} i32 @rand() \#3 \\
+\qquad     \%cmp1 = \keyword{icmp ugt} i32 \%a.0, 6 \\
+\qquad     \keyword{br} i1 \%cmp1, label \%land.lhs.true, label \%if.else \\
+
+\vspace{0.2cm}
+
+\labele{land.lhs.true:} \\
+\qquad     \%cmp2 \keyword{= icmp ult} i32 \%b.0, 6 \\
+\qquad     \keyword{br} i1 \%cmp2, label \%if.then, label \%if.else
+
+
+\endgroup
+
+\end{scriptsize}
+
+\vfill
+
+\hfill ... and many more lines of code
 \end{frame}
 %--------------------------------------------------------------------------------------------------
 \begin{frame}[fragile]{\textcolor{blue}{Content of the Lab}}
